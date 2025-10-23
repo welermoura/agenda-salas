@@ -2,7 +2,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from typing import List
 import ldap
-from .. import ldap_utils, config
+from .. import ldap_utils
 from ..logging_config import logger
 
 router = APIRouter(
@@ -18,11 +18,17 @@ def list_users(conn: ldap.ldapobject.SimpleLDAPObject = Depends(ldap_utils.get_l
     """
     logger.info("Endpoint /api/users chamado")
     search_filter = "(objectClass=person)"
-    search_base = config.LDAP_BASE_DN
+    search_base = ldap_utils.get_base_dn()
     try:
+        # A busca real no LDAP seria algo como:
+        # results = conn.search_s(search_base, ldap.SCOPE_SUBTREE, search_filter)
+        # users = [{"dn": dn, "attrs": attrs} for dn, attrs in results if dn is not None]
+        # return users
+
+        # Por enquanto, retorna dados mocados
         mock_users = [
-            {"dn": "cn=John Doe,ou=users,dc=your-domain,dc=com", "attrs": {"cn": [b"John Doe"], "mail": [b"john.doe@example.com"]}},
-            {"dn": "cn=Jane Smith,ou=users,dc=your-domain,dc=com", "attrs": {"cn": [b"Jane Smith"], "mail": [b"jane.smith@example.com"]}}
+            {"dn": f"cn=John Doe,ou=users,{search_base}", "attrs": {"cn": [b"John Doe"], "mail": [b"john.doe@example.com"]}},
+            {"dn": f"cn=Jane Smith,ou=users,{search_base}", "attrs": {"cn": [b"Jane Smith"], "mail": [b"jane.smith@example.com"]}}
         ]
         logger.info(f"Retornando {len(mock_users)} usuários (mocados).")
         return mock_users

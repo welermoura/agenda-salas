@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 import UsersPage from './pages/UsersPage';
 import GroupsPage from './pages/GroupsPage';
 import LogsPage from './pages/LogsPage';
+import ConfigPage from './pages/ConfigPage';
 import './App.css';
 
 function App() {
@@ -20,6 +21,9 @@ function App() {
             <li>
               <Link to="/logs">Logs de Auditoria</Link>
             </li>
+            <li>
+              <Link to="/config">Configurações</Link>
+            </li>
           </ul>
         </nav>
         <main>
@@ -27,6 +31,7 @@ function App() {
             <Route path="/users" element={<UsersPage />} />
             <Route path="/groups" element={<GroupsPage />} />
             <Route path="/logs" element={<LogsPage />} />
+            <Route path="/config" element={<ConfigPage />} />
             <Route path="/" element={<h2>Bem-vindo à Ferramenta de Gestão de Active Directory</h2>} />
           </Routes>
         </main>

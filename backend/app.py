@@ -1,7 +1,7 @@
 # backend/app.py
 from fastapi import FastAPI, Request
 from .logging_config import logger
-from .routers import users, groups, logs
+from .routers import users, groups, logs, config
 
 app = FastAPI(
     title="AD Management Tool API",
@@ -21,6 +21,7 @@ async def log_requests(request: Request, call_next):
 app.include_router(users.router)
 app.include_router(groups.router)
 app.include_router(logs.router)
+app.include_router(config.router)
 
 @app.get("/")
 def read_root():

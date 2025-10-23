@@ -2,7 +2,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from typing import List
 import ldap
-from .. import ldap_utils, config
+from .. import ldap_utils
 from ..logging_config import logger
 
 router = APIRouter(
@@ -18,11 +18,17 @@ def list_groups(conn: ldap.ldapobject.SimpleLDAPObject = Depends(ldap_utils.get_
     """
     logger.info("Endpoint /api/groups chamado")
     search_filter = "(objectClass=group)"
-    search_base = config.LDAP_BASE_DN
+    search_base = ldap_utils.get_base_dn()
     try:
+        # A busca real no LDAP seria algo como:
+        # results = conn.search_s(search_base, ldap.SCOPE_SUBTREE, search_filter)
+        # groups = [{"dn": dn, "attrs": attrs} for dn, attrs in results if dn is not None]
+        # return groups
+
+        # Por enquanto, retorna dados mocados
         mock_groups = [
-            {"dn": "cn=Admins,ou=groups,dc=your-domain,dc=com", "attrs": {"cn": [b"Admins"]}},
-            {"dn": "cn=Developers,ou=groups,dc=your-domain,dc=com", "attrs": {"cn": [b"Developers"]}}
+            {"dn": f"cn=Admins,ou=groups,{search_base}", "attrs": {"cn": [b"Admins"]}},
+            {"dn": f"cn=Developers,ou=groups,{search_base}", "attrs": {"cn": [b"Developers"]}}
         ]
         logger.info(f"Retornando {len(mock_groups)} grupos (mocados).")
         return mock_groups

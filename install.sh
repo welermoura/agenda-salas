@@ -40,17 +40,8 @@ deactivate
 echo "=> Instalando dependências do frontend Node.js (isso pode levar alguns minutos)..."
 npm install --prefix frontend
 
-# --- 5. Configurar o arquivo de ambiente ---
-echo "=> Configurando o arquivo de ambiente .env..."
-if [ ! -f backend/.env ]; then
-    cp backend/.env.example backend/.env
-    echo "Arquivo 'backend/.env' criado. Por favor, edite-o com as suas configurações de AD."
-else
-    echo "Arquivo 'backend/.env' já existe. Nenhuma alteração foi feita."
-fi
-
 echo ""
 echo "--- Instalação concluída com sucesso! ---"
 echo "Próximos passos:"
-echo "1. Edite o arquivo 'backend/.env' com as informações do seu Active Directory."
-echo "2. Execute o script './start.sh' para iniciar a aplicação (não precisa torná-lo executável novamente)."
+echo "1. Execute o script './start.sh' para iniciar a aplicação."
+echo "2. Acesse a aplicação no seu navegador e vá para a página 'Configurações' para configurar a conexão com o AD."
