@@ -7,8 +7,10 @@ echo "--- Iniciando a aplicação da Ferramenta de Gestão de AD ---"
 
 # --- 1. Iniciar o Backend (FastAPI) ---
 echo "=> Iniciando o servidor do backend em segundo plano..."
+# Caminho para o executável do uvicorn dentro do venv
+UVICORN_PATH="backend/venv/bin/uvicorn"
 # Usamos --host 0.0.0.0 para que seja acessível na rede
-uvicorn backend.app:app --host 0.0.0.0 --port 8000 > backend.log 2>&1 &
+$UVICORN_PATH backend.app:app --host 0.0.0.0 --port 8000 > backend.log 2>&1 &
 BACKEND_PID=$!
 echo "Servidor do backend iniciado com PID: $BACKEND_PID"
 

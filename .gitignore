@@ -6,6 +6,7 @@ __pycache__/
 
 # Arquivos de ambiente
 backend/.env
+backend/venv/
 
 # Logs
 *.log
