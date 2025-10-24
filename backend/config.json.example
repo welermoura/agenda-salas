@@ -1,4 +1,5 @@
 {
+    "_comment_user": "O campo 'user' pode ser um nome de usuário simples (ex: 'admin'), um User Principal Name (UPN, ex: 'admin@dominio.com') ou um Distinguished Name (DN, ex: 'cn=admin,dc=dominio,dc=com').",
     "server": "seu.servidor.ldap.com",
     "port": 389,
     "user": "cn=admin,dc=seu,dc=dominio,dc=com",
