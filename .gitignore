@@ -9,6 +9,7 @@ venv/
 *.egg-info/
 dist/
 build/
+venv/
 
 # Node
 node_modules/
