@@ -65,8 +65,8 @@ const ConfigPage = () => {
                     <input type="number" name="port" value={config.port} onChange={handleChange} required />
                 </div>
                 <div>
-                    <label>Usuário (Bind DN):</label>
-                    <input type="text" name="user" value={config.user} onChange={handleChange} required placeholder="ex: cn=admin,dc=example,dc=com" />
+                    <label>Usuário:</label>
+                    <input type="text" name="user" value={config.user} onChange={handleChange} required placeholder="ex: admin" />
                 </div>
                 <div>
                     <label>Senha:</label>

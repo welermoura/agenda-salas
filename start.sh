@@ -14,14 +14,20 @@ $UVICORN_PATH backend.app:app --host 0.0.0.0 --port 8000 > backend.log 2>&1 &
 BACKEND_PID=$!
 echo "Servidor do backend iniciado com PID: $BACKEND_PID"
 
-# --- 2. Iniciar o Frontend (React) ---
-echo "=> Iniciando o servidor do frontend em segundo plano..."
-# Entra no diretório do frontend e inicia o servidor
-(cd frontend && npm start > ../frontend.log 2>&1 &)
-# Encontra o PID do processo do Node.js do react-scripts
-# Pode ser frágil, mas é a maneira mais simples em um script
-sleep 5 # Dá um tempo para o processo iniciar
-FRONTEND_PID=$(pgrep -f "react-scripts start")
+# --- 2. Compilar e servir o Frontend (React) ---
+echo "=> Compilando o frontend para produção (isso pode levar alguns minutos)..."
+npm run build --prefix frontend
+
+echo "=> Verificando se o 'serve' está instalado..."
+if ! command -v serve &> /dev/null
+then
+    echo "'serve' não encontrado. Instalando globalmente..."
+    npm install -g serve
+fi
+
+echo "=> Iniciando o servidor de arquivos estáticos para o frontend em segundo plano..."
+serve -s frontend/build -l 3000 > frontend_serve.log 2>&1 &
+FRONTEND_PID=$!
 echo "Servidor do frontend iniciado com PID: $FRONTEND_PID"
 
 # --- 3. Exibir informações de acesso ---

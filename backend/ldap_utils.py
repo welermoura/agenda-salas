@@ -26,8 +26,9 @@ def get_ldap_connection():
     """Estabelece e retorna uma conexão LDAP usando as configurações do config.json."""
     config = _load_ldap_config()
 
-    ldap_uri = f"{config['server']}:{config['port']}"
-    bind_user = config['user']
+    ldap_uri = f"ldap://{config['server']}:{config['port']}"
+    # Construir o UPN (User Principal Name) para autenticação
+    bind_user = f"{config['user']}@{config['domain']}"
     bind_password = config['password']
 
     try:
