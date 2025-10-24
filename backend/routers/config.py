@@ -27,7 +27,7 @@ def save_config(config: ADConfig):
     logger.info("Recebida requisição para salvar a configuração do AD.")
     try:
         with open(CONFIG_FILE, 'w') as f:
-            json.dump(config.dict(), f, indent=4)
+            json.dump(config.model_dump(), f, indent=4)
         logger.info(f"Configuração salva com sucesso em '{CONFIG_FILE}'.")
         return {"message": "Configuração salva com sucesso!"}
     except Exception as e:

@@ -27,9 +27,17 @@ def get_ldap_connection():
     config = _load_ldap_config()
 
     ldap_uri = f"ldap://{config['server']}:{config['port']}"
-    # Construir o UPN (User Principal Name) para autenticação
-    bind_user = f"{config['user']}@{config['domain']}"
-    bind_password = config['password']
+
+    user = config.get('user', '')
+
+    # Se o 'user' já for um DN (contém vírgulas) ou um UPN (contém '@'), usa diretamente.
+    # Caso contrário, constrói o UPN no formato "user@domain".
+    if ',' in user or '@' in user:
+        bind_user = user
+    else:
+        bind_user = f"{user}@{config.get('domain', '')}"
+
+    bind_password = config.get('password', '')
 
     try:
         conn = ldap.initialize(ldap_uri)
