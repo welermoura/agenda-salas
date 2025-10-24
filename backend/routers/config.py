@@ -5,17 +5,23 @@ from pydantic import BaseModel, Field
 from auth import get_current_user, User
 from common import load_config, save_config
 
-# Modelo Pydantic para a configuração do AD
-# Os campos agora são opcionais e usam Field para melhores metadados
+# ==============================================================================
+# Modelo Pydantic para a Configuração do AD
+# ==============================================================================
+# Este modelo agora corresponde exatamente ao que o frontend envia.
+# Usamos 'alias' para mapear os nomes do JSON (ex: 'server') para os nomes
+# que usamos internamente no Python (ex: 'ad_server').
 class ADConfig(BaseModel):
-    AD_SERVER: str | None = Field(None, title="Servidor AD")
-    USE_LDAPS: bool = Field(False, title="Usar LDAPS (SSL)")
-    AD_DOMAIN: str | None = Field(None, title="Domínio (ex: MEUDOMINIO)")
-    AD_SEARCH_BASE: str | None = Field(None, title="Base de Busca (ex: OU=Users,DC=corp,DC=com)")
-    SSO_ENABLED: bool = Field(False, title="Habilitar Single Sign-On")
-    DEFAULT_PASSWORD: str | None = Field(None, title="Senha Padrão para Novos Usuários")
-    SERVICE_ACCOUNT_USER: str | None = Field(None, title="Usuário de Serviço")
-    SERVICE_ACCOUNT_PASSWORD: str | None = Field(None, title="Senha do Usuário de Serviço")
+    server: str | None = Field(None, alias='AD_SERVER')
+    port: int | None = Field(None, alias='AD_PORT') # Supondo que a porta também pode vir
+    user: str | None = Field(None, alias='SERVICE_ACCOUNT_USER')
+    password: str | None = Field(None, alias='SERVICE_ACCOUNT_PASSWORD')
+    base_dn: str | None = Field(None, alias='AD_SEARCH_BASE')
+    domain: str | None = Field(None, alias='AD_DOMAIN')
+
+    # Permite que o Pydantic popule o modelo usando os aliases
+    class Config:
+        populate_by_name = True
 
 # O roteador agora exige autenticação para todas as suas rotas
 router = APIRouter(
@@ -24,42 +30,40 @@ router = APIRouter(
     dependencies=[Depends(get_current_user)]
 )
 
-@router.get("/", response_model=ADConfig)
+@router.get("/", response_model=ADConfig, response_model_by_alias=False)
 def get_config_route():
     """
     Busca as configurações do Active Directory.
-    Dados sensíveis como senhas são descriptografados pela função load_config.
+    'response_model_by_alias=False' garante que o JSON retornado use os nomes de campo
+    do Python (server, port, etc.), que é o que o frontend espera.
     """
     try:
         config_data = load_config()
-        # Omitir senhas da resposta para segurança adicional
+        # Omitir senhas da resposta para segurança
         config_data.pop('SERVICE_ACCOUNT_PASSWORD', None)
         config_data.pop('DEFAULT_PASSWORD', None)
         return config_data
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erro ao ler a configuração: {e}")
 
-
 @router.post("/")
 def save_config_route(config: ADConfig, current_user: User = Depends(get_current_user)):
     """
     Salva as configurações do Active Directory.
-    Dados sensíveis são criptografados pela função save_config.
+    O Pydantic irá mapear automaticamente o JSON recebido para os aliases.
     """
-    # Exemplo de verificação de permissão (descomente se necessário)
-    # if current_user.access_level != 'full':
-    #     raise HTTPException(status_code=403, detail="Permissão negada para salvar a configuração.")
-
     try:
-        # Pydantic converte o modelo para um dicionário
-        config_dict = config.model_dump(exclude_unset=True)
+        # Converte o modelo para um dicionário, usando os aliases como chaves.
+        # 'exclude_unset=True' garante que apenas os campos enviados sejam atualizados.
+        update_data = config.model_dump(by_alias=True, exclude_unset=True)
 
-        # Como as senhas não são retornadas no GET, precisamos preservá-las se não forem alteradas.
-        if not config_dict.get('SERVICE_ACCOUNT_PASSWORD'):
-            current_config = load_config()
-            config_dict['SERVICE_ACCOUNT_PASSWORD'] = current_config.get('SERVICE_ACCOUNT_PASSWORD')
+        # Carrega a configuração atual para preservar valores não alterados
+        current_config = load_config()
 
-        save_config(config_dict)
+        # Mescla a configuração atual com os novos dados
+        current_config.update(update_data)
+
+        save_config(current_config)
         return {"message": "Configuração salva com sucesso!"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Não foi possível salvar a configuração: {e}")
