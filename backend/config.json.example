@@ -1,0 +1,8 @@
+{
+    "server": "seu.servidor.ldap.com",
+    "port": 389,
+    "user": "cn=admin,dc=seu,dc=dominio,dc=com",
+    "password": "sua_senha_segura",
+    "base_dn": "dc=seu,dc=dominio,dc=com",
+    "domain": "seu.dominio.com"
+}

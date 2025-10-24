@@ -1,7 +1,7 @@
 # backend/routers/logs.py
 from fastapi import APIRouter, HTTPException
 from typing import List
-from ..logging_config import logger
+from logging_config import logger
 
 router = APIRouter(
     prefix="/api/logs",

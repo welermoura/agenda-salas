@@ -2,8 +2,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from typing import List
 import ldap
-from .. import ldap_utils
-from ..logging_config import logger
+import ldap_utils
+from logging_config import logger
 
 router = APIRouter(
     prefix="/api/users",
@@ -20,18 +20,20 @@ def list_users(conn: ldap.ldapobject.SimpleLDAPObject = Depends(ldap_utils.get_l
     search_filter = "(objectClass=person)"
     search_base = ldap_utils.get_base_dn()
     try:
-        # A busca real no LDAP seria algo como:
-        # results = conn.search_s(search_base, ldap.SCOPE_SUBTREE, search_filter)
-        # users = [{"dn": dn, "attrs": attrs} for dn, attrs in results if dn is not None]
-        # return users
+        results = conn.search_s(search_base, ldap.SCOPE_SUBTREE, search_filter)
 
-        # Por enquanto, retorna dados mocados
-        mock_users = [
-            {"dn": f"cn=John Doe,ou=users,{search_base}", "attrs": {"cn": [b"John Doe"], "mail": [b"john.doe@example.com"]}},
-            {"dn": f"cn=Jane Smith,ou=users,{search_base}", "attrs": {"cn": [b"Jane Smith"], "mail": [b"jane.smith@example.com"]}}
-        ]
-        logger.info(f"Retornando {len(mock_users)} usuários (mocados).")
-        return mock_users
+        # O resultado precisa ser decodificado de bytes para strings para ser serializável em JSON
+        users = []
+        for dn, attrs in results:
+            if dn is not None:
+                decoded_attrs = {}
+                for key, value in attrs.items():
+                    decoded_values = [v.decode('utf-8', 'ignore') for v in value]
+                    decoded_attrs[key] = decoded_values
+                users.append({"dn": dn, "attrs": decoded_attrs})
+
+        logger.info(f"Retornando {len(users)} usuários encontrados no LDAP.")
+        return users
     except ldap.LDAPError as e:
         logger.error(f"Erro no LDAP ao listar usuários: {e}")
         raise HTTPException(status_code=500, detail=f"Erro no LDAP: {e}")

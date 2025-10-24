@@ -16,13 +16,16 @@ echo "Servidor do backend iniciado com PID: $BACKEND_PID"
 
 # --- 2. Iniciar o Frontend (React) ---
 echo "=> Iniciando o servidor do frontend em segundo plano..."
-# A porta 3000 é a padrão do create-react-app
-npm start --prefix frontend > frontend.log 2>&1 &
-FRONTEND_PID=$!
+# Entra no diretório do frontend e inicia o servidor
+(cd frontend && npm start > ../frontend.log 2>&1 &)
+# Encontra o PID do processo do Node.js do react-scripts
+# Pode ser frágil, mas é a maneira mais simples em um script
+sleep 5 # Dá um tempo para o processo iniciar
+FRONTEND_PID=$(pgrep -f "react-scripts start")
 echo "Servidor do frontend iniciado com PID: $FRONTEND_PID"
 
 # --- 3. Exibir informações de acesso ---
-# Aguarda um pouco para que os servidores iniciem
+# Aguarda um pouco mais para que os servidores iniciem
 sleep 5
 
 # Obtém os endereços IP da máquina

@@ -2,7 +2,7 @@
 import ldap
 from fastapi import HTTPException
 import json
-from .logging_config import logger
+from logging_config import logger
 
 CONFIG_FILE = "backend/config.json"
 

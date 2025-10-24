@@ -2,7 +2,7 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 import json
-from ..logging_config import logger
+from logging_config import logger
 
 router = APIRouter(
     prefix="/api/config",
@@ -17,6 +17,7 @@ class ADConfig(BaseModel):
     user: str
     password: str
     base_dn: str
+    domain: str
 
 @router.post("/")
 def save_config(config: ADConfig):
