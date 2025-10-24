@@ -37,6 +37,9 @@ deactivate
 
 
 # --- 4. Instalar dependências do Frontend (Node.js) ---
+echo "=> Removendo instalações anteriores do Node.js para garantir uma instalação limpa..."
+rm -rf frontend/node_modules frontend/package-lock.json
+
 echo "=> Instalando dependências do frontend Node.js (isso pode levar alguns minutos)..."
 npm install --prefix frontend
 
