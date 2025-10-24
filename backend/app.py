@@ -32,6 +32,9 @@ async def log_requests(request: Request, call_next):
     return response
 
 # --- Incluir os roteadores ---
+from routers import auth as auth_router
+
+app.include_router(auth_router.router)
 app.include_router(users.router)
 app.include_router(groups.router)
 app.include_router(logs.router)
