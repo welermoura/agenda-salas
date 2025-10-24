@@ -12,23 +12,17 @@ Esta aplicação web permite cadastrar URLs de calendários públicos do Microso
 
 ### Pré-requisitos
 
-- Python 3.8+ e pip
+- Python 3.8+ (com `venv` disponível)
 - Node.js e npm
 
-### 1. Instalação
+### Instalação e Execução
 
-Execute o script de instalação para baixar todas as dependências do backend e do frontend.
+Este projeto foi simplificado para ser instalado e executado com um único comando. O script irá criar um ambiente virtual para as dependências Python, instalar tudo o que é necessário e iniciar os servidores.
+
+Execute o seguinte comando no seu terminal:
 
 ```bash
 bash install.sh
-```
-
-### 2. Execução
-
-Execute o script de inicialização para iniciar os servidores do backend e do frontend.
-
-```bash
-bash start.sh
 ```
 
 Após a execução, a aplicação estará disponível nos seguintes endereços:
@@ -36,7 +30,7 @@ Após a execução, a aplicação estará disponível nos seguintes endereços:
 - **Frontend:** [http://localhost:3000](http://localhost:3000)
 - **Backend:** [http://localhost:8000](http://localhost:8000)
 
-### 3. Como Usar
+### Como Usar
 
 1.  Abra o frontend em [http://localhost:3000](http://localhost:3000).
 2.  No campo de texto, insira a URL pública de um calendário no formato `.ics`.
@@ -47,5 +41,6 @@ Após a execução, a aplicação estará disponível nos seguintes endereços:
 
 - `backend/`: Contém o código do servidor FastAPI.
 - `frontend/`: Contém o código da aplicação React.
-- `install.sh`: Script para instalar todas as dependências.
-- `start.sh`: Script para iniciar a aplicação.
+- `venv/`: Diretório do ambiente virtual Python (criado pelo `install.sh`).
+- `install.sh`: Script para instalar todas as dependências e iniciar a aplicação.
+- `start.sh`: Script para iniciar os servidores (chamado pelo `install.sh`).
