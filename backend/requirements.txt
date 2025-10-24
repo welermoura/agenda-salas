@@ -1,6 +1,0 @@
-fastapi
-uvicorn[standard]
-ldap3
-cryptography
-python-jose[cryptography]
-pydantic[email]
