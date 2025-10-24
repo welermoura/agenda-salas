@@ -26,8 +26,8 @@ class ADConfig(BaseModel):
 # O roteador agora exige autenticação para todas as suas rotas
 router = APIRouter(
     prefix="/api/config",
-    tags=["config"],
-    dependencies=[Depends(get_current_user)]
+    tags=["config"]
+    # A dependência de autenticação foi removida para permitir a configuração inicial
 )
 
 @router.get("/", response_model=ADConfig, response_model_by_alias=False)
@@ -47,7 +47,7 @@ def get_config_route():
         raise HTTPException(status_code=500, detail=f"Erro ao ler a configuração: {e}")
 
 @router.post("/")
-def save_config_route(config: ADConfig, current_user: User = Depends(get_current_user)):
+def save_config_route(config: ADConfig):
     """
     Salva as configurações do Active Directory.
     O Pydantic irá mapear automaticamente o JSON recebido para os aliases.
