@@ -29,6 +29,20 @@ class Agenda(BaseModel):
 # Armazenamento em memória
 agendas_db: List[Agenda] = []
 
+def carregar_agendas():
+    try:
+        with open("backend/agendas.json", "r") as f:
+            agendas_json = json.load(f)
+            agendas_db.clear()
+            for agenda in agendas_json:
+                agendas_db.append(Agenda(**agenda))
+    except FileNotFoundError:
+        pass
+
+def salvar_agendas():
+    with open("backend/agendas.json", "w") as f:
+        json.dump([agenda.dict() for agenda in agendas_db], f, indent=4)
+
 async def update_schedules_periodically():
     loop = asyncio.get_running_loop()
     while True:
@@ -47,18 +61,46 @@ async def update_schedules_periodically():
 
 @app.on_event("startup")
 async def startup_event():
+    carregar_agendas()
     asyncio.create_task(update_schedules_periodically())
 
 @app.post("/agendas", response_model=Agenda)
-def adicionar_agenda(agenda: Agenda):
+async def adicionar_agenda(agenda: Agenda):
     if any(a.url == agenda.url for a in agendas_db):
         raise HTTPException(status_code=400, detail="URL já cadastrada")
     agendas_db.append(agenda)
+    salvar_agendas()
+
+    # Adicionado para verificação imediata do status
+    loop = asyncio.get_running_loop()
+    status = await loop.run_in_executor(
+        None, functools.partial(get_room_status, agenda.url)
+    )
+    await manager.broadcast(json.dumps({agenda.url: status}))
+
     return agenda
+
+from urllib.parse import unquote
 
 @app.get("/agendas", response_model=List[Agenda])
 def listar_agendas():
     return agendas_db
+
+@app.delete("/agendas/{url}")
+def remover_agenda(url: str):
+    url_decoded = unquote(url)
+    agenda_removida = None
+    for agenda in agendas_db:
+        if agenda.url == url_decoded:
+            agenda_removida = agenda
+            break
+
+    if agenda_removida:
+        agendas_db.remove(agenda_removida)
+        salvar_agendas()
+        return {"message": "Agenda removida com sucesso"}
+
+    raise HTTPException(status_code=404, detail="Agenda não encontrada")
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):

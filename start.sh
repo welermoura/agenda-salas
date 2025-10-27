@@ -16,7 +16,7 @@ fi
 # 2. Iniciar o servidor do backend em segundo plano com hypercorn
 echo "Iniciando servidor do backend (Hypercorn)..."
 # Redirecionar stdout e stderr para o arquivo de log para capturar todos os erros.
-./venv/bin/hypercorn backend.main:app --bind 0.0.0.0:8000 > backend.log 2>&1 &
+PYTHONPATH=$PYTHONPATH:. ./venv/bin/hypercorn backend.main:app --bind 0.0.0.0:8000 > backend.log 2>&1 &
 BACKEND_PID=$!
 
 # 3. Iniciar o servidor do frontend em segundo plano
