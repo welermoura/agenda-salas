@@ -1,41 +1,48 @@
-.dashboard-container {
+.dashboard-grid {
     display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    padding: 20px;
-    gap: 20px;
+    flex-direction: row;
+    border-left: 1px solid #ccc;
+    border-top: 1px solid #ccc;
 }
 
-.room-column {
-    flex: 1;
-    min-width: 280px;
-    max-width: 400px;
-    padding: 20px;
-    border-radius: 8px;
-    color: #fff;
+.time-column, .room-column {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1; /* Permite que as colunas de sala cresçam */
+}
+
+.time-column {
+    flex-grow: 0; /* Impede que a coluna de tempo cresça */
+    flex-basis: 100px; /* Largura fixa para a coluna de tempo */
+}
+
+
+.header-cell, .time-cell, .status-cell {
+    padding: 15px;
+    border-right: 1px solid #ccc;
+    border-bottom: 1px solid #ccc;
     text-align: center;
-    transition: background-color 0.5s ease;
+    font-weight: 500;
 }
 
-.room-name {
-    font-size: 2rem;
-    margin-bottom: 10px;
-}
-
-.room-status {
-    font-size: 1.5rem;
+.header-cell {
+    background-color: #f2f2f2;
     font-weight: bold;
+    position: sticky;
+    top: 0;
 }
 
-/* Cores de status */
-.status-livre {
-    background-color: #28a745; /* Verde */
+.status-cell.status-livre {
+    background-color: #d4edda; /* Verde claro */
+    color: #155724;
 }
 
-.status-ocupado {
-    background-color: #dc3545; /* Vermelho */
+.status-cell.status-ocupado {
+    background-color: #f8d7da; /* Vermelho claro */
+    color: #721c24;
 }
 
-.status-desconhecido {
-    background-color: #6c757d; /* Cinza */
+.status-cell.status-desconhecido {
+    background-color: #e2e3e5; /* Cinza */
+    color: #383d41;
 }

@@ -1,22 +1,33 @@
 import requests
 from ics import Calendar
-from datetime import datetime
 import arrow
+from typing import List, Dict
 
-def get_room_status(url: str) -> str:
+def get_room_schedule_for_today(url: str) -> List[Dict[str, str]]:
+    """
+    Busca um calendário de uma URL e retorna uma lista de eventos para o dia atual.
+    Cada evento é um dicionário com chaves 'start' e 'end' no formato ISO.
+    """
     try:
         response = requests.get(url)
         response.raise_for_status()
 
         calendar = Calendar(response.text)
-        now = arrow.utcnow()
+        today = arrow.utcnow()
+        today_start = today.floor('day')
+        today_end = today.ceil('day')
 
+        events_today = []
         for event in calendar.events:
-            if event.begin < now < event.end:
-                return "ocupado"
+            # Verifica se o evento se sobrepõe com o dia de hoje
+            if event.begin <= today_end and event.end >= today_start:
+                events_today.append({
+                    "start": event.begin.isoformat(),
+                    "end": event.end.isoformat(),
+                })
 
-        return "livre"
+        return events_today
 
     except Exception as e:
         print(f"Erro ao processar o calendário da URL {url}: {e}")
-        return "desconhecido"
+        return []
