@@ -25,6 +25,7 @@ app.add_middleware(
 )
 
 class Agenda(BaseModel):
+    name: str
     url: str
 
 # Armazenamento em memória

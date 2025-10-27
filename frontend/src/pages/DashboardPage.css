@@ -1,0 +1,41 @@
+.dashboard-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 20px;
+    gap: 20px;
+}
+
+.room-column {
+    flex: 1;
+    min-width: 280px;
+    max-width: 400px;
+    padding: 20px;
+    border-radius: 8px;
+    color: #fff;
+    text-align: center;
+    transition: background-color 0.5s ease;
+}
+
+.room-name {
+    font-size: 2rem;
+    margin-bottom: 10px;
+}
+
+.room-status {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+/* Cores de status */
+.status-livre {
+    background-color: #28a745; /* Verde */
+}
+
+.status-ocupado {
+    background-color: #dc3545; /* Vermelho */
+}
+
+.status-desconhecido {
+    background-color: #6c757d; /* Cinza */
+}
