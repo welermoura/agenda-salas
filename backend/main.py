@@ -2,8 +2,8 @@ from fastapi import FastAPI, WebSocket, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List
-from backend.websocket import manager
-from backend.calendar_parser import get_room_schedule_for_today
+from websocket import manager
+from calendar_parser import get_room_schedule_for_today
 import asyncio
 import json
 import functools
@@ -11,9 +11,11 @@ import functools
 app = FastAPI()
 
 # Configuração do CORS
+# Configuração do CORS
 origins = [
     "http://localhost:3000",
     "http://10.10.1.182:3000",
+    "http://192.168.1.5:3000",
 ]
 
 app.add_middleware(
