@@ -18,6 +18,7 @@ yarn-error.log
 
 # Custom
 backend/config.py
+backend/agendas.json
 
 # Logs
 *.log

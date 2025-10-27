@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List
 from backend.websocket import manager
-from backend.calendar_parser import get_room_status
+from backend.calendar_parser import get_room_schedule_for_today
 import asyncio
 import json
 import functools
@@ -52,10 +52,10 @@ async def update_schedules_periodically():
         if agendas_db:
             for agenda in agendas_db:
                 # Executa a função de I/O bloqueante em um executor de threads
-                status = await loop.run_in_executor(
-                    None, functools.partial(get_room_status, agenda.url)
+                events = await loop.run_in_executor(
+                    None, functools.partial(get_room_schedule_for_today, agenda.url)
                 )
-                schedules[agenda.url] = status
+                schedules[agenda.url] = events
 
             await manager.broadcast(json.dumps(schedules))
 
@@ -72,14 +72,7 @@ async def adicionar_agenda(agenda: Agenda):
         raise HTTPException(status_code=400, detail="URL já cadastrada")
     agendas_db.append(agenda)
     salvar_agendas()
-
-    # Adicionado para verificação imediata do status
-    loop = asyncio.get_running_loop()
-    status = await loop.run_in_executor(
-        None, functools.partial(get_room_status, agenda.url)
-    )
-    await manager.broadcast(json.dumps({agenda.url: status}))
-
+    # Não há mais necessidade de broadcast imediato, a tarefa periódica cuidará disso
     return agenda
 
 from urllib.parse import unquote
@@ -88,12 +81,11 @@ from urllib.parse import unquote
 def listar_agendas():
     return agendas_db
 
-@app.delete("/agendas/{url}")
+@app.delete("/agendas/{url:path}")
 def remover_agenda(url: str):
-    url_decoded = unquote(url)
     agenda_removida = None
     for agenda in agendas_db:
-        if agenda.url == url_decoded:
+        if agenda.url == url:
             agenda_removida = agenda
             break
 
