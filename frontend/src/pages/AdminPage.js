@@ -6,6 +6,7 @@ const AdminPage = () => {
     const [agendas, setAgendas] = useState([]);
     const [name, setName] = useState('');
     const [url, setUrl] = useState('');
+    const [errorMessage, setErrorMessage] = useState('');
 
     useEffect(() => {
         fetch(`${API_BASE_URL}/agendas`)
@@ -14,27 +15,32 @@ const AdminPage = () => {
             .catch(error => console.error('Erro ao buscar agendas:', error));
     }, []);
 
-    const handleSubmit = (event) => {
+    const handleSubmit = async (event) => {
         event.preventDefault();
-        if (agendas.some(agenda => agenda.url === url)) {
-            alert("Esta URL já foi adicionada.");
-            return;
-        }
+        setErrorMessage(''); // Limpa erros antigos ao submeter
 
         const novaAgenda = { name, url };
 
-        fetch(`${API_BASE_URL}/agendas`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(novaAgenda),
-        })
-        .then(response => response.json())
-        .then(data => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/agendas`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(novaAgenda),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || 'Ocorreu um erro');
+            }
+
+            const data = await response.json();
             setAgendas([...agendas, data]);
             setName('');
             setUrl('');
-        })
-        .catch(error => console.error('Erro ao adicionar agenda:', error));
+
+        } catch (error) {
+            setErrorMessage(error.message);
+        }
     };
 
     const handleRemove = (urlToRemove) => {
@@ -56,6 +62,7 @@ const AdminPage = () => {
             </header>
             <main>
                 <form onSubmit={handleSubmit}>
+                    {errorMessage && <p className="error-message">{errorMessage}</p>}
                     <input
                         type="text"
                         value={name}
