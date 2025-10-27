@@ -38,8 +38,9 @@ def carregar_agendas():
             agendas_db.clear()
             for agenda in agendas_json:
                 agendas_db.append(Agenda(**agenda))
-    except FileNotFoundError:
-        pass
+    except (FileNotFoundError, json.JSONDecodeError):
+        # Se o arquivo não existe ou está vazio/corrompido, começa com uma lista vazia.
+        agendas_db.clear()
 
 def salvar_agendas():
     with open("backend/agendas.json", "w") as f:

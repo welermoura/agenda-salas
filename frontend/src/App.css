@@ -61,3 +61,13 @@ button {
 .desconhecido {
   background-color: grey;
 }
+
+.error-message {
+  color: #721c24; /* Cor do texto vermelho escuro */
+  background-color: #f8d7da; /* Fundo vermelho claro */
+  border: 1px solid #f5c6cb; /* Borda vermelha */
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 15px;
+  text-align: center;
+}
