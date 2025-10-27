@@ -6,7 +6,7 @@ function App() {
   const [url, setUrl] = useState('');
 
   useEffect(() => {
-    fetch('http://localhost:8000/agendas')
+    fetch('/agendas')
       .then(response => response.json())
       .then(data => {
         const initialAgendas = data.map(agenda => ({ ...agenda, status: 'desconhecido' }));
@@ -36,7 +36,7 @@ function App() {
       alert("Esta URL já foi adicionada.");
       return;
     }
-    fetch('http://localhost:8000/agendas', {
+    fetch('/agendas', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -49,6 +49,18 @@ function App() {
         setUrl('');
       })
       .catch(error => console.error('Erro ao adicionar agenda:', error));
+  };
+
+  const handleRemove = (urlToRemove) => {
+    fetch(`/agendas/${encodeURIComponent(urlToRemove)}`, {
+      method: 'DELETE',
+    })
+    .then(response => {
+      if (response.ok) {
+        setAgendas(agendas.filter(agenda => agenda.url !== urlToRemove));
+      }
+    })
+    .catch(error => console.error('Erro ao remover agenda:', error));
   };
 
   return (
@@ -75,6 +87,7 @@ function App() {
                 <li key={index}>
                   <span>{agenda.url}</span>
                   <span className={`status ${agenda.status}`}>{agenda.status}</span>
+                  <button onClick={() => handleRemove(agenda.url)}>Remover</button>
                 </li>
               ))}
             </ul>
