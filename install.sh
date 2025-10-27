@@ -1,19 +1,35 @@
 #!/bin/bash
+# Script para instalar todas as dependências do projeto.
+# Ele garante uma instalação limpa, removendo ambientes virtuais antigos.
+
 # Exit immediately if a command exits with a non-zero status.
 set -e
 
-echo "--- Setting up Python virtual environment ---"
+echo "--- Iniciando a instalação do Monitor de Salas ---"
+
+# 1. Limpeza do ambiente virtual antigo (se existir)
+if [ -d "venv" ]; then
+    echo "Removendo ambiente virtual antigo..."
+    rm -rf venv
+fi
+
+# 2. Criação de um novo ambiente virtual Python
+echo "Criando um novo ambiente virtual Python em ./venv..."
 python3 -m venv venv
 
-echo "--- Installing backend dependencies into the virtual environment ---"
-# Call pip from the venv directly to ensure correct installation
+# 3. Instalação das dependências do backend
+echo "Instalando dependências do backend (Python) dentro do ambiente virtual..."
+# Usar o pip de dentro do venv garante que os pacotes sejam instalados no local correto.
 ./venv/bin/pip install -r backend/requirements.txt
 
-echo "--- Installing frontend dependencies ---"
+# 4. Instalação das dependências do frontend
+echo "Instalando dependências do frontend (Node.js)..."
 npm install --prefix frontend
 
-echo "--- Installation complete ---"
-echo "To start the application, run: bash start.sh"
-
-# Make start.sh executable
+# 5. Tornar o script de inicialização executável
 chmod +x start.sh
+
+echo ""
+echo "--- Instalação concluída com sucesso! ---"
+echo "Para iniciar a aplicação, execute o seguinte comando:"
+echo "bash start.sh"

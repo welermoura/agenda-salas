@@ -1,4 +1,4 @@
-from fastapi import FastAPI, WebSocket
+from fastapi import FastAPI, WebSocket, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List
@@ -6,6 +6,7 @@ from backend.websocket import manager
 from backend.calendar_parser import get_room_status
 import asyncio
 import json
+import functools
 
 app = FastAPI()
 
@@ -29,22 +30,24 @@ class Agenda(BaseModel):
 agendas_db: List[Agenda] = []
 
 async def update_schedules_periodically():
+    loop = asyncio.get_running_loop()
     while True:
         schedules = {}
         if agendas_db:
             for agenda in agendas_db:
-                status = get_room_status(agenda.url)
+                # Executa a função de I/O bloqueante em um executor de threads
+                status = await loop.run_in_executor(
+                    None, functools.partial(get_room_status, agenda.url)
+                )
                 schedules[agenda.url] = status
 
             await manager.broadcast(json.dumps(schedules))
 
-        await asyncio.sleep(60) # Atualiza a cada 60 segundos
+        await asyncio.sleep(60)
 
 @app.on_event("startup")
 async def startup_event():
     asyncio.create_task(update_schedules_periodically())
-
-from fastapi import HTTPException
 
 @app.post("/agendas", response_model=Agenda)
 def adicionar_agenda(agenda: Agenda):
@@ -63,8 +66,8 @@ async def websocket_endpoint(websocket: WebSocket):
     try:
         while True:
             await websocket.receive_text()
-    except Exception as e:
-        print(e)
+    except Exception:
+        pass
     finally:
         manager.disconnect(websocket)
 
