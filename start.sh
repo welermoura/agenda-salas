@@ -13,16 +13,17 @@ if [ ! -d "venv" ]; then
     exit 1
 fi
 
-# 2. Iniciar o servidor do backend em segundo plano com hypercorn
-echo "Iniciando servidor do backend (Hypercorn)..."
-# Redirecionar stdout e stderr para o arquivo de log para capturar todos os erros.
-PYTHONPATH=$PYTHONPATH:. ./venv/bin/hypercorn backend.main:app --bind 0.0.0.0:8000 > backend.log 2>&1 &
+# 2. Iniciar o servidor do backend com nohup para garantir que continue rodando
+echo "Iniciando servidor do backend (Uvicorn)..."
+nohup ./venv/bin/uvicorn main:app --host 0.0.0.0 --port 8000 --app-dir backend > backend.log 2>&1 &
 BACKEND_PID=$!
 
-# 3. Iniciar o servidor do frontend em segundo plano
+# 3. Fazer o build e servir o frontend com nohup
 echo "Iniciando servidor do frontend (React)..."
-# Redirecionar stdout e stderr para o arquivo de log.
-npm start --prefix frontend > frontend.log 2>&1 &
+echo "Executando o build do frontend (pode levar um momento)..."
+npm run build --prefix frontend > frontend-build.log 2>&1
+echo "Servindo os arquivos estáticos do frontend..."
+nohup serve -s frontend/build -l 3000 > frontend.log 2>&1 &
 FRONTEND_PID=$!
 
 sleep 5 # Dar um tempo para os servidores iniciarem
