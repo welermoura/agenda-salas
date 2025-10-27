@@ -1,1 +1,6 @@
-[]
+[
+    {
+        "name": "Sala de Testes",
+        "url": "https://example.com/calendar.ics"
+    }
+]
