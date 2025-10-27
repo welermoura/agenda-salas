@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000';
+
 function App() {
   const [agendas, setAgendas] = useState([]);
   const [url, setUrl] = useState('');
 
   useEffect(() => {
-    fetch('/agendas')
+    fetch(`${API_BASE_URL}/agendas`)
       .then(response => response.json())
       .then(data => {
         const initialAgendas = data.map(agenda => ({ ...agenda, status: 'desconhecido' }));
@@ -14,7 +16,8 @@ function App() {
       })
       .catch(error => console.error('Erro ao buscar agendas:', error));
 
-    const ws = new WebSocket('ws://localhost:8000/ws');
+    const wsUrl = API_BASE_URL.replace(/^http/, 'ws');
+    const ws = new WebSocket(`${wsUrl}/ws`);
     ws.onmessage = (event) => {
       const statuses = JSON.parse(event.data);
       setAgendas(prevAgendas =>
@@ -36,7 +39,7 @@ function App() {
       alert("Esta URL já foi adicionada.");
       return;
     }
-    fetch('/agendas', {
+    fetch(`${API_BASE_URL}/agendas`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -52,7 +55,7 @@ function App() {
   };
 
   const handleRemove = (urlToRemove) => {
-    fetch(`/agendas/${encodeURIComponent(urlToRemove)}`, {
+    fetch(`${API_BASE_URL}/agendas/${encodeURIComponent(urlToRemove)}`, {
       method: 'DELETE',
     })
     .then(response => {
