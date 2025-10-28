@@ -2,8 +2,8 @@ from fastapi import FastAPI, WebSocket, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List
-from backend.websocket import manager
-from backend.calendar_parser import get_room_status
+from websocket import manager
+from calendar_parser import get_room_status
 import asyncio
 import json
 import functools
@@ -11,10 +11,7 @@ import functools
 app = FastAPI()
 
 # Configuração do CORS
-origins = [
-    "http://localhost:3000",
-    "http://10.10.1.182:3000",
-]
+origins = ["*"]
 
 app.add_middleware(
     CORSMiddleware,
@@ -65,8 +62,13 @@ async def startup_event():
     carregar_agendas()
     asyncio.create_task(update_schedules_periodically())
 
+import logging
+
+logging.basicConfig(level=logging.INFO)
+
 @app.post("/agendas", response_model=Agenda)
 async def adicionar_agenda(agenda: Agenda):
+    logging.info(f"Recebida solicitação para adicionar agenda: {agenda.url}")
     if any(a.url == agenda.url for a in agendas_db):
         raise HTTPException(status_code=400, detail="URL já cadastrada")
     agendas_db.append(agenda)

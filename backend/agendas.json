@@ -1,1 +1,8 @@
-[]
+[
+    {
+        "url": "https://raw.githubusercontent.com/nidhaloff/react-big-calendar/master/examples/data/events.ics"
+    },
+    {
+        "url": "local"
+    }
+]
