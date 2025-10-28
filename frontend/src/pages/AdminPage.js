@@ -78,6 +78,16 @@ function AdminPage() {
         });
     };
 
+    const extractRoomName = (url) => {
+        try {
+            const decodedUrl = decodeURIComponent(url);
+            const match = decodedUrl.match(/([^/]+)\.ics$/);
+            return match ? match[1].replace(/_/g, ' ') : "Nome Indisponível";
+        } catch (e) {
+            return "Nome Inválido";
+        }
+    };
+
     return (
         <div className="admin-page">
             <h2>Gerenciamento de Agendas</h2>
@@ -98,7 +108,7 @@ function AdminPage() {
                 <ul>
                     {agendas.map((agenda, index) => (
                         <li key={index}>
-                            <span>{agenda.url}</span>
+                            <span><strong>{extractRoomName(agenda.url)}:</strong> {agenda.url}</span>
                             <button onClick={() => handleRemove(agenda.url)}>Remover</button>
                         </li>
                     ))}
