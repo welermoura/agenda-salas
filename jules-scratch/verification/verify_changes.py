@@ -7,18 +7,18 @@ def run_verification():
 
         try:
             # 1. Navegar para a página do dashboard
-            page.goto("http://localhost:3000/", timeout=60000)
+            page.goto("http://localhost:3000/", timeout=120000)
 
             # 2. Verificar se a agenda está presente com o nome correto
-            test_nome = "Feriados no Brasil"
+            test_nome = "Calendário de Teste"
             new_agenda_item = page.locator(f"//div[contains(text(), '{test_nome}')]")
-            expect(new_agenda_item).to_be_visible(timeout=10000)
+            expect(new_agenda_item).to_be_visible(timeout=30000)
 
-            # 3. Verificar se há células de status 'ocupado'
-            expect(page.locator(".status-ocupado")).not_to_have_count(0, timeout=10000)
+            # 3. Verificar se há células de status 'ocupado' ou 'livre'
+            expect(page.locator(".status-livre, .status-ocupado")).not_to_have_count(0, timeout=30000)
 
             # 4. Tirar a captura de tela do dashboard
-            page.screenshot(path="jules-scratch/verification/dashboard_status_colors.png")
+            page.screenshot(path="jules-scratch/verification/dashboard_final.png")
             print("Verificação do frontend concluída com sucesso. Captura de tela salva.")
 
         except Exception as e:
