@@ -109,7 +109,19 @@ def remover_agenda(url: str):
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await manager.connect(websocket)
+    # Envia o status atual assim que o cliente se conecta
     try:
+        schedules = {}
+        if agendas_db:
+            loop = asyncio.get_running_loop()
+            for agenda in agendas_db:
+                status = await loop.run_in_executor(
+                    None, functools.partial(get_room_status, agenda.url)
+                )
+                schedules[agenda.url] = {"nome": agenda.nome, "status": status}
+            await websocket.send_text(json.dumps(schedules))
+
+        # Mantém a conexão aberta para futuras atualizações
         while True:
             await websocket.receive_text()
     except Exception:
