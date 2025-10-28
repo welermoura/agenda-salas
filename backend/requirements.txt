@@ -1,7 +1,0 @@
-fastapi
-websockets
-ics
-requests
-arrow
-hypercorn
-uvicorn
