@@ -22,6 +22,7 @@ app.add_middleware(
 )
 
 class Agenda(BaseModel):
+    nome: str
     url: str
 
 # Armazenamento em memória
@@ -51,11 +52,11 @@ async def update_schedules_periodically():
                 status = await loop.run_in_executor(
                     None, functools.partial(get_room_status, agenda.url)
                 )
-                schedules[agenda.url] = status
+                schedules[agenda.url] = {"nome": agenda.nome, "status": status}
 
             await manager.broadcast(json.dumps(schedules))
 
-        await asyncio.sleep(15)
+        await asyncio.sleep(10)
 
 @app.on_event("startup")
 async def startup_event():
@@ -79,7 +80,7 @@ async def adicionar_agenda(agenda: Agenda):
     status = await loop.run_in_executor(
         None, functools.partial(get_room_status, agenda.url)
     )
-    await manager.broadcast(json.dumps({agenda.url: status}))
+    await manager.broadcast(json.dumps({agenda.url: {"nome": agenda.nome, "status": status}}))
 
     return agenda
 

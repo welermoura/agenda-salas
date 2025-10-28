@@ -4,6 +4,7 @@ const API_BASE_URL = `http://${window.location.hostname}:8000`;
 
 function AdminPage() {
     const [agendas, setAgendas] = useState([]);
+    const [nome, setNome] = useState('');
     const [url, setUrl] = useState('');
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
@@ -36,7 +37,7 @@ function AdminPage() {
         fetch(`${API_BASE_URL}/agendas`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ url }),
+            body: JSON.stringify({ nome, url }),
         })
         .then(response => {
             if (response.status === 400) {
@@ -49,6 +50,7 @@ function AdminPage() {
         })
         .then(novaAgenda => {
             setAgendas([...agendas, novaAgenda]);
+            setNome('');
             setUrl('');
             setSuccess('Agenda adicionada com sucesso!');
         })
@@ -78,22 +80,19 @@ function AdminPage() {
         });
     };
 
-    const extractRoomName = (url) => {
-        try {
-            const decodedUrl = decodeURIComponent(url);
-            const match = decodedUrl.match(/([^/]+)\.ics$/);
-            return match ? match[1].replace(/_/g, ' ') : "Nome Indisponível";
-        } catch (e) {
-            return "Nome Inválido";
-        }
-    };
-
     return (
         <div className="admin-page">
             <h2>Gerenciamento de Agendas</h2>
             {error && <p className="error-message">{error}</p>}
             {success && <p className="success-message">{success}</p>}
             <form onSubmit={handleSubmit}>
+                <input
+                    type="text"
+                    value={nome}
+                    onChange={(e) => setNome(e.target.value)}
+                    placeholder="Nome da Sala"
+                    required
+                />
                 <input
                     type="text"
                     value={url}
@@ -108,7 +107,7 @@ function AdminPage() {
                 <ul>
                     {agendas.map((agenda, index) => (
                         <li key={index}>
-                            <span><strong>{extractRoomName(agenda.url)}:</strong> {agenda.url}</span>
+                            <span><strong>{agenda.nome}:</strong> {agenda.url}</span>
                             <button onClick={() => handleRemove(agenda.url)}>Remover</button>
                         </li>
                     ))}

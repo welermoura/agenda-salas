@@ -34,16 +34,6 @@ function DashboardPage() {
         };
     }, []);
 
-    const extractRoomName = (url) => {
-        try {
-            const decodedUrl = decodeURIComponent(url);
-            const match = decodedUrl.match(/([^/]+)\.ics$/);
-            return match ? match[1].replace(/_/g, ' ') : "Nome Indisponível";
-        } catch (e) {
-            return "Nome Inválido";
-        }
-    };
-
     const horas = Array.from({ length: 15 }, (_, i) => `${(i + 6).toString().padStart(2, '0')}:00`);
 
     return (
@@ -58,11 +48,11 @@ function DashboardPage() {
                         {horas.map(hora => <div key={hora}>{hora}</div>)}
                     </div>
                     {Object.keys(schedules).length > 0 ? (
-                        Object.entries(schedules).map(([url, status]) => (
+                        Object.entries(schedules).map(([url, data]) => (
                             <div className="grid-row" key={url}>
-                                <div className="sala-nome">{extractRoomName(url)}</div>
+                                <div className="sala-nome">{data.nome}</div>
                                 {horas.map(hora => {
-                                    const statusClass = status[hora] || 'desconhecido';
+                                    const statusClass = data.status[hora] || 'desconhecido';
                                     return <div key={hora} className={`grid-cell status-${statusClass}`}></div>;
                                 })}
                             </div>
