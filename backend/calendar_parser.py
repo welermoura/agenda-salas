@@ -1,43 +1,50 @@
 import requests
 from ics import Calendar
-from datetime import datetime, time
+from datetime import datetime, time, timedelta
 import arrow
 
 def get_room_status(url: str) -> dict:
     """
-    Verifica o status de uma sala para cada hora do dia (06:00 - 20:00).
+    Verifica o status de uma sala para cada hora do dia (06:00 - 20:00),
+    usando um método robusto para tratar eventos de dia inteiro e um proxy
+    para contornar bloqueios de CORS.
 
     Retorna um dicionário onde a chave é a hora e o valor é 'livre' ou 'ocupado'.
     """
     try:
-        # Faz o download e parse do calendário
-        response = requests.get(url)
+        # Utiliza um proxy para evitar problemas de CORS e bloqueios de servidores
+        proxy_url = f"https://cors-anywhere.herokuapp.com/{url}"
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+            "Origin": "http://localhost:3000",
+            "X-Requested-With": "XMLHttpRequest",
+        }
+
+        response = requests.get(proxy_url, headers=headers)
         response.raise_for_status()
         calendar = Calendar(response.text)
 
         # Define o dia de hoje e os horários de verificação
-        today = arrow.utcnow().date()
+        today_utc = arrow.utcnow().to('utc').floor('day')
         horas = [time(h) for h in range(6, 21)] # Das 06:00 às 20:00
 
-        # Inicializa todos os horários como 'livre'
-        schedule_status = {h.strftime("%H:%M"): "livre" for h in horas}
+        schedule_status = {}
 
-        # Converte os eventos para o fuso horário UTC para comparação
-        events = sorted([event for event in calendar.events], key=lambda e: e.begin)
+        for hora in horas:
+            # Define o intervalo de uma hora para a verificação
+            start_time = today_utc.replace(hour=hora.hour, minute=hora.minute).datetime
+            end_time = start_time + timedelta(hours=1)
 
-        for event in events:
-            # Garante que o evento tenha um fuso horário para a comparação
-            event_begin = arrow.get(event.begin.datetime).to('utc')
-            event_end = arrow.get(event.end.datetime).to('utc')
+            # Utiliza o método 'overlapping' para verificar se há eventos no intervalo
+            # Este método trata corretamente eventos de dia inteiro e fusos horários
+            events_in_hour = list(calendar.timeline.overlapping(start_time, end_time))
 
-            # Itera sobre cada hora do dia para verificar se há conflito
-            for hora in horas:
-                # Cria um objeto arrow para a hora atual no dia de hoje
-                hora_utc = arrow.get(datetime.combine(today, hora)).to('utc')
+            hora_str = hora.strftime("%H:%M")
 
-                # Verifica se a hora está dentro do período do evento
-                if event_begin <= hora_utc < event_end:
-                    schedule_status[hora.strftime("%H:%M")] = "ocupado"
+            if events_in_hour:
+                schedule_status[hora_str] = "ocupado"
+            else:
+                schedule_status[hora_str] = "livre"
 
         return schedule_status
 
