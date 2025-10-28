@@ -23,7 +23,7 @@ echo "Iniciando servidor do frontend (React)..."
 echo "Executando o build do frontend (pode levar um momento)..."
 npm run build --prefix frontend > frontend-build.log 2>&1
 echo "Servindo os arquivos estáticos do frontend..."
-nohup serve -s frontend/build -l 3000 > frontend.log 2>&1 &
+nohup npx serve -s frontend/build -l 3000 > frontend.log 2>&1 &
 FRONTEND_PID=$!
 
 sleep 5 # Dar um tempo para os servidores iniciarem
