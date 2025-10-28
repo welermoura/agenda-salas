@@ -32,6 +32,8 @@ class Agenda(BaseModel):
 
 # Armazenamento em memória
 agendas_db: List[Agenda] = []
+current_schedules = {}
+
 
 def carregar_agendas():
     try:
@@ -49,20 +51,33 @@ def salvar_agendas():
         json.dump([agenda.dict() for agenda in agendas_db], f, indent=4)
 
 async def update_schedules_periodically():
+    global current_schedules
     loop = asyncio.get_running_loop()
+
+    # Executa a primeira atualização imediatamente no startup
+    schedules = {}
+    if agendas_db:
+        for agenda in agendas_db:
+            events = await loop.run_in_executor(
+                None, functools.partial(get_room_schedule_for_today, agenda.url)
+            )
+            schedules[agenda.url] = events
+    current_schedules = schedules
+
+    # Inicia o loop de atualizações periódicas
     while True:
+        await asyncio.sleep(15)
+
         schedules = {}
         if agendas_db:
             for agenda in agendas_db:
-                # Executa a função de I/O bloqueante em um executor de threads
                 events = await loop.run_in_executor(
                     None, functools.partial(get_room_schedule_for_today, agenda.url)
                 )
                 schedules[agenda.url] = events
 
-            await manager.broadcast(json.dumps(schedules))
-
-        await asyncio.sleep(60)
+        current_schedules = schedules
+        await manager.broadcast(json.dumps(current_schedules))
 
 @app.on_event("startup")
 async def startup_event():
@@ -102,8 +117,13 @@ def remover_agenda(url: str):
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await manager.connect(websocket)
+    # Envia o estado atual assim que o cliente se conecta
+    if current_schedules:
+        await websocket.send_text(json.dumps(current_schedules))
+
     try:
         while True:
+            # Mantém a conexão aberta para futuras atualizações
             await websocket.receive_text()
     except Exception:
         pass
