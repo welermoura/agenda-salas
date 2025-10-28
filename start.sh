@@ -13,10 +13,10 @@ if [ ! -d "venv" ]; then
     exit 1
 fi
 
-# 2. Iniciar o servidor do backend em segundo plano com hypercorn
-echo "Iniciando servidor do backend (Hypercorn)..."
+# 2. Iniciar o servidor do backend em segundo plano com uvicorn
+echo "Iniciando servidor do backend (Uvicorn)..."
 # Redirecionar stdout e stderr para o arquivo de log para capturar todos os erros.
-PYTHONPATH=$PYTHONPATH:. ./venv/bin/hypercorn backend.main:app --bind 0.0.0.0:8000 > backend.log 2>&1 &
+./venv/bin/uvicorn main:app --host 0.0.0.0 --port 8000 --app-dir backend > backend.log 2>&1 &
 BACKEND_PID=$!
 
 # 3. Iniciar o servidor do frontend em segundo plano
