@@ -1,47 +1,45 @@
 import requests
 from ics import Calendar
-from datetime import datetime, time, timedelta
+from datetime import time
 import arrow
-import logging
-
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def get_room_status(url: str) -> dict:
     """
     Verifica o status de uma sala para cada hora do dia (06:00 - 20:00),
-    usando um método robusto para tratar eventos de dia inteiro.
+    usando a lógica original de análise de eventos.
     """
-    try:
-        headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
-        }
+    schedule_status = {}
+    horas = [time(h) for h in range(6, 21)] # Das 06:00 às 20:00
 
-        response = requests.get(url, headers=headers, timeout=20)
+    try:
+        response = requests.get(url, timeout=20)
         response.raise_for_status()
         calendar = Calendar(response.text)
 
-        today_utc = arrow.utcnow().to('utc').floor('day')
-        horas = [time(h) for h in range(6, 21)]
+        # Converte os eventos para objetos arrow para facilitar a comparação
+        events = [
+            (arrow.get(event.begin.datetime), arrow.get(event.end.datetime))
+            for event in calendar.events
+        ]
 
-        schedule_status = {}
+        today = arrow.utcnow().date()
 
         for hora in horas:
-            start_time = today_utc.replace(hour=hora.hour, minute=hora.minute).datetime
-            end_time = start_time + timedelta(hours=1)
-
-            events_in_hour = list(calendar.timeline.overlapping(start_time, end_time))
-
             hora_str = hora.strftime("%H:%M")
+            # Cria um objeto arrow para a hora atual no dia de hoje, em UTC
+            hora_utc = arrow.get(today).replace(hour=hora.hour, minute=hora.minute).to('utc')
 
-            if events_in_hour:
-                schedule_status[hora_str] = "ocupado"
-            else:
-                schedule_status[hora_str] = "livre"
+            # Assume que a hora está livre até que se prove o contrário
+            schedule_status[hora_str] = "livre"
+
+            # Verifica se a hora atual cai dentro de algum evento
+            for begin, end in events:
+                if begin <= hora_utc < end:
+                    schedule_status[hora_str] = "ocupado"
+                    break # Se encontrou um evento, não precisa verificar os outros
 
         return schedule_status
 
     except Exception as e:
-        logging.error(f"Erro detalhado ao processar a URL {url}: {e}", exc_info=True)
-
-        horas = [time(h) for h in range(6, 21)]
+        print(f"Erro ao processar o calendário da URL {url}: {e}")
         return {h.strftime("%H:%M"): "desconhecido" for h in horas}
