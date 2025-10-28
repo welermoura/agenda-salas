@@ -55,7 +55,7 @@ async def update_schedules_periodically():
 
             await manager.broadcast(json.dumps(schedules))
 
-        await asyncio.sleep(60)
+        await asyncio.sleep(15)
 
 @app.on_event("startup")
 async def startup_event():
@@ -89,7 +89,7 @@ from urllib.parse import unquote
 def listar_agendas():
     return agendas_db
 
-@app.delete("/agendas/{url}")
+@app.delete("/agendas/{url:path}")
 def remover_agenda(url: str):
     url_decoded = unquote(url)
     agenda_removida = None
