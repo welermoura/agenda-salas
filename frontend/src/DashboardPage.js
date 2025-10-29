@@ -34,27 +34,6 @@ const DashboardPage = () => {
         };
     }, [WS_URL]);
 
-    const [currentTime, setCurrentTime] = useState(new Date());
-
-    useEffect(() => {
-        const timer = setInterval(() => {
-            setCurrentTime(new Date());
-        }, 1000);
-        return () => clearInterval(timer);
-    }, []);
-
-    const formatDateTime = (date) => {
-        const dateOptions = { weekday: 'long', day: 'numeric', month: 'long' };
-        let formattedDate = date.toLocaleDateString('pt-BR', dateOptions);
-        formattedDate = formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
-
-        const timeString = date.toLocaleTimeString('pt-BR');
-
-        return { date: formattedDate, time: timeString };
-    };
-
-    const { date, time } = formatDateTime(currentTime);
-
     // Gera os intervalos de 30 minutos para as linhas
     const timeSlots = [];
     for (let i = 6; i < 21; i++) {
@@ -87,11 +66,7 @@ const DashboardPage = () => {
             ) : (
                 <>
                     <div className="dashboard-header">
-                        <h1>Dashboard de Salas</h1>
-                        <div className="real-time-clock">
-                            <div className="date-display">{date}</div>
-                            <div className="time-display">{time}</div>
-                        </div>
+                        <h1>Disponibilidade das Salas de Reunião</h1>
                     </div>
 
                     {Object.keys(schedules).length === 0 ? (
