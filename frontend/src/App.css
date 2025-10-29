@@ -127,31 +127,44 @@ nav a:hover {
 /* Página do Dashboard */
 .schedule-table {
     width: 100%;
-    border-collapse: collapse;
-    background-color: #fff;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    border-radius: 8px;
-    overflow: hidden; /* Garante que o border-radius seja aplicado nas bordas da tabela */
+    border-collapse: separate; /* Muda de collapse para separate */
+    border-spacing: 2px; /* Adiciona espaçamento entre as células */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Fonte mais moderna */
 }
 
 .schedule-table th, .schedule-table td {
-    border: 1px solid #ddd;
-    padding: 12px;
+    border: none; /* Remove as bordas */
+    padding: 8px; /* Ajusta o padding */
     text-align: center;
+    border-radius: 4px; /* Adiciona bordas arredondadas */
 }
 
 .schedule-table th {
-    background-color: #f2f2f2;
+    background-color: #333; /* Fundo escuro para o cabeçalho */
+    color: white; /* Texto claro */
+    font-weight: bold;
 }
 
+/* Primeira célula do cabeçalho (Sala) */
+.schedule-table th:first-child {
+    background-color: transparent;
+    color: #333;
+}
+
+/* Primeira célula de cada linha (nome da sala) */
+.schedule-table td:first-child {
+    font-weight: bold;
+    text-align: left;
+    background-color: transparent;
+}
+
+
 .status-livre {
-    background-color: #90ee90; /* Verde claro */
-    color: #2e6b2e;
+    background-color: #28a745; /* Verde Bootstrap */
 }
 
 .status-ocupado {
-    background-color: #f08080; /* Vermelho claro */
-    color: #a52a2a;
+    background-color: #dc3545; /* Vermelho Bootstrap */
 }
 
 .status-error {

@@ -34,8 +34,13 @@ const DashboardPage = () => {
         };
     }, [WS_URL]);
 
-    // Define o cabeçalho de horas
-    const hours = Array.from({ length: 15 }, (_, i) => `${(i + 6).toString().padStart(2, '0')}:00`);
+    // Define o cabeçalho de horas com intervalos de 30 minutos
+    const hours = [];
+    for (let i = 6; i < 21; i++) {
+        const hour = i.toString().padStart(2, '0');
+        hours.push(`${hour}:00`);
+        hours.push(`${hour}:30`);
+    }
 
     return (
         <div className="dashboard-page">
@@ -62,7 +67,7 @@ const DashboardPage = () => {
                                     const status = data.status[hour] || 'indisponivel';
                                     return (
                                         <td key={hour} className={`status-${status}`}>
-                                            {status === 'error' ? 'Erro' : status}
+                                            {/* O status será indicado apenas pela cor de fundo */}
                                         </td>
                                     );
                                 })}
