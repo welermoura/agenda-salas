@@ -61,7 +61,7 @@ const DashboardPage = () => {
     return (
         <div className="dashboard-page">
             {loading ? (
-                <p className="loading-message">Favor aguarde, carregando agendas.</p>
+                <p className="loading-message">Carregando Agendas, favor aguarde</p>
             ) : (
                 <>
                     <div className="dashboard-header">
@@ -93,10 +93,10 @@ const DashboardPage = () => {
                                             return (
                                                 <td key={hour} className="hour-cell">
                                                     <div className={`time-slot slot-00 status-${slot1_status}`}>
-                                                        {slot1_status === 'ocupado' ? 'Ocupado' : 'Livre'}
+                                                        {slot1_status === 'ocupado' ? '🔒' : ''}
                                                     </div>
                                                     <div className={`time-slot slot-30 status-${slot2_status}`}>
-                                                        {slot2_status === 'ocupado' ? 'Ocupado' : 'Livre'}
+                                                        {slot2_status === 'ocupado' ? '🔒' : ''}
                                                     </div>
                                                 </td>
                                             );
