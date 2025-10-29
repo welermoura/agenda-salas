@@ -54,24 +54,31 @@ const DashboardPage = () => {
     };
 
     const { date, time } = formatDateTime(currentTime);
-    const scrollContainerRef = React.useRef(null);
+
+    // Gera os intervalos de 30 minutos para as linhas
+    const timeSlots = [];
+    for (let i = 6; i < 21; i++) {
+        const hour = i.toString().padStart(2, '0');
+        timeSlots.push(`${hour}:00`);
+        timeSlots.push(`${hour}:30`);
+    }
+
+    // Extrai as salas para as colunas
+    const rooms = Object.entries(schedules).map(([url, data]) => ({ url, nome: data.nome }));
 
     useEffect(() => {
-        if (!loading && scrollContainerRef.current) {
-            const currentHour = new Date().getHours().toString().padStart(2, '0');
-            const currentHourColumn = document.getElementById(`hour-${currentHour}`);
-            if (currentHourColumn) {
-                const scrollLeft = currentHourColumn.offsetLeft - scrollContainerRef.current.offsetLeft;
-                scrollContainerRef.current.scrollTo({
-                    left: scrollLeft,
-                    behavior: 'smooth'
-                });
+        if (!loading) {
+            const now = new Date();
+            const hour = now.getHours().toString().padStart(2, '0');
+            const minute = now.getMinutes() < 30 ? '00' : '30';
+            const currentTimeSlotId = `time-${hour}-${minute}`;
+
+            const element = document.getElementById(currentTimeSlotId);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
         }
     }, [loading]);
-
-    // Define o cabeçalho de horas cheias
-    const hours = Array.from({ length: 15 }, (_, i) => (i + 6).toString().padStart(2, '0'));
 
     return (
         <div className="dashboard-page">
@@ -90,37 +97,30 @@ const DashboardPage = () => {
                     {Object.keys(schedules).length === 0 ? (
                         <p>Nenhuma agenda cadastrada. Adicione uma na <a href="/admin">página de administração</a>.</p>
                     ) : (
-                        <div className="table-scroll-container" ref={scrollContainerRef}>
-                            <table className="schedule-table">
+                        <div className="table-scroll-container">
+                            <table className="schedule-table schedule-table-vertical">
                                 <thead>
                                     <tr>
-                                        <th className="room-header-cell">Sala</th>
-                                        {hours.map(hour => <th key={hour} id={`hour-${hour}`}>{hour}h</th>)}
+                                        <th className="time-header-cell">Horário</th>
+                                        {rooms.map(room => <th key={room.url}>{room.nome}</th>)}
                                     </tr>
                                 </thead>
                                 <tbody>
-                                {Object.entries(schedules).map(([url, data]) => (
-                                    <tr key={url}>
-                                        <td className="room-name-cell">{data.nome}</td>
-                                        {hours.map(hour => {
-                                            const slot1_status = data.status[`${hour}:00`] || 'livre';
-                                            const slot2_status = data.status[`${hour}:30`] || 'livre';
-
-                                            return (
-                                                <td key={hour} className="hour-cell">
-                                                    <div className={`time-slot slot-00 status-${slot1_status}`}>
-                                                        {slot1_status === 'ocupado' ? '🔒' : ''}
-                                                    </div>
-                                                    <div className={`time-slot slot-30 status-${slot2_status}`}>
-                                                        {slot2_status === 'ocupado' ? '🔒' : ''}
-                                                    </div>
-                                                </td>
-                                            );
-                                        })}
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                    {timeSlots.map(slot => (
+                                        <tr key={slot} id={`time-${slot.replace(':', '-')}`}>
+                                            <th className="time-cell">{slot}</th>
+                                            {rooms.map(room => {
+                                                const status = schedules[room.url]?.status[slot] || 'indisponivel';
+                                                return (
+                                                    <td key={room.url} className={`status-cell status-${status}`}>
+                                                        {status === 'ocupado' ? 'Ocupado' : 'Livre'}
+                                                    </td>
+                                                );
+                                            })}
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
                         </div>
                     )}
                 </>
