@@ -42,6 +42,7 @@ const DashboardPage = () => {
             <h1>Dashboard de Salas</h1>
             {loading && <p>Carregando status das salas...</p>}
 
+            <div className="container">
             {!loading && Object.keys(schedules).length === 0 && (
                 <p>Nenhuma agenda cadastrada. Adicione uma na <a href="/admin">página de administração</a>.</p>
             )}
@@ -71,6 +72,7 @@ const DashboardPage = () => {
                     </tbody>
                 </table>
             )}
+            </div>
         </div>
     );
 };
