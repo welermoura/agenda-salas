@@ -124,55 +124,58 @@ nav a:hover {
     background-color: #c9302c;
 }
 
-/* Página do Dashboard */
+/* Estilo inspirado no MS Teams para o Dashboard */
 .schedule-table {
     width: 100%;
-    border-collapse: separate; /* Muda de collapse para separate */
-    border-spacing: 2px; /* Adiciona espaçamento entre as células */
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Fonte mais moderna */
-}
-
-.schedule-table th, .schedule-table td {
-    border: none; /* Remove as bordas */
-    padding: 8px; /* Ajusta o padding */
-    text-align: center;
-    border-radius: 4px; /* Adiciona bordas arredondadas */
+    border-collapse: separate;
+    border-spacing: 0 8px; /* Espaçamento vertical entre as linhas */
+    font-family: 'Segoe UI', 'Roboto', sans-serif;
 }
 
 .schedule-table th {
-    background-color: #333; /* Fundo escuro para o cabeçalho */
-    color: white; /* Texto claro */
-    font-weight: bold;
+    text-align: center;
+    padding: 8px;
+    color: #616161; /* Cinza escuro para o texto do cabeçalho */
+    font-weight: 600; /* Semi-bold */
+    border: none;
 }
 
-/* Primeira célula do cabeçalho (Sala) */
-.schedule-table th:first-child {
-    background-color: transparent;
-    color: #333;
+.schedule-table td {
+    padding: 12px 8px;
+    text-align: center;
+    font-size: 14px;
+    border-radius: 4px;
 }
 
-/* Primeira célula de cada linha (nome da sala) */
+/* Nome da sala */
 .schedule-table td:first-child {
-    font-weight: bold;
+    font-weight: 600;
+    color: #333;
     text-align: left;
-    background-color: transparent;
 }
 
-
+/* Estilos de Status */
 .status-livre {
-    background-color: #28a745; /* Verde Bootstrap */
+    background-color: #F8F8F8; /* Fundo quase branco */
+    color: #4CAF50; /* Verde para o texto */
+    border-left: 3px solid #E0E0E0; /* Borda sutil */
 }
 
 .status-ocupado {
-    background-color: #dc3545; /* Vermelho Bootstrap */
+    background-color: #E6E6FA; /* Lilás/Roxo claro de fundo */
+    color: #4B0082; /* Roxo índigo escuro para o texto */
+    font-weight: 500;
+    border-left: 3px solid #6A5ACD; /* Borda roxa mais escura */
 }
 
 .status-error {
-    background-color: #ffc107; /* Amarelo */
+    background-color: #FFF3CD;
     color: #856404;
+    border-left: 3px solid #FFC107;
 }
 
 .status-indisponivel {
-    background-color: #e9ecef; /* Cinza */
-    color: #495057;
+    background-color: #F5F5F5;
+    color: #757575;
+    border-left: 3px solid #BDBDBD;
 }

@@ -65,9 +65,16 @@ const DashboardPage = () => {
                                 <td>{data.nome}</td>
                                 {hours.map(hour => {
                                     const status = data.status[hour] || 'indisponivel';
+                                    const statusText = {
+                                        'livre': 'Livre',
+                                        'ocupado': 'Ocupado',
+                                        'error': 'Erro',
+                                        'indisponivel': 'Indisponível'
+                                    }[status];
+
                                     return (
                                         <td key={hour} className={`status-${status}`}>
-                                            {/* O status será indicado apenas pela cor de fundo */}
+                                            {statusText}
                                         </td>
                                     );
                                 })}
