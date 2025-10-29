@@ -1,26 +1,55 @@
-/* Estilos Globais */
+/* --- Variáveis Globais --- */
+:root {
+    --primary-color: #4a90e2;      /* Azul mais suave */
+    --primary-hover: #357abd;
+    --danger-color: #e94e77;       /* Rosa/vermelho moderno */
+    --danger-hover: #d93b64;
+    --light-gray: #f9f9f9;
+    --medium-gray: #e0e0e0;
+    --dark-gray: #666666;
+    --text-color: #333333;
+    --background-color: #ffffff;
+    --border-radius: 12px;         /* Bordas mais arredondadas */
+    --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    --transition-speed: 0.3s;
+}
+
+/* --- Reset e Estilos de Base --- */
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    background-color: #f4f7f6;
-    color: #333;
+    font-family: var(--font-family);
+    background-color: var(--light-gray);
+    color: var(--text-color);
     margin: 0;
+    line-height: 1.6;
 }
 
 .App {
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 0 auto;
     padding: 20px;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
 }
 
-/* Navegação */
+main {
+    flex-grow: 1;
+}
+
+h1, h2 {
+    color: var(--text-color);
+    font-weight: 600;
+}
+
+/* --- Navegação --- */
 nav {
-    background-color: #fff;
-    padding: 10px 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    margin-bottom: 20px;
+    background-color: var(--background-color);
+    padding: 1rem 1.5rem;
+    border-radius: var(--border-radius);
+    box-shadow: none; /* Sombra removida para um look mais flat */
+    border: 1px solid var(--medium-gray);
+    margin-bottom: 2rem;
 }
 
 nav ul {
@@ -28,138 +57,185 @@ nav ul {
     padding: 0;
     margin: 0;
     display: flex;
-    gap: 20px;
+    gap: 25px;
 }
 
 nav a {
     text-decoration: none;
-    color: #007bff;
-    font-weight: bold;
+    color: var(--primary-color);
+    font-size: 1.1rem;
+    font-weight: 600;
+    transition: color var(--transition-speed) ease;
 }
 
 nav a:hover {
-    text-decoration: underline;
+    color: var(--primary-hover);
 }
 
-/* Página de Admin */
-.admin-page h1, .dashboard-page h1 {
-    color: #333;
+/* --- Container Genérico --- */
+.container {
+    background: var(--background-color);
+    padding: 2rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    margin-bottom: 2rem;
 }
 
+/* --- Página de Admin (Responsiva) --- */
 .agenda-form {
     display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    flex-direction: column;
+    gap: 1rem;
 }
 
 .agenda-form input {
-    flex-grow: 1;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+    padding: 14px;
+    border: 1px solid var(--medium-gray);
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    transition: border-color var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+}
+
+.agenda-form input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
 }
 
 .agenda-form button {
-    padding: 10px 20px;
-    background-color: #007bff;
+    padding: 14px 20px;
+    background-color: var(--primary-color);
     color: white;
     border: none;
-    border-radius: 4px;
+    border-radius: var(--border-radius);
     cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: background-color var(--transition-speed) ease, transform var(--transition-speed) ease;
 }
 
 .agenda-form button:hover {
-    background-color: #0056b3;
+    background-color: var(--primary-hover);
+    transform: translateY(-2px);
 }
 
 .error-message {
-    color: #d9534f;
-    background-color: #f2dede;
-    padding: 10px;
-    border-radius: 4px;
-    margin-bottom: 20px;
-}
-
-.agendas-list {
-    list-style: none;
-    padding: 0;
+    color: var(--danger-color);
+    background-color: #fddede;
+    padding: 1rem;
+    border-radius: var(--border-radius);
 }
 
 .agendas-list li {
-    background-color: #fff;
-    padding: 15px;
-    margin-bottom: 10px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    background-color: var(--background-color);
+    padding: 1rem 1.5rem;
+    margin-bottom: 1rem;
+    border-radius: var(--border-radius);
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 15px;
+    flex-direction: column;
+    gap: 0.5rem;
+    border: 1px solid var(--medium-gray);
+    transition: box-shadow var(--transition-speed) ease;
+}
+
+.agendas-list li:hover {
+    box-shadow: var(--box-shadow);
 }
 
 .agendas-list li strong {
-    flex-shrink: 0;
+    font-size: 1.1rem;
 }
 
 .agendas-list li span {
-    flex-grow: 1;
-    color: #666;
-    word-break: break-all; /* Essencial para URLs longas */
+    color: var(--dark-gray);
+    word-break: break-all;
 }
 
 .agendas-list li button {
-    padding: 8px 12px;
-    background-color: #d9534f;
+    padding: 10px 15px;
+    background-color: var(--danger-color);
     color: white;
     border: none;
-    border-radius: 4px;
+    border-radius: var(--border-radius);
     cursor: pointer;
+    align-self: flex-start;
+    transition: background-color var(--transition-speed) ease, transform var(--transition-speed) ease;
 }
 
 .agendas-list li button:hover {
-    background-color: #c9302c;
+    background-color: var(--danger-hover);
+    transform: translateY(-2px);
 }
 
-/* Página do Dashboard */
+/* --- Página do Dashboard (Responsiva) --- */
+.dashboard-page .container {
+    overflow-x: auto;
+}
+
 .schedule-table {
     width: 100%;
     border-collapse: collapse;
-    background-color: #fff;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    border-radius: 8px;
-    overflow: hidden; /* Garante que o border-radius seja aplicado nas bordas da tabela */
+    min-width: 800px;
+    border: 1px solid var(--medium-gray);
+    border-radius: var(--border-radius);
+    overflow: hidden;
 }
 
 .schedule-table th, .schedule-table td {
-    border: 1px solid #ddd;
-    padding: 12px;
+    padding: 1rem;
     text-align: center;
+    white-space: nowrap;
+    border: none;
+    border-bottom: 1px solid var(--medium-gray);
 }
 
 .schedule-table th {
-    background-color: #f2f2f2;
+    background-color: var(--light-gray);
+    font-weight: 600;
+    border-bottom-width: 2px;
 }
 
-.status-livre {
-    background-color: #90ee90; /* Verde claro */
-    color: #2e6b2e;
+.schedule-table tr:last-child td {
+    border-bottom: none;
 }
 
-.status-ocupado {
-    background-color: #f08080; /* Vermelho claro */
-    color: #a52a2a;
+.schedule-table td:first-child {
+    font-weight: bold;
+    background-color: var(--light-gray);
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    border-right: 1px solid var(--medium-gray);
 }
 
-.status-error {
-    background-color: #ffc107; /* Amarelo */
-    color: #856404;
-}
+.status-livre { background-color: #e8f5e9; color: #2e7d32; }
+.status-ocupado { background-color: #ffebee; color: #c62828; }
+.status-error { background-color: #fffde7; color: #f57f17; }
+.status-indisponivel { background-color: #eceff1; color: #37474f; }
 
-.status-indisponivel {
-    background-color: #e9ecef; /* Cinza */
-    color: #495057;
+
+/* --- Media Queries para Telas Maiores --- */
+@media (min-width: 768px) {
+    .agenda-form {
+        flex-direction: row;
+        align-items: center;
+    }
+
+    .agenda-form input {
+        flex-grow: 1;
+    }
+
+    .agenda-form button {
+        flex-shrink: 0;
+    }
+
+    .agendas-list li {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .agendas-list li button {
+        align-self: center;
+    }
 }

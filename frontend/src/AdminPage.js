@@ -65,7 +65,8 @@ const AdminPage = () => {
     return (
         <div className="admin-page">
             <h1>Administração de Agendas</h1>
-            <form onSubmit={handleSubmit} className="agenda-form">
+            <div className="container">
+                <form onSubmit={handleSubmit} className="agenda-form">
                 <input
                     type="text"
                     value={nome}
@@ -83,7 +84,9 @@ const AdminPage = () => {
                 <button type="submit">Adicionar</button>
             </form>
             {error && <p className="error-message">{error}</p>}
+            </div>
 
+            <div className="container">
             <h2>Agendas Cadastradas</h2>
             <ul className="agendas-list">
                 {agendas && agendas.map((agenda, index) => (
@@ -94,6 +97,7 @@ const AdminPage = () => {
                     </li>
                 ))}
             </ul>
+            </div>
         </div>
     );
 };
