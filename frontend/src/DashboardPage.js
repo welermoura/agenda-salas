@@ -72,11 +72,6 @@ const DashboardPage = () => {
                         </div>
                     </div>
 
-                    <div className="legend">
-                        <div className="legend-item"><span className="legend-color-box status-livre"></span> Livre</div>
-                        <div className="legend-item"><span className="legend-color-box status-ocupado"></span> Ocupado</div>
-                    </div>
-
                     {Object.keys(schedules).length === 0 ? (
                         <p>Nenhuma agenda cadastrada. Adicione uma na <a href="/admin">página de administração</a>.</p>
                     ) : (
