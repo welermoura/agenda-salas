@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import RoomCard from './RoomCard'; // Importa o novo componente
+import RoomRow from './RoomRow'; // Importa o novo componente RoomRow
 
 // Componente para o relógio
 const Clock = () => {
@@ -21,7 +21,6 @@ const Clock = () => {
         </div>
     );
 };
-
 
 const DashboardPage = () => {
     const [schedules, setSchedules] = useState({});
@@ -48,8 +47,6 @@ const DashboardPage = () => {
     return (
         <div className="dashboard-page">
             <header className="dashboard-header">
-                {/* Usaremos um placeholder para o logo */}
-                <div className="logo">AGENDAS</div>
                 <h1>Disponibilidade de Salas de Reunião</h1>
                 <Clock />
             </header>
@@ -62,9 +59,9 @@ const DashboardPage = () => {
                 </div>
             )}
 
-            <div className="cards-container">
+            <div className="rows-container">
                 {Object.entries(schedules).map(([url, data]) => (
-                    <RoomCard key={url} name={data.nome} schedule={data.status} />
+                    <RoomRow key={url} name={data.nome} schedule={data.status} />
                 ))}
             </div>
         </div>
