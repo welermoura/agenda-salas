@@ -170,3 +170,9 @@ nav a:hover {
         font-size: 12px;
     }
 }
+
+/* Estilo para horas que já passaram */
+.past-time-slot {
+    opacity: 0.4;
+    transition: opacity 0.3s ease-in-out;
+}

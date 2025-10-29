@@ -40,6 +40,8 @@ const DashboardPage = () => {
     // Extrai as salas para as colunas
     const rooms = Object.entries(schedules).map(([url, data]) => ({ url, nome: data.nome }));
 
+    const currentHour = new Date().getHours();
+
     useEffect(() => {
         if (!loading) {
             const now = new Date();
@@ -72,7 +74,7 @@ const DashboardPage = () => {
                                 </thead>
                                 <tbody>
                                     {hours.map(hour => (
-                                        <tr key={hour} id={`hour-row-${hour}`}>
+                                        <tr key={hour} id={`hour-row-${hour}`} className={parseInt(hour) < currentHour ? 'past-time-slot' : ''}>
                                             <th className="time-cell">{hour}:00</th>
                                             {rooms.map(room => {
                                                 const slot1_status = schedules[room.url]?.status[`${hour}:00`] || 'indisponivel';
