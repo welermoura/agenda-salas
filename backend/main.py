@@ -111,17 +111,16 @@ async def delete_agenda(url: str):
 async def websocket_endpoint(websocket: WebSocket):
     await manager.connect(websocket)
     try:
-        # Envia o estado atual assim que o cliente se conecta
+        # Envia o estado atual assim que o cliente se conecta, mesmo que esteja vazio
         agendas = await carregar_agendas()
         statuses = {}
-        if agendas:
-            for agenda in agendas:
-                try:
-                    status = get_room_status(str(agenda.url))
-                    statuses[str(agenda.url)] = {"nome": agenda.nome, "status": status}
-                except Exception as e:
-                    statuses[str(agenda.url)] = {"nome": agenda.nome, "status": {"error": str(e)}}
-            await websocket.send_text(json.dumps(statuses))
+        for agenda in agendas:
+            try:
+                status = get_room_status(str(agenda.url))
+                statuses[str(agenda.url)] = {"nome": agenda.nome, "status": status}
+            except Exception as e:
+                statuses[str(agenda.url)] = {"nome": agenda.nome, "status": {"error": str(e)}}
+        await websocket.send_text(json.dumps(statuses))
 
         while True:
             # Mantém a conexão aberta para receber broadcasts

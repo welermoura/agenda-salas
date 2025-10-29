@@ -156,27 +156,6 @@ nav a:hover {
     border-radius: 4px;
 }
 
-/* Legenda */
-.legend {
-    display: flex;
-    gap: 24px;
-    margin-bottom: 16px;
-    align-items: center;
-}
-
-.legend-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 14px;
-}
-
-.legend-color-box {
-    width: 16px;
-    height: 16px;
-    border-radius: 4px;
-}
-
 /* Remove bordas externas desnecessárias */
 .schedule-table th:last-child,
 .schedule-table td:last-child {
