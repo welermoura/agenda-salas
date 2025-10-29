@@ -1,4 +1,27 @@
 import React, { useState, useEffect } from 'react';
+import RoomCard from './RoomCard'; // Importa o novo componente
+
+// Componente para o relógio
+const Clock = () => {
+    const [time, setTime] = useState(new Date());
+
+    useEffect(() => {
+        const timerId = setInterval(() => setTime(new Date()), 1000);
+        return () => clearInterval(timerId);
+    }, []);
+
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    const date = time.toLocaleDateString('pt-BR', options);
+    const currentTime = time.toLocaleTimeString('pt-BR');
+
+    return (
+        <div className="clock">
+            <p className="date">{date}</p>
+            <p className="time">{currentTime}</p>
+        </div>
+    );
+};
+
 
 const DashboardPage = () => {
     const [schedules, setSchedules] = useState({});
@@ -8,70 +31,41 @@ const DashboardPage = () => {
 
     useEffect(() => {
         const ws = new WebSocket(WS_URL);
-
-        ws.onopen = () => {
-            console.log("Conexão WebSocket estabelecida.");
-        };
-
+        ws.onopen = () => console.log("Conexão WebSocket estabelecida.");
         ws.onmessage = (event) => {
             const data = JSON.parse(event.data);
             setSchedules(data);
-            setLoading(false); // Dados recebidos, para de carregar
+            setLoading(false);
         };
-
-        ws.onclose = () => {
-            console.log("Conexão WebSocket fechada.");
-        };
-
+        ws.onclose = () => console.log("Conexão WebSocket fechada.");
         ws.onerror = (error) => {
             console.error("Erro no WebSocket:", error);
             setLoading(false);
         };
-
-        // Limpa a conexão ao desmontar o componente
-        return () => {
-            ws.close();
-        };
+        return () => ws.close();
     }, [WS_URL]);
-
-    // Define o cabeçalho de horas
-    const hours = Array.from({ length: 15 }, (_, i) => `${(i + 6).toString().padStart(2, '0')}:00`);
 
     return (
         <div className="dashboard-page">
-            <h1>Dashboard de Salas</h1>
-            {loading && <p>Carregando status das salas...</p>}
+            <header className="dashboard-header">
+                {/* Usaremos um placeholder para o logo */}
+                <div className="logo">AGENDAS</div>
+                <h1>Disponibilidade de Salas de Reunião</h1>
+                <Clock />
+            </header>
 
-            <div className="container">
+            {loading && <p className="loading-message">Carregando status das salas...</p>}
+
             {!loading && Object.keys(schedules).length === 0 && (
-                <p>Nenhuma agenda cadastrada. Adicione uma na <a href="/admin">página de administração</a>.</p>
+                <div className="container">
+                    <p>Nenhuma agenda cadastrada. Adicione uma na página de administração (acessível em /admin).</p>
+                </div>
             )}
 
-            {Object.keys(schedules).length > 0 && (
-                <table className="schedule-table">
-                    <thead>
-                        <tr>
-                            <th>Sala</th>
-                            {hours.map(hour => <th key={hour}>{hour}</th>)}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {Object.entries(schedules).map(([url, data]) => (
-                            <tr key={url}>
-                                <td>{data.nome}</td>
-                                {hours.map(hour => {
-                                    const status = data.status[hour] || 'indisponivel';
-                                    return (
-                                        <td key={hour} className={`status-${status}`}>
-                                            {status === 'error' ? 'Erro' : status}
-                                        </td>
-                                    );
-                                })}
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            )}
+            <div className="cards-container">
+                {Object.entries(schedules).map(([url, data]) => (
+                    <RoomCard key={url} name={data.nome} schedule={data.status} />
+                ))}
             </div>
         </div>
     );
