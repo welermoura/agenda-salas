@@ -124,58 +124,74 @@ nav a:hover {
     background-color: #c9302c;
 }
 
-/* Estilo inspirado no MS Teams para o Dashboard */
+/* Layout Final - Estilo Calendário com Divisória */
 .schedule-table {
     width: 100%;
-    border-collapse: separate;
-    border-spacing: 0 8px; /* Espaçamento vertical entre as linhas */
+    border-collapse: collapse;
     font-family: 'Segoe UI', 'Roboto', sans-serif;
 }
 
+.schedule-table th, .schedule-table td {
+    border: 1px solid #E0E0E0; /* Bordas cinzas claras */
+    padding: 0;
+    height: 40px; /* Altura fixa para as linhas */
+}
+
 .schedule-table th {
-    text-align: center;
-    padding: 8px;
-    color: #616161; /* Cinza escuro para o texto do cabeçalho */
-    font-weight: 600; /* Semi-bold */
-    border: none;
-}
-
-.schedule-table td {
-    padding: 12px 8px;
-    text-align: center;
-    font-size: 14px;
-    border-radius: 4px;
-}
-
-/* Nome da sala */
-.schedule-table td:first-child {
+    background-color: #F5F5F5;
     font-weight: 600;
     color: #333;
+}
+
+.room-name-cell, .room-header-cell {
     text-align: left;
+    padding-left: 10px;
+    width: 150px; /* Largura fixa para a coluna de salas */
 }
 
-/* Estilos de Status */
-.status-livre {
-    background-color: #F8F8F8; /* Fundo quase branco */
-    color: #4CAF50; /* Verde para o texto */
-    border-left: 3px solid #E0E0E0; /* Borda sutil */
+.hour-cell {
+    position: relative;
+    background-image: linear-gradient(to right, transparent 50%, #E0E0E0 50%);
+    background-size: 2px 100%;
+    background-repeat: no-repeat;
+    background-position: center;
 }
 
-.status-ocupado {
-    background-color: #E6E6FA; /* Lilás/Roxo claro de fundo */
-    color: #4B0082; /* Roxo índigo escuro para o texto */
-    font-weight: 500;
-    border-left: 3px solid #6A5ACD; /* Borda roxa mais escura */
+.time-slot {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    height: 100%;
 }
 
-.status-error {
-    background-color: #FFF3CD;
-    color: #856404;
-    border-left: 3px solid #FFC107;
+.slot-00 {
+    left: 0;
+    width: 50%;
 }
 
-.status-indisponivel {
-    background-color: #F5F5F5;
-    color: #757575;
-    border-left: 3px solid #BDBDBD;
+.slot-30 {
+    left: 50%;
+    width: 50%;
+}
+
+/* O status "livre" é transparente por padrão */
+.time-slot.status-livre {
+    background-color: transparent;
+}
+
+.time-slot.status-ocupado {
+    background-color: rgba(139, 107, 218, 0.8); /* Roxo do Teams com transparência */
+    border-radius: 2px;
+}
+
+/* Remove a borda direita da última célula do cabeçalho e do corpo */
+.schedule-table th:last-child,
+.schedule-table td:last-child {
+    border-right: none;
+}
+
+/* Remove a borda esquerda da primeira célula do cabeçalho e do corpo */
+.schedule-table th:first-child,
+.schedule-table td:first-child {
+    border-left: none;
 }

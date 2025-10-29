@@ -34,13 +34,8 @@ const DashboardPage = () => {
         };
     }, [WS_URL]);
 
-    // Define o cabeçalho de horas com intervalos de 30 minutos
-    const hours = [];
-    for (let i = 6; i < 21; i++) {
-        const hour = i.toString().padStart(2, '0');
-        hours.push(`${hour}:00`);
-        hours.push(`${hour}:30`);
-    }
+    // Define o cabeçalho de horas cheias
+    const hours = Array.from({ length: 15 }, (_, i) => (i + 6).toString().padStart(2, '0'));
 
     return (
         <div className="dashboard-page">
@@ -55,26 +50,22 @@ const DashboardPage = () => {
                 <table className="schedule-table">
                     <thead>
                         <tr>
-                            <th>Sala</th>
-                            {hours.map(hour => <th key={hour}>{hour}</th>)}
+                            <th className="room-header-cell">Sala</th>
+                            {hours.map(hour => <th key={hour}>{hour}h</th>)}
                         </tr>
                     </thead>
                     <tbody>
                         {Object.entries(schedules).map(([url, data]) => (
                             <tr key={url}>
-                                <td>{data.nome}</td>
+                                <td className="room-name-cell">{data.nome}</td>
                                 {hours.map(hour => {
-                                    const status = data.status[hour] || 'indisponivel';
-                                    const statusText = {
-                                        'livre': 'Livre',
-                                        'ocupado': 'Ocupado',
-                                        'error': 'Erro',
-                                        'indisponivel': 'Indisponível'
-                                    }[status];
+                                    const slot1_status = data.status[`${hour}:00`] || 'livre';
+                                    const slot2_status = data.status[`${hour}:30`] || 'livre';
 
                                     return (
-                                        <td key={hour} className={`status-${status}`}>
-                                            {statusText}
+                                        <td key={hour} className="hour-cell">
+                                            <div className={`time-slot slot-00 status-${slot1_status}`}></div>
+                                            <div className={`time-slot slot-30 status-${slot2_status}`}></div>
                                         </td>
                                     );
                                 })}
