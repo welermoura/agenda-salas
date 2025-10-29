@@ -9,8 +9,8 @@ body {
 }
 
 .App {
-    max-width: 1400px; /* Aumenta a largura máxima */
-    margin: 0 auto;
+    /* max-width foi removido para preencher a tela */
+    margin: 0;
     padding: 24px;
 }
 
@@ -132,4 +132,29 @@ nav a:hover {
 .schedule-table th:first-child,
 .schedule-table td:first-child {
     border-left: none;
+}
+
+/* --- Responsividade --- */
+@media (max-width: 768px) {
+    .App {
+        padding: 16px;
+    }
+
+    .dashboard-page {
+        overflow-x: auto; /* Permite a rolagem horizontal da tabela */
+    }
+
+    .schedule-table {
+        min-width: 800px; /* Garante que a tabela não fique muito espremida */
+    }
+
+    .admin-page h1, .dashboard-page h1 {
+        font-size: 22px;
+    }
+
+    .room-name-cell, .room-header-cell {
+        width: 120px;
+        padding-left: 8px;
+        font-size: 14px;
+    }
 }
