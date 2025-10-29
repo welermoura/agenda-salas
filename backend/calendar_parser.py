@@ -18,7 +18,7 @@ def get_room_status(url: str) -> dict:
 
         # Converte os eventos para objetos arrow para facilitar a comparação
         events = [
-            (arrow.get(event.begin.datetime), arrow.get(event.end.datetime))
+            (arrow.get(event.begin.datetime).to('local'), arrow.get(event.end.datetime).to('local'))
             for event in calendar.events
         ]
 
