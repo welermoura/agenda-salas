@@ -34,13 +34,8 @@ const DashboardPage = () => {
         };
     }, [WS_URL]);
 
-    // Gera os intervalos de 30 minutos para as linhas
-    const timeSlots = [];
-    for (let i = 6; i < 21; i++) {
-        const hour = i.toString().padStart(2, '0');
-        timeSlots.push(`${hour}:00`);
-        timeSlots.push(`${hour}:30`);
-    }
+    // Gera as horas cheias para as linhas, começando das 8:00
+    const hours = Array.from({ length: 13 }, (_, i) => (i + 8).toString().padStart(2, '0'));
 
     // Extrai as salas para as colunas
     const rooms = Object.entries(schedules).map(([url, data]) => ({ url, nome: data.nome }));
@@ -49,10 +44,9 @@ const DashboardPage = () => {
         if (!loading) {
             const now = new Date();
             const hour = now.getHours().toString().padStart(2, '0');
-            const minute = now.getMinutes() < 30 ? '00' : '30';
-            const currentTimeSlotId = `time-${hour}-${minute}`;
+            const currentHourRowId = `hour-row-${hour}`;
 
-            const element = document.getElementById(currentTimeSlotId);
+            const element = document.getElementById(currentHourRowId);
             if (element) {
                 element.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
@@ -77,14 +71,20 @@ const DashboardPage = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {timeSlots.map(slot => (
-                                        <tr key={slot} id={`time-${slot.replace(':', '-')}`}>
-                                            <th className="time-cell">{slot}</th>
+                                    {hours.map(hour => (
+                                        <tr key={hour} id={`hour-row-${hour}`}>
+                                            <th className="time-cell">{hour}:00</th>
                                             {rooms.map(room => {
-                                                const status = schedules[room.url]?.status[slot] || 'indisponivel';
+                                                const slot1_status = schedules[room.url]?.status[`${hour}:00`] || 'indisponivel';
+                                                const slot2_status = schedules[room.url]?.status[`${hour}:30`] || 'indisponivel';
                                                 return (
-                                                    <td key={room.url} className={`status-cell status-${status}`}>
-                                                        {status === 'ocupado' ? 'Ocupado' : 'Livre'}
+                                                    <td key={room.url} className="status-cell">
+                                                        <div className={`half-hour-slot slot-top status-${slot1_status}`}>
+                                                            {slot1_status.charAt(0).toUpperCase() + slot1_status.slice(1)}
+                                                        </div>
+                                                        <div className={`half-hour-slot slot-bottom status-${slot2_status}`}>
+                                                            {slot2_status.charAt(0).toUpperCase() + slot2_status.slice(1)}
+                                                        </div>
                                                     </td>
                                                 );
                                             })}

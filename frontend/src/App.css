@@ -114,16 +114,31 @@ nav a:hover {
 }
 
 .status-cell {
+    position: relative;
+    padding: 0;
+    height: 60px; /* Aumenta a altura para acomodar os dois slots */
+    background-image: linear-gradient(to bottom, transparent 50%, #333 50%);
+    background-size: 100% 1px;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.half-hour-slot {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 50%;
     font-weight: 500;
     color: #fff;
 }
 
 .status-livre {
-    background-color: #66bb6a; /* Verde suave */
+    background-color: #66bb6a;
 }
 
 .status-ocupado {
-    background-color: #e57373; /* Vermelho suave */
+    background-color: #e57373;
 }
 
 .status-indisponivel {

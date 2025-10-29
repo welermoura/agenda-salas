@@ -26,7 +26,7 @@ def get_room_status(url):
 
     # Gera o schedule com intervalos de 30 minutos
     schedule = {}
-    current_schedule_time = today_start.replace(hour=6, minute=0)
+    current_schedule_time = today_start.replace(hour=8, minute=0)
     while current_schedule_time.hour < 21:
         schedule[current_schedule_time.strftime("%H:%M")] = "livre"
         current_schedule_time += timedelta(minutes=30)
