@@ -1,7 +1,0 @@
-fastapi
-uvicorn[standard]
-pydantic
-requests
-arrow
-icalendar
-aiofiles
