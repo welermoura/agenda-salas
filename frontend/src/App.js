@@ -40,6 +40,7 @@ function App() {
               </li>
             </ul>
           </nav>
+          <h1 className="app-title">Disponibilidade das Salas de Reunião</h1>
           <div className="real-time-clock">
             <div className="date-display">{date}</div>
             <div className="time-display">{time}</div>

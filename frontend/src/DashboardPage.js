@@ -65,10 +65,6 @@ const DashboardPage = () => {
                 <p className="loading-message">Carregando Agendas, favor aguarde</p>
             ) : (
                 <>
-                    <div className="dashboard-header">
-                        <h1>Disponibilidade das Salas de Reunião</h1>
-                    </div>
-
                     {Object.keys(schedules).length === 0 ? (
                         <p>Nenhuma agenda cadastrada. Adicione uma na <a href="/admin">página de administração</a>.</p>
                     ) : (

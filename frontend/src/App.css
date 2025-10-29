@@ -24,6 +24,15 @@ body {
     border-bottom: 1px solid #333;
 }
 
+.app-title {
+    color: #fff;
+    font-size: 24px;
+    margin: 0;
+    text-align: center;
+    flex-grow: 1; /* Permite que o título ocupe o espaço central */
+}
+
+
 /* Navegação */
 nav {
     background-color: transparent;
@@ -48,18 +57,10 @@ nav a:hover {
     color: #fff;
 }
 
-/* Títulos e Cabeçalho do Dashboard */
-.dashboard-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 24px;
-}
-
-.admin-page h1, .dashboard-page h1 {
+/* Títulos (agora apenas no AdminPage) */
+.admin-page h1 {
     color: #fff;
     font-size: 28px;
-    margin: 0; /* Remove a margem padrão do h1 */
 }
 
 .real-time-clock {
