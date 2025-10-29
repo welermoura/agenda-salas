@@ -15,9 +15,15 @@ function DashboardPage() {
         };
 
         ws.onmessage = (event) => {
+            console.log("Dados recebidos via WebSocket:", event.data);
             setLoading(false);
             const data = JSON.parse(event.data);
-            setSchedules(prev => ({ ...prev, ...data }));
+            console.log("Dados após o parse:", data);
+            setSchedules(prev => {
+                const newState = { ...prev, ...data };
+                console.log("Novo estado dos agendamentos:", newState);
+                return newState;
+            });
         };
 
         ws.onerror = (error) => {

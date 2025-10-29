@@ -54,6 +54,7 @@ async def update_schedules_periodically():
                 )
                 schedules[agenda.url] = {"nome": agenda.nome, "status": status}
 
+            logging.info(f"Enviando atualizações de agendamento via WebSocket: {schedules}")
             await manager.broadcast(json.dumps(schedules))
 
         await asyncio.sleep(10)
@@ -123,8 +124,8 @@ async def websocket_endpoint(websocket: WebSocket):
         # Mantém a conexão aberta para futuras atualizações
         while True:
             await websocket.receive_text()
-    except Exception:
-        pass
+    except Exception as e:
+        logging.error(f"Erro no endpoint WebSocket: {e}", exc_info=True)
     finally:
         manager.disconnect(websocket)
 
