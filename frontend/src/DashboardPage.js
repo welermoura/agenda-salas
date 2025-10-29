@@ -39,40 +39,42 @@ const DashboardPage = () => {
 
     return (
         <div className="dashboard-page">
-            <h1>Dashboard de Salas</h1>
-            {loading && <p>Carregando status das salas...</p>}
+            {loading ? (
+                <p className="loading-message">Favor aguarde, carregando agendas.</p>
+            ) : (
+                <>
+                    <h1>Dashboard de Salas</h1>
+                    {Object.keys(schedules).length === 0 ? (
+                        <p>Nenhuma agenda cadastrada. Adicione uma na <a href="/admin">página de administração</a>.</p>
+                    ) : (
+                        <table className="schedule-table">
+                            <thead>
+                                <tr>
+                                    <th className="room-header-cell">Sala</th>
+                                    {hours.map(hour => <th key={hour}>{hour}h</th>)}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {Object.entries(schedules).map(([url, data]) => (
+                                    <tr key={url}>
+                                        <td className="room-name-cell">{data.nome}</td>
+                                        {hours.map(hour => {
+                                            const slot1_status = data.status[`${hour}:00`] || 'livre';
+                                            const slot2_status = data.status[`${hour}:30`] || 'livre';
 
-            {!loading && Object.keys(schedules).length === 0 && (
-                <p>Nenhuma agenda cadastrada. Adicione uma na <a href="/admin">página de administração</a>.</p>
-            )}
-
-            {Object.keys(schedules).length > 0 && (
-                <table className="schedule-table">
-                    <thead>
-                        <tr>
-                            <th className="room-header-cell">Sala</th>
-                            {hours.map(hour => <th key={hour}>{hour}h</th>)}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {Object.entries(schedules).map(([url, data]) => (
-                            <tr key={url}>
-                                <td className="room-name-cell">{data.nome}</td>
-                                {hours.map(hour => {
-                                    const slot1_status = data.status[`${hour}:00`] || 'livre';
-                                    const slot2_status = data.status[`${hour}:30`] || 'livre';
-
-                                    return (
-                                        <td key={hour} className="hour-cell">
-                                            <div className={`time-slot slot-00 status-${slot1_status}`}></div>
-                                            <div className={`time-slot slot-30 status-${slot2_status}`}></div>
-                                        </td>
-                                    );
-                                })}
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+                                            return (
+                                                <td key={hour} className="hour-cell">
+                                                    <div className={`time-slot slot-00 status-${slot1_status}`}></div>
+                                                    <div className={`time-slot slot-30 status-${slot2_status}`}></div>
+                                                </td>
+                                            );
+                                        })}
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    )}
+                </>
             )}
         </div>
     );
