@@ -47,17 +47,15 @@ def get_room_status(url):
                 end = arrow.get(dtend.strftime('%Y-%m-%d %H:%M:%S')).replace(tzinfo='America/Sao_Paulo')
 
             if start < today_end and end > today_start:
-                # Itera sobre cada intervalo de 30 minutos do evento
-                current_time = start
-                while current_time < end:
-                    # Arredonda o tempo para o intervalo de 30 minutos mais próximo (para baixo)
-                    minute = 0 if current_time.minute < 30 else 30
-                    rounded_time = current_time.replace(minute=minute, second=0, microsecond=0)
+                # Arredonda a hora de início para o intervalo de 30 minutos anterior mais próximo
+                start_minute = 0 if start.minute < 30 else 30
+                current_time = start.replace(minute=start_minute, second=0, microsecond=0)
 
-                    time_str = rounded_time.strftime("%H:%M")
+                # Itera sobre cada intervalo de 30 minutos até o final do evento
+                while current_time < end:
+                    time_str = current_time.strftime("%H:%M")
                     if time_str in schedule:
                         schedule[time_str] = "ocupado"
-
                     current_time += timedelta(minutes=30)
 
     return schedule
