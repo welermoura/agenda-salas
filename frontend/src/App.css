@@ -165,14 +165,16 @@ nav a:hover {
     border-left: none;
 }
 
+/* Contêiner de Rolagem da Tabela */
+.table-scroll-container {
+    overflow-x: auto;
+    width: 100%;
+}
+
 /* --- Responsividade --- */
 @media (max-width: 768px) {
     .App {
         padding: 16px;
-    }
-
-    .dashboard-page {
-        overflow-x: auto; /* Permite a rolagem horizontal da tabela */
     }
 
     .schedule-table {

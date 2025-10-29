@@ -54,6 +54,21 @@ const DashboardPage = () => {
     };
 
     const { date, time } = formatDateTime(currentTime);
+    const scrollContainerRef = React.useRef(null);
+
+    useEffect(() => {
+        if (!loading && scrollContainerRef.current) {
+            const currentHour = new Date().getHours().toString().padStart(2, '0');
+            const currentHourColumn = document.getElementById(`hour-${currentHour}`);
+            if (currentHourColumn) {
+                const scrollLeft = currentHourColumn.offsetLeft - scrollContainerRef.current.offsetLeft;
+                scrollContainerRef.current.scrollTo({
+                    left: scrollLeft,
+                    behavior: 'smooth'
+                });
+            }
+        }
+    }, [loading]);
 
     // Define o cabeçalho de horas cheias
     const hours = Array.from({ length: 15 }, (_, i) => (i + 6).toString().padStart(2, '0'));
@@ -75,14 +90,15 @@ const DashboardPage = () => {
                     {Object.keys(schedules).length === 0 ? (
                         <p>Nenhuma agenda cadastrada. Adicione uma na <a href="/admin">página de administração</a>.</p>
                     ) : (
-                        <table className="schedule-table">
-                            <thead>
-                                <tr>
-                                    <th className="room-header-cell">Sala</th>
-                                    {hours.map(hour => <th key={hour}>{hour}h</th>)}
-                                </tr>
-                            </thead>
-                            <tbody>
+                        <div className="table-scroll-container" ref={scrollContainerRef}>
+                            <table className="schedule-table">
+                                <thead>
+                                    <tr>
+                                        <th className="room-header-cell">Sala</th>
+                                        {hours.map(hour => <th key={hour} id={`hour-${hour}`}>{hour}h</th>)}
+                                    </tr>
+                                </thead>
+                                <tbody>
                                 {Object.entries(schedules).map(([url, data]) => (
                                     <tr key={url}>
                                         <td className="room-name-cell">{data.nome}</td>
@@ -105,6 +121,7 @@ const DashboardPage = () => {
                                 ))}
                             </tbody>
                         </table>
+                        </div>
                     )}
                 </>
             )}
