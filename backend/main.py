@@ -68,17 +68,28 @@ manager = ConnectionManager()
 # --- Tarefa de Atualização em Background ---
 async def update_scheduler():
     while True:
-        agendas = await carregar_agendas()
-        statuses = {}
-        for agenda in agendas:
-            try:
-                status = get_room_status(str(agenda.url))
-                statuses[str(agenda.url)] = {"nome": agenda.nome, "status": status}
-            except Exception as e:
-                # Se a busca falhar, informa o erro
-                statuses[str(agenda.url)] = {"nome": agenda.nome, "status": {"error": str(e)}}
+        try:
+            agendas = await carregar_agendas()
+            statuses = {}
+            if agendas:
+                for agenda in agendas:
+                    try:
+                        status = get_room_status(str(agenda.url))
+                        statuses[str(agenda.url)] = {"nome": agenda.nome, "status": status}
+                    except Exception:
+                        # Se a busca por um calendário específico falhar, pula para o próximo
+                        # O erro poderia ser logado em um sistema de monitoramento real
+                        pass
 
-        await manager.broadcast(json.dumps(statuses))
+                if statuses:
+                    await manager.broadcast(json.dumps(statuses))
+
+        except Exception:
+            # Captura qualquer outra exceção inesperada no loop principal
+            # para garantir que a tarefa nunca pare de ser executada.
+            # Em um ambiente de produção, isso seria um log de erro crítico.
+            pass
+
         await asyncio.sleep(10) # Intervalo de atualização
 
 @app.on_event("startup")
