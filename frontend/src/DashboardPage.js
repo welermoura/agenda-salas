@@ -34,6 +34,27 @@ const DashboardPage = () => {
         };
     }, [WS_URL]);
 
+    const [currentTime, setCurrentTime] = useState(new Date());
+
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setCurrentTime(new Date());
+        }, 1000);
+        return () => clearInterval(timer);
+    }, []);
+
+    const formatDateTime = (date) => {
+        const dateOptions = { weekday: 'long', day: 'numeric', month: 'long' };
+        let formattedDate = date.toLocaleDateString('pt-BR', dateOptions);
+        formattedDate = formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
+
+        const timeString = date.toLocaleTimeString('pt-BR');
+
+        return { date: formattedDate, time: timeString };
+    };
+
+    const { date, time } = formatDateTime(currentTime);
+
     // Define o cabeçalho de horas cheias
     const hours = Array.from({ length: 15 }, (_, i) => (i + 6).toString().padStart(2, '0'));
 
@@ -43,7 +64,19 @@ const DashboardPage = () => {
                 <p className="loading-message">Favor aguarde, carregando agendas.</p>
             ) : (
                 <>
-                    <h1>Dashboard de Salas</h1>
+                    <div className="dashboard-header">
+                        <h1>Dashboard de Salas</h1>
+                        <div className="real-time-clock">
+                            <div className="date-display">{date}</div>
+                            <div className="time-display">{time}</div>
+                        </div>
+                    </div>
+
+                    <div className="legend">
+                        <div className="legend-item"><span className="legend-color-box status-livre"></span> Livre</div>
+                        <div className="legend-item"><span className="legend-color-box status-ocupado"></span> Ocupado</div>
+                    </div>
+
                     {Object.keys(schedules).length === 0 ? (
                         <p>Nenhuma agenda cadastrada. Adicione uma na <a href="/admin">página de administração</a>.</p>
                     ) : (
@@ -64,8 +97,12 @@ const DashboardPage = () => {
 
                                             return (
                                                 <td key={hour} className="hour-cell">
-                                                    <div className={`time-slot slot-00 status-${slot1_status}`}></div>
-                                                    <div className={`time-slot slot-30 status-${slot2_status}`}></div>
+                                                    <div className={`time-slot slot-00 status-${slot1_status}`}>
+                                                        {slot1_status === 'ocupado' ? 'Ocupado' : 'Livre'}
+                                                    </div>
+                                                    <div className={`time-slot slot-30 status-${slot2_status}`}>
+                                                        {slot2_status === 'ocupado' ? 'Ocupado' : 'Livre'}
+                                                    </div>
                                                 </td>
                                             );
                                         })}

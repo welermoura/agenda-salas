@@ -41,11 +41,33 @@ nav a:hover {
     color: #fff;
 }
 
-/* Títulos */
+/* Títulos e Cabeçalho do Dashboard */
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
 .admin-page h1, .dashboard-page h1 {
     color: #fff;
     font-size: 28px;
-    margin-bottom: 24px;
+    margin: 0; /* Remove a margem padrão do h1 */
+}
+
+.real-time-clock {
+    text-align: right;
+}
+
+.date-display {
+    font-size: 16px;
+    color: #e0e0e0;
+}
+
+.time-display {
+    font-size: 24px;
+    font-weight: 600;
+    color: #fff;
 }
 
 /* Mensagem de Carregamento */
@@ -114,12 +136,44 @@ nav a:hover {
     width: calc(50% - 3px);
 }
 
+.time-slot {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 500;
+    color: #fff;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+}
+
 .time-slot.status-livre {
-    background-color: transparent;
+    background-color: #66bb6a; /* Verde suave */
+    border-radius: 4px;
 }
 
 .time-slot.status-ocupado {
     background-color: #e57373; /* Vermelho suave */
+    border-radius: 4px;
+}
+
+/* Legenda */
+.legend {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 16px;
+    align-items: center;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+}
+
+.legend-color-box {
+    width: 16px;
+    height: 16px;
     border-radius: 4px;
 }
 
