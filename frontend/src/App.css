@@ -1,26 +1,25 @@
-/* Estilos Globais */
+/* Estilos Globais - Tema Moderno (Dark) */
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    background-color: #f4f7f6;
-    color: #333;
+    background-color: #1a1d21; /* Fundo cinza escuro/azulado */
+    color: #e0e0e0; /* Texto principal claro */
     margin: 0;
 }
 
 .App {
-    max-width: 1200px;
+    max-width: 1400px; /* Aumenta a largura máxima */
     margin: 0 auto;
-    padding: 20px;
+    padding: 24px;
 }
 
 /* Navegação */
 nav {
-    background-color: #fff;
-    padding: 10px 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    margin-bottom: 20px;
+    background-color: transparent;
+    margin-bottom: 24px;
+    border-bottom: 1px solid #333;
+    padding-bottom: 16px;
 }
 
 nav ul {
@@ -28,169 +27,108 @@ nav ul {
     padding: 0;
     margin: 0;
     display: flex;
-    gap: 20px;
+    gap: 24px;
 }
 
 nav a {
     text-decoration: none;
-    color: #007bff;
-    font-weight: bold;
+    color: #8ab4f8; /* Azul claro para links */
+    font-weight: 600;
+    font-size: 16px;
 }
 
 nav a:hover {
-    text-decoration: underline;
+    color: #fff;
 }
 
-/* Página de Admin */
+/* Títulos */
 .admin-page h1, .dashboard-page h1 {
-    color: #333;
+    color: #fff;
+    font-size: 28px;
+    margin-bottom: 24px;
 }
 
-.agenda-form {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+/* Mensagem de Carregamento */
+.loading-message {
+    color: #e0e0e0;
+    font-size: 18px;
+    text-align: center;
+    padding: 40px;
 }
 
-.agenda-form input {
-    flex-grow: 1;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
-
-.agenda-form button {
-    padding: 10px 20px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.agenda-form button:hover {
-    background-color: #0056b3;
-}
-
-.error-message {
-    color: #d9534f;
-    background-color: #f2dede;
-    padding: 10px;
-    border-radius: 4px;
-    margin-bottom: 20px;
-}
-
-.agendas-list {
-    list-style: none;
-    padding: 0;
-}
-
-.agendas-list li {
-    background-color: #fff;
-    padding: 15px;
-    margin-bottom: 10px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 15px;
-}
-
-.agendas-list li strong {
-    flex-shrink: 0;
-}
-
-.agendas-list li span {
-    flex-grow: 1;
-    color: #666;
-    word-break: break-all; /* Essencial para URLs longas */
-}
-
-.agendas-list li button {
-    padding: 8px 12px;
-    background-color: #d9534f;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.agendas-list li button:hover {
-    background-color: #c9302c;
-}
-
-/* Layout Final - Estilo Calendário com Divisória */
+/* Tabela de Agendamento - Layout Moderno */
 .schedule-table {
     width: 100%;
     border-collapse: collapse;
-    font-family: 'Segoe UI', 'Roboto', sans-serif;
 }
 
 .schedule-table th, .schedule-table td {
-    border: 1px solid #E0E0E0; /* Bordas cinzas claras */
+    border: 1px solid #333; /* Bordas escuras */
     padding: 0;
-    height: 40px; /* Altura fixa para as linhas */
+    height: 48px; /* Aumenta a altura da linha */
 }
 
 .schedule-table th {
-    background-color: #F5F5F5;
+    background-color: #2c2f33; /* Fundo do cabeçalho */
     font-weight: 600;
-    color: #333;
+    color: #fff;
+    font-size: 14px;
 }
 
 .room-name-cell, .room-header-cell {
     text-align: left;
-    padding-left: 10px;
-    width: 150px; /* Largura fixa para a coluna de salas */
+    padding-left: 16px;
+    width: 180px;
+    font-weight: 500;
 }
+
+.room-name-cell {
+    background-color: #2c2f33;
+    color: #fff;
+}
+
 
 .hour-cell {
     position: relative;
-    background-image: linear-gradient(to right, transparent 50%, #E0E0E0 50%);
-    background-size: 2px 100%;
+    /* Linha divisória de 30 minutos */
+    background-image: linear-gradient(to right, transparent 50%, #333 50%);
+    background-size: 1px 100%;
     background-repeat: no-repeat;
     background-position: center;
 }
 
 .time-slot {
     position: absolute;
-    top: 0;
-    bottom: 0;
-    height: 100%;
+    top: 2px;
+    bottom: 2px;
+    height: calc(100% - 4px);
 }
 
 .slot-00 {
-    left: 0;
-    width: 50%;
+    left: 2px;
+    width: calc(50% - 2px);
 }
 
 .slot-30 {
-    left: 50%;
-    width: 50%;
+    left: calc(50% + 1px);
+    width: calc(50% - 3px);
 }
 
-/* O status "livre" é transparente por padrão */
 .time-slot.status-livre {
     background-color: transparent;
 }
 
 .time-slot.status-ocupado {
-    background-color: rgba(139, 107, 218, 0.8); /* Roxo do Teams com transparência */
-    border-radius: 2px;
+    background-color: #e57373; /* Vermelho suave */
+    border-radius: 4px;
 }
 
-/* Remove a borda direita da última célula do cabeçalho e do corpo */
+/* Remove bordas externas desnecessárias */
 .schedule-table th:last-child,
 .schedule-table td:last-child {
     border-right: none;
 }
 
-/* Remove a borda esquerda da primeira célula do cabeçalho e do corpo */
 .schedule-table th:first-child,
 .schedule-table td:first-child {
     border-left: none;
