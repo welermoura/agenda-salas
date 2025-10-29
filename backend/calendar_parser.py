@@ -24,7 +24,14 @@ def get_room_status(url):
     today_start = now.floor('day')
     today_end = now.ceil('day')
 
-    schedule = {f"{hour:02d}:00": "livre" for hour in range(6, 21)}
+    # Gera slots de 30 minutos das 06:00 às 20:00
+    schedule = {}
+    start_time = today_start.replace(hour=6)
+    end_time = today_start.replace(hour=20)
+    current_slot = start_time
+    while current_slot <= end_time:
+        schedule[current_slot.strftime("%H:%M")] = "livre"
+        current_slot = current_slot.shift(minutes=30)
 
     for component in cal.walk():
         if component.name == "VEVENT":
@@ -41,12 +48,18 @@ def get_room_status(url):
                 end = arrow.get(dtend.strftime('%Y-%m-%d %H:%M:%S')).replace(tzinfo='America/Sao_Paulo')
 
             if start < today_end and end > today_start:
-                # Itera sobre cada hora do evento
+                # Itera sobre cada slot de 30 minutos do evento
                 current_time = start
                 while current_time < end:
-                    hour_str = current_time.strftime("%H:00")
-                    if hour_str in schedule:
-                        schedule[hour_str] = "ocupado"
-                    current_time += timedelta(hours=1)
+                    # Arredonda para o slot de 30 minutos mais próximo (para baixo)
+                    minute = 30 if current_time.minute >= 30 else 0
+                    current_slot_time = current_time.replace(minute=minute, second=0, microsecond=0)
+
+                    slot_str = current_slot_time.strftime("%H:%M")
+                    if slot_str in schedule:
+                        schedule[slot_str] = "ocupado"
+
+                    # Avança para o próximo slot de 30 minutos
+                    current_time = current_time.shift(minutes=30)
 
     return schedule
