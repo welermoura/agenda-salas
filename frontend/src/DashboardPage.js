@@ -22,38 +22,47 @@ const addDays = (dateStr, days) => {
 
 
 const DashboardPage = () => {
-    const [schedules, setSchedules] = useState(null); // Inicia como null para diferenciar do estado "vazio"
+    const [schedules, setSchedules] = useState(null);
     const [loading, setLoading] = useState(true);
-    // Estado para controlar a data, inicializado com a data atual
     const [selectedDate, setSelectedDate] = useState(formatDate(new Date()));
+    const [scheduleCache, setScheduleCache] = useState({}); // Cache para as agendas
 
     const ws = useRef(null);
     const WS_URL = `ws://${window.location.hostname}:8000/ws`;
+    const selectedDateRef = useRef(selectedDate); // Ref para evitar closure estagnado
 
+    // Atualiza a ref sempre que a data selecionada mudar
     useEffect(() => {
-        // A função de conexão é movida para dentro do useEffect para lidar com selectedDate
+        selectedDateRef.current = selectedDate;
+    }, [selectedDate]);
+
+
+    // Efeito para gerenciar a conexão WebSocket e o recebimento de dados
+    useEffect(() => {
         const connect = () => {
             ws.current = new WebSocket(WS_URL);
 
             ws.current.onopen = () => {
                 console.log("Conexão WebSocket estabelecida.");
-                // Solicita os dados para a data selecionada ao conectar
-                ws.current.send(JSON.stringify({ date: selectedDate }));
+                // Solicita os dados para a data inicial se não estiverem em cache
+                if (!scheduleCache[selectedDateRef.current]) {
+                    ws.current.send(JSON.stringify({ date: selectedDateRef.current }));
+                }
             };
 
             ws.current.onmessage = (event) => {
                 const data = JSON.parse(event.data);
-                // Apenas atualiza o estado se a data recebida for a mesma da selecionada
-                if (data.date === selectedDate) {
+                // Atualiza o cache com os novos dados
+                setScheduleCache(prevCache => ({ ...prevCache, [data.date]: data.statuses }));
+
+                // Se os dados recebidos forem para a data atualmente selecionada, atualiza a UI
+                if (data.date === selectedDateRef.current) {
                     setSchedules(data.statuses);
                     setLoading(false);
                 }
             };
 
-            ws.current.onclose = () => {
-                console.log("Conexão WebSocket fechada.");
-            };
-
+            ws.current.onclose = () => console.log("Conexão WebSocket fechada.");
             ws.current.onerror = (error) => {
                 console.error("Erro no WebSocket:", error);
                 setLoading(false);
@@ -62,13 +71,27 @@ const DashboardPage = () => {
 
         connect();
 
-        // Limpa a conexão ao desmontar o componente
         return () => {
-            if (ws.current) {
-                ws.current.close();
-            }
+            if (ws.current) ws.current.close();
         };
-    }, [WS_URL, selectedDate]);
+        // Roda apenas uma vez para estabelecer a conexão
+    }, [WS_URL]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    // Efeito para solicitar dados quando a data selecionada muda
+    useEffect(() => {
+        if (scheduleCache[selectedDate]) {
+            // Se os dados estiverem no cache, usa-os diretamente
+            setSchedules(scheduleCache[selectedDate]);
+            setLoading(false);
+        } else {
+            // Caso contrário, solicita ao WebSocket se a conexão estiver aberta
+            setLoading(true);
+            if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+                ws.current.send(JSON.stringify({ date: selectedDate }));
+            }
+            // Se a conexão não estiver aberta, o 'onopen' do primeiro useEffect fará a solicitação inicial.
+        }
+    }, [selectedDate, scheduleCache]);
 
     // Gera as horas cheias para as linhas, começando das 8:00
     const hours = Array.from({ length: 13 }, (_, i) => (i + 8).toString().padStart(2, '0'));
@@ -92,6 +115,26 @@ const DashboardPage = () => {
             }
         }
     }, [loading, isToday]);
+
+    // Efeito para pré-carregar (pre-fetch) os dias adjacentes
+    useEffect(() => {
+        // Só executa se o carregamento da data atual estiver concluído e a conexão WS estiver aberta
+        if (!loading && ws.current && ws.current.readyState === WebSocket.OPEN) {
+            const prevDate = addDays(selectedDate, -1);
+            const nextDate = addDays(selectedDate, 1);
+
+            // Pré-carrega o dia anterior se ainda não estiver no cache
+            if (!scheduleCache[prevDate]) {
+                ws.current.send(JSON.stringify({ date: prevDate }));
+            }
+
+            // Pré-carrega o dia seguinte se ainda não estiver no cache
+            if (!scheduleCache[nextDate]) {
+                ws.current.send(JSON.stringify({ date: nextDate }));
+            }
+        }
+    }, [loading, selectedDate, scheduleCache]); // Roda sempre que a data selecionada ou o estado de loading muda
+
 
     // Funções para navegar entre as datas
     const handleDateChange = (days) => {
