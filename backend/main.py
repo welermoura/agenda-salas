@@ -5,6 +5,7 @@ import json
 import asyncio
 import aiofiles
 from typing import List, Dict
+import arrow
 
 # Importa a lógica de parsing do calendário
 from calendar_parser import get_room_status
@@ -82,7 +83,8 @@ async def update_scheduler():
                         pass
 
                 if statuses:
-                    await manager.broadcast(json.dumps(statuses))
+                    today_str = arrow.now('America/Sao_Paulo').format('YYYY-MM-DD')
+                    await manager.broadcast(json.dumps({"date": today_str, "statuses": statuses}))
 
         except Exception:
             # Captura qualquer outra exceção inesperada no loop principal
@@ -122,20 +124,35 @@ async def delete_agenda(url: str):
 async def websocket_endpoint(websocket: WebSocket):
     await manager.connect(websocket)
     try:
-        # Envia o estado atual assim que o cliente se conecta, mesmo que esteja vazio
-        agendas = await carregar_agendas()
-        statuses = {}
-        for agenda in agendas:
-            try:
-                status = get_room_status(str(agenda.url))
-                statuses[str(agenda.url)] = {"nome": agenda.nome, "status": status}
-            except Exception as e:
-                statuses[str(agenda.url)] = {"nome": agenda.nome, "status": {"error": str(e)}}
-        await websocket.send_text(json.dumps(statuses))
+        # Função para buscar e enviar dados para uma data específica
+        async def send_status_for_date(date_str=None):
+            agendas = await carregar_agendas()
+            statuses = {}
+            for agenda in agendas:
+                try:
+                    # Passa a data para a função get_room_status
+                    status = get_room_status(str(agenda.url), date_str)
+                    statuses[str(agenda.url)] = {"nome": agenda.nome, "status": status}
+                except Exception as e:
+                    statuses[str(agenda.url)] = {"nome": agenda.nome, "status": {"error": str(e)}}
+
+            # Garante que a data enviada corresponda à data solicitada (ou hoje se for nula)
+            response_date = date_str if date_str else arrow.now('America/Sao_Paulo').format('YYYY-MM-DD')
+            await websocket.send_text(json.dumps({"date": response_date, "statuses": statuses}))
+
+        # Envia o estado do dia atual assim que o cliente se conecta
+        await send_status_for_date()
 
         while True:
-            # Mantém a conexão aberta para receber broadcasts
-            await websocket.receive_text()
+            # Aguarda por mensagens do cliente para buscar datas específicas
+            data = await websocket.receive_text()
+            try:
+                request = json.loads(data)
+                if "date" in request:
+                    await send_status_for_date(request["date"])
+            except json.JSONDecodeError:
+                # Ignora mensagens mal formatadas
+                pass
     except WebSocketDisconnect:
         manager.disconnect(websocket)
     except Exception as e:
