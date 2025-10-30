@@ -142,7 +142,7 @@ const DashboardPage = () => {
 
 
     return (
-        <div className="dashboard-page">
+        <div className="dashboard-container">
             <div className="date-navigation">
                 <input
                     type="date"
