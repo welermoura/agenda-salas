@@ -1,11 +1,31 @@
 import React, { useState, useEffect, useRef } from 'react';
-import Arrow from 'arrow-js';
+
+// --- Funções Auxiliares de Data ---
+// Formata um objeto Date para 'YYYY-MM-DD' ou 'DD/MM/YYYY'
+const formatDate = (date, format = 'YYYY-MM-DD') => {
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    if (format === 'DD/MM/YYYY') {
+        return `${day}/${month}/${year}`;
+    }
+    return `${year}-${month}-${day}`;
+};
+
+// Adiciona ou subtrai dias de uma data no formato 'YYYY-MM-DD'
+const addDays = (dateStr, days) => {
+    const date = new Date(dateStr + 'T00:00:00'); // Adiciona T00:00:00 para evitar problemas de fuso
+    date.setDate(date.getDate() + days);
+    return formatDate(date);
+};
+// --- Fim das Funções Auxiliares ---
+
 
 const DashboardPage = () => {
     const [schedules, setSchedules] = useState({});
     const [loading, setLoading] = useState(true);
     // Estado para controlar a data, inicializado com a data atual
-    const [selectedDate, setSelectedDate] = useState(Arrow.utc().format('YYYY-MM-DD'));
+    const [selectedDate, setSelectedDate] = useState(formatDate(new Date()));
 
     const ws = useRef(null);
     const WS_URL = `ws://${window.location.hostname}:8000/ws`;
@@ -57,7 +77,7 @@ const DashboardPage = () => {
     const rooms = Object.entries(schedules).map(([url, data]) => ({ url, nome: data.nome }));
 
     const currentHour = new Date().getHours();
-    const isToday = selectedDate === Arrow.utc().format('YYYY-MM-DD');
+    const isToday = selectedDate === formatDate(new Date());
 
     useEffect(() => {
         // Rola para a hora atual apenas se for hoje e os dados estiverem carregados
@@ -75,30 +95,32 @@ const DashboardPage = () => {
 
     // Funções para navegar entre as datas
     const handleDateChange = (days) => {
-        const newDate = Arrow.from(selectedDate).shift({ days: days }).format('YYYY-MM-DD');
+        const newDate = addDays(selectedDate, days);
         setSelectedDate(newDate);
         setLoading(true); // Mostra o loading ao mudar de data
     };
 
     const goToToday = () => {
-        const today = Arrow.utc().format('YYYY-MM-DD');
+        const today = formatDate(new Date());
         setSelectedDate(today);
         setLoading(true);
     };
+
+    // Converte a data 'YYYY-MM-DD' para 'DD/MM/YYYY' para exibição
+    const displayDate = formatDate(new Date(selectedDate + 'T00:00:00'), 'DD/MM/YYYY');
+
 
     return (
         <div className="dashboard-page">
             <div className="date-navigation">
                 <button onClick={() => handleDateChange(-1)}>&lt; Anterior</button>
-                <span className="current-date">
-                    {Arrow.from(selectedDate).format('DD/MM/YYYY')}
-                </span>
+                <span className="current-date">{displayDate}</span>
                 <button onClick={() => handleDateChange(1)}>Próximo &gt;</button>
                 <button onClick={goToToday} className="today-button">Hoje</button>
             </div>
 
             {loading ? (
-                <p className="loading-message">Carregando Agendas para {Arrow.from(selectedDate).format('DD/MM/YYYY')}, favor aguarde</p>
+                <p className="loading-message">Carregando Agendas para {displayDate}, favor aguarde</p>
             ) : (
                 <>
                     {Object.keys(schedules).length === 0 ? (
