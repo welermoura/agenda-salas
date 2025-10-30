@@ -123,6 +123,12 @@ async def delete_agenda(url: str):
     agendas_filtradas = [a for a in agendas if str(a.url) != url]
     await salvar_agendas(agendas_filtradas)
 
+@app.post("/agendas/reorder", status_code=200)
+async def reorder_agendas(ordered_agendas: List[Agenda]):
+    # Simplesmente salva a lista recebida, que já está na ordem correta
+    await salvar_agendas(ordered_agendas)
+    return {"message": "Ordem das agendas atualizada com sucesso."}
+
 # --- Endpoint WebSocket ---
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):

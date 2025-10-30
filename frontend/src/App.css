@@ -86,55 +86,62 @@ nav a:hover {
     padding: 40px;
 }
 
+/* --- Estilos da Página do Dashboard --- */
+.dashboard-container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
 /* Tabela de Agendamento - Layout Vertical */
 .schedule-table-vertical {
     width: 100%;
-    border-collapse: collapse;
-    table-layout: fixed; /* Garante que as colunas tenham larguras iguais */
+    border-collapse: separate; /* Permite o uso de border-spacing */
+    border-spacing: 0 4px; /* Espaçamento vertical entre as linhas */
+    table-layout: fixed;
 }
 
 .schedule-table-vertical th, .schedule-table-vertical td {
-    border-right: 1px solid #2c2f33; /* Bordas mais sutis */
-    border-bottom: 1px solid #2c2f33;
-    padding: 0; /* Padding removido para os slots preencherem */
+    border: none; /* Remove todas as bordas antigas */
+    padding: 0;
     text-align: center;
     font-size: 14px;
 }
 
 .schedule-table-vertical th {
-    padding: 12px 8px; /* Padding apenas para cabeçalhos */
+    padding: 12px 8px;
 }
 
-
 .schedule-table-vertical thead th {
-    background-color: #2c2f33;
-    color: #fff;
+    background-color: transparent;
+    color: #a0a0a0; /* Cor mais suave para o cabeçalho */
     font-weight: 600;
+    text-transform: uppercase;
+    font-size: 12px;
 }
 
 .time-header-cell, .time-cell {
-    width: 100px; /* Largura fixa para a coluna de horários */
-    background-color: #2c2f33;
-    color: #fff;
+    width: 100px;
+    background-color: transparent;
+    color: #a0a0a0;
     font-weight: 600;
+    border-right: 1px solid #2c2f33;
 }
 
 .status-cell {
     position: relative;
-    padding: 2px; /* Pequeno espaçamento para os blocos internos */
-    border-top: 1px solid #2c2f33;
-    border-left: 1px solid #2c2f33;
+    padding: 0 4px; /* Espaçamento horizontal para os slots */
 }
 
 .half-hour-slot {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 100%;
-    height: 50%;
-    font-weight: 500;
+    height: 28px; /* Altura fixa para cada slot de 30min */
+    font-weight: 600;
     color: #fff;
-    border-radius: 6px; /* Cantos arredondados */
+    border-radius: 6px;
+    margin: 2px 0; /* Pequeno espaçamento vertical entre os slots */
+    font-size: 12px;
 }
 
 .status-livre {
@@ -254,4 +261,121 @@ nav a:hover {
     border-top-color: #8ab4f8;
     border-radius: 50%;
     animation: rotate 1s linear infinite;
+}
+
+/* --- Estilos da Página de Administração --- */
+.admin-container {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.admin-page h1, .admin-page h2 {
+    color: #fff;
+    border-bottom: 1px solid #333;
+    padding-bottom: 8px;
+    margin-bottom: 24px;
+}
+
+.agenda-form {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 32px;
+    align-items: center;
+}
+
+.agenda-form input {
+    flex-grow: 1;
+    padding: 12px;
+    font-size: 16px;
+    background-color: #2c2f33;
+    border: 1px solid #4a4f54;
+    color: #e0e0e0;
+    border-radius: 6px;
+}
+
+.agenda-form button {
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: 600;
+    background-color: #8ab4f8;
+    color: #1a1d21;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.agenda-form button:hover {
+    background-color: #a8c4f9;
+}
+
+.save-order-button {
+    background-color: #66bb6a;
+    color: #fff;
+    padding: 12px 24px;
+    font-size: 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-bottom: 16px;
+}
+
+.agendas-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.agendas-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #2c2f33;
+    padding: 16px;
+    border-radius: 8px;
+    border: 1px solid #3a3f44;
+}
+
+.agenda-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    overflow: hidden; /* Garante que o conteúdo não estoure */
+}
+
+.agenda-info strong {
+    font-size: 16px;
+    color: #fff;
+}
+
+.agenda-url {
+    font-size: 14px;
+    color: #a0a0a0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis; /* Adiciona '...' se a URL for muito longa */
+}
+
+.agenda-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.agenda-actions button {
+    padding: 8px 12px;
+    font-size: 14px;
+    background-color: #3a3f44;
+    color: #e0e0e0;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.agenda-actions .remove-button {
+    background-color: #e57373;
+    color: #fff;
 }
