@@ -6,8 +6,8 @@ import './App.css';
 
 function App() {
   const [currentTime, setCurrentTime] = useState(new Date());
-  // Estado para gerenciar o tema, lendo do localStorage ou usando 'dark' como padrão
-  const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'dark');
+  // Estado para gerenciar o tema, lendo do localStorage ou usando 'light' como padrão
+  const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'light');
 
   useEffect(() => {
     const timer = setInterval(() => {
