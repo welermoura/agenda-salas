@@ -50,7 +50,7 @@ if [ -z "$APP_USER" ]; then
 fi
 
 # --- 2. Instalação de Dependências ---
-if confirm "Deseja instalar/atualizar as dependências do sistema (apache2, python3-venv, npm)?"; then
+if confirm "Deseja instalar/atualizar as dependências do sistema (Apache, Python, Node.js)?"; then
     log "Tentando corrigir possíveis pacotes quebrados..."
     dpkg --configure -a
     apt-get --fix-broken install -y
@@ -58,9 +58,19 @@ if confirm "Deseja instalar/atualizar as dependências do sistema (apache2, pyth
     log "Atualizando a lista de pacotes..."
     apt-get update
 
-    log "Instalando dependências..."
-    apt-get install -y apache2 python3-venv npm || error "Falha ao instalar dependências."
-    success "Dependências instaladas."
+    log "Instalando dependências base (apache2, python3-venv, curl)..."
+    apt-get install -y apache2 python3-venv curl || error "Falha ao instalar dependências base."
+
+    # Instalação do Node.js e npm via NodeSource (método recomendado)
+    if ! command -v node >/dev/null; then
+        log "Instalando Node.js LTS (v20.x) via NodeSource..."
+        curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+        apt-get install -y nodejs || error "Falha ao instalar Node.js via NodeSource."
+    else
+        log "Node.js já está instalado. Pulando."
+    fi
+
+    success "Dependências do sistema instaladas."
 fi
 
 # --- 3. Build do Frontend ---
@@ -82,14 +92,17 @@ log "Criando diretórios em $APP_DIR e $WEB_DIR..."
 mkdir -p $APP_DIR/backend $APP_DIR/tmp $WEB_DIR
 
 log "Copiando arquivos da aplicação..."
-# Copia tudo exceto o frontend, que já foi buildado
-rsync -a --exclude 'frontend/' --exclude '.git/' --exclude 'deploy/' ./ $APP_DIR/
+# Copia o diretório do backend e o start.sh
+cp -r backend $APP_DIR/
+cp start.sh install.sh $APP_DIR/ 2>/dev/null || true # Copia scripts auxiliares se existirem
+
+# Copia os arquivos de build do frontend
 cp -r frontend/build/* $WEB_DIR/
 
 log "Configurando o ambiente virtual Python em $APP_DIR/venv..."
 python3 -m venv $APP_DIR/venv || error "Falha ao criar venv."
 source $APP_DIR/venv/bin/activate
-$APP_DIR/venv/bin/pip install --no-cache-dir -r $APP_DIR/backend/requirements.txt || error "Falha ao instalar dependências Python."
+$APP_DIR/venv/bin/pip install --no-cache-dir -r $APP_DIR/backend/requirements.txt || error "Falha ao instalar dependências Python. Verifique se o arquivo requirements.txt existe."
 deactivate
 
 log "Ajustando permissões..."
