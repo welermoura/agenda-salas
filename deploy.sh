@@ -118,7 +118,7 @@ if confirm "Deseja configurar o Apache?"; then
     cp deploy/apache_agendasalas.conf /etc/apache2/sites-available/agendasalas.conf
 
     log "Habilitando os módulos necessários do Apache..."
-    a2enmod proxy proxy_wstunnel rewrite || error "Falha ao habilitar módulos do Apache."
+    a2enmod proxy proxy_http proxy_wstunnel rewrite || error "Falha ao habilitar módulos do Apache."
 
     log "Habilitando o site 'agendasalas'..."
     a2ensite agendasalas || error "Falha ao habilitar o site."
