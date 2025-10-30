@@ -1,26 +1,23 @@
 /* --- Definição das Variáveis de Tema --- */
-body {
-    /* Tema Claro (Light) - Padrão */
-    --background-color: #f0f2f5; /* Fundo branco-gelo suave */
-    --text-color: #333333; /* Texto principal escuro */
-    --text-color-strong: #000000; /* Texto de maior destaque (títulos) */
-    --header-background-color: #e9ecef; /* Fundo de cabeçalhos (tabela) */
-    --border-color: #dcdcdc; /* Cor de borda principal */
-    --table-border-color: #dee2e6; /* Cor de borda para tabelas */
-    --link-color: #007bff; /* Cor para links */
-    --link-hover-color: #0056b3; /* Cor para links (hover) */
-    --button-background-color: #e0e0e0; /* Fundo de botão padrão */
-    --button-hover-background-color: #cccccc; /* Fundo de botão (hover) */
-    --button-text-color: #1c1e21; /* Cor de texto para botões */
+
+[data-theme='light'] {
+    --background-color: #f0f2f5;
+    --text-color: #333333;
+    --text-color-strong: #000000;
+    --header-background-color: #e9ecef;
+    --border-color: #dcdcdc;
+    --table-border-color: #dee2e6;
+    --link-color: #007bff;
+    --link-hover-color: #0056b3;
+    --button-background-color: #e0e0e0;
+    --button-hover-background-color: #cccccc;
+    --button-text-color: #1c1e21;
     --today-button-background-color: #007bff;
     --today-button-text-color: #ffffff;
     --date-picker-background: #e0e0e0;
-    --date-picker-filter: invert(0); /* Sem filtro para o ícone */
+    --date-picker-filter: invert(0);
     --status-indisponivel-bg: #d6d8db;
     --status-indisponivel-text: #6c757d;
-
-    /* Transição suave entre temas */
-    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 [data-theme='dark'] {
