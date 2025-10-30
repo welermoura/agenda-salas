@@ -176,3 +176,82 @@ nav a:hover {
     opacity: 0.4;
     transition: opacity 0.3s ease-in-out;
 }
+
+/* --- Novos Estilos para Navegação e Carregamento --- */
+
+/* Contêiner da Navegação de Data */
+.date-navigation {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px; /* Espaçamento entre os elementos */
+    margin-bottom: 24px;
+}
+
+/* Data Atual Exibida */
+.current-date {
+    font-size: 18px;
+    font-weight: 600;
+    color: #fff;
+    padding: 8px 16px;
+    background-color: #2c2f33;
+    border-radius: 6px;
+}
+
+/* Botões de Navegação */
+.date-navigation button {
+    background-color: #3a3f44;
+    color: #e0e0e0;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+}
+
+.date-navigation button:hover {
+    background-color: #4a4f54;
+}
+
+.date-navigation button:active {
+    transform: scale(0.95);
+}
+
+/* Botão "Hoje" com estilo diferenciado */
+.today-button {
+    background-color: #8ab4f8;
+    color: #1a1d21;
+}
+
+.today-button:hover {
+    background-color: #a8c4f9;
+}
+
+
+/* Animação de Carregamento (Spinner) */
+.loading-message {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+}
+
+@keyframes rotate {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.spinner {
+    width: 24px;
+    height: 24px;
+    border: 4px solid #4a4f54;
+    border-top-color: #8ab4f8;
+    border-radius: 50%;
+    animation: rotate 1s linear infinite;
+}
