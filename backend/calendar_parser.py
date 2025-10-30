@@ -2,20 +2,50 @@ import arrow
 from icalendar import Calendar
 import requests
 from datetime import timedelta
-import subprocess
+import time
+
+# --- Cache em Memória com TTL (Time-To-Live) ---
+_cache = {}
+CACHE_EXPIRATION_SECONDS = 300  # 5 minutos
+
+def _get_from_cache(key):
+    """Obtém um item do cache se ele existir e não tiver expirado."""
+    if key in _cache:
+        entry = _cache[key]
+        if time.time() - entry['timestamp'] < CACHE_EXPIRATION_SECONDS:
+            return entry['data']
+    return None
+
+def _set_in_cache(key, data):
+    """Define um item no cache com o timestamp atual."""
+    _cache[key] = {
+        'data': data,
+        'timestamp': time.time()
+    }
+# --- Fim da Implementação do Cache ---
+
 
 def get_room_status(url, date_str=None):
     """
     Busca e analisa um calendário .ics para determinar o status de uma sala de reunião.
     Retorna um dicionário com a programação horária do dia especificado.
+    Utiliza um cache em memória para otimizar requisições repetidas.
     """
+    # Define a data alvo para usar na chave do cache de forma consistente
+    target_date_key = date_str if date_str else arrow.now('America/Sao_Paulo').format('YYYY-MM-DD')
+    cache_key = (url, target_date_key)
+
+    # Tenta obter do cache primeiro
+    cached_schedule = _get_from_cache(cache_key)
+    if cached_schedule is not None:
+        return cached_schedule
+
+    # --- Se não estiver no cache, executa a lógica original ---
     try:
-        # Usa requests para buscar o calendário com um User-Agent comum
         response = requests.get(url, headers={'User-Agent': 'Mozilla/5.0'})
-        response.raise_for_status() # Lança uma exceção para códigos de status ruins (4xx ou 5xx)
+        response.raise_for_status()
         calendar_data = response.text
     except requests.exceptions.RequestException as e:
-        # Se a requisição falhar, lança uma exceção clara
         raise ConnectionError(f"Falha ao buscar o calendário da URL: {url}. Erro: {e}") from e
 
     cal = Calendar.from_ical(calendar_data)
@@ -62,4 +92,6 @@ def get_room_status(url, date_str=None):
                         schedule[time_str] = "ocupado"
                     current_time += timedelta(minutes=30)
 
+    # Armazena o resultado no cache antes de retornar
+    _set_in_cache(cache_key, schedule)
     return schedule
