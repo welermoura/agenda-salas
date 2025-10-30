@@ -4,10 +4,10 @@ import requests
 from datetime import timedelta
 import subprocess
 
-def get_room_status(url):
+def get_room_status(url, date_str=None):
     """
     Busca e analisa um calendário .ics para determinar o status de uma sala de reunião.
-    Retorna um dicionário com a programação horária do dia atual.
+    Retorna um dicionário com a programação horária do dia especificado.
     """
     try:
         # Usa requests para buscar o calendário com um User-Agent comum
@@ -20,13 +20,17 @@ def get_room_status(url):
 
     cal = Calendar.from_ical(calendar_data)
 
-    now = arrow.now('America/Sao_Paulo')
-    today_start = now.floor('day')
-    today_end = now.ceil('day')
+    if date_str:
+        target_date = arrow.get(date_str, 'YYYY-MM-DD', tzinfo='America/Sao_Paulo')
+    else:
+        target_date = arrow.now('America/Sao_Paulo')
+
+    day_start = target_date.floor('day')
+    day_end = target_date.ceil('day')
 
     # Gera o schedule com intervalos de 30 minutos
     schedule = {}
-    current_schedule_time = today_start.replace(hour=8, minute=0)
+    current_schedule_time = day_start.replace(hour=8, minute=0)
     while current_schedule_time.hour < 21:
         schedule[current_schedule_time.strftime("%H:%M")] = "livre"
         current_schedule_time += timedelta(minutes=30)
@@ -46,7 +50,7 @@ def get_room_status(url):
                 start = arrow.get(dtstart.strftime('%Y-%m-%d %H:%M:%S')).replace(tzinfo='America/Sao_Paulo')
                 end = arrow.get(dtend.strftime('%Y-%m-%d %H:%M:%S')).replace(tzinfo='America/Sao_Paulo')
 
-            if start < today_end and end > today_start:
+            if start < day_end and end > day_start:
                 # Arredonda a hora de início para o intervalo de 30 minutos anterior mais próximo
                 start_minute = 0 if start.minute < 30 else 30
                 current_time = start.replace(minute=start_minute, second=0, microsecond=0)
