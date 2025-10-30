@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 const AdminPage = () => {
     const [agendas, setAgendas] = useState([]);
@@ -8,8 +8,8 @@ const AdminPage = () => {
 
     const API_URL = `http://${window.location.hostname}:8000`;
 
-    // Função para buscar as agendas cadastradas
-    const fetchAgendas = async () => {
+    // Função para buscar as agendas cadastradas, envolvida em useCallback
+    const fetchAgendas = useCallback(async () => {
         try {
             const response = await fetch(`${API_URL}/agendas`);
             const data = await response.json();
@@ -18,12 +18,12 @@ const AdminPage = () => {
             console.error("Erro ao buscar agendas:", error);
             setError("Não foi possível carregar as agendas.");
         }
-    };
+    }, [API_URL]);
 
     // Efeito para carregar as agendas na montagem do componente
     useEffect(() => {
         fetchAgendas();
-    }, []);
+    }, [fetchAgendas]);
 
     // Função para submeter o formulário de nova agenda
     const handleSubmit = async (e) => {
