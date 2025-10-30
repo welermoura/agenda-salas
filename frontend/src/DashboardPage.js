@@ -28,7 +28,7 @@ const DashboardPage = () => {
     const [scheduleCache, setScheduleCache] = useState({}); // Cache para as agendas
 
     const ws = useRef(null);
-    const WS_URL = `ws://${window.location.hostname}:8000/ws`;
+    const WS_URL = `ws://${window.location.hostname}/ws`;
     const selectedDateRef = useRef(selectedDate); // Ref para evitar closure estagnado
 
     // Atualiza a ref sempre que a data selecionada mudar
