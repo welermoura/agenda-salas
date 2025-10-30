@@ -137,6 +137,16 @@ const DashboardPage = () => {
         setLoading(true);
     };
 
+    const goToPreviousDay = () => {
+        setSelectedDate(prevDate => addDays(prevDate, -1));
+        setLoading(true);
+    };
+
+    const goToNextDay = () => {
+        setSelectedDate(prevDate => addDays(prevDate, 1));
+        setLoading(true);
+    };
+
     // Formata a data para exibição no formato DD/MM/YYYY
     const displayDate = formatDate(new Date(selectedDate + 'T00:00:00'), 'DD/MM/YYYY');
 
@@ -144,12 +154,14 @@ const DashboardPage = () => {
     return (
         <div className="dashboard-page">
             <div className="date-navigation">
+                <button onClick={goToPreviousDay} className="nav-button">Anterior</button>
                 <input
                     type="date"
                     value={selectedDate}
                     onChange={(e) => setSelectedDate(e.target.value)}
                     className="date-picker"
                 />
+                <button onClick={goToNextDay} className="nav-button">Próximo</button>
                 <button onClick={goToToday} className="today-button">Hoje</button>
             </div>
 
