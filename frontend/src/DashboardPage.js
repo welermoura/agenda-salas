@@ -116,32 +116,20 @@ const DashboardPage = () => {
         }
     }, [loading, isToday]);
 
-    // Efeito para pré-carregar (pre-fetch) os dias adjacentes
+    // Efeito para pré-carregar (pre-fetch) o dia seguinte
     useEffect(() => {
         // Só executa se o carregamento da data atual estiver concluído e a conexão WS estiver aberta
         if (!loading && ws.current && ws.current.readyState === WebSocket.OPEN) {
-            const prevDate = addDays(selectedDate, -1);
             const nextDate = addDays(selectedDate, 1);
-
-            // Pré-carrega o dia anterior se ainda não estiver no cache
-            if (!scheduleCache[prevDate]) {
-                ws.current.send(JSON.stringify({ date: prevDate }));
-            }
 
             // Pré-carrega o dia seguinte se ainda não estiver no cache
             if (!scheduleCache[nextDate]) {
+                console.log(`Pré-carregando dados para: ${nextDate}`);
                 ws.current.send(JSON.stringify({ date: nextDate }));
             }
         }
     }, [loading, selectedDate, scheduleCache]); // Roda sempre que a data selecionada ou o estado de loading muda
 
-
-    // Funções para navegar entre as datas
-    const handleDateChange = (days) => {
-        const newDate = addDays(selectedDate, days);
-        setSelectedDate(newDate);
-        setLoading(true); // Mostra o loading ao mudar de data
-    };
 
     const goToToday = () => {
         const today = formatDate(new Date());
@@ -149,16 +137,19 @@ const DashboardPage = () => {
         setLoading(true);
     };
 
-    // Converte a data 'YYYY-MM-DD' para 'DD/MM/YYYY' para exibição
+    // Formata a data para exibição no formato DD/MM/YYYY
     const displayDate = formatDate(new Date(selectedDate + 'T00:00:00'), 'DD/MM/YYYY');
 
 
     return (
         <div className="dashboard-page">
             <div className="date-navigation">
-                <button onClick={() => handleDateChange(-1)}>&lt; Anterior</button>
-                <span className="current-date">{displayDate}</span>
-                <button onClick={() => handleDateChange(1)}>Próximo &gt;</button>
+                <input
+                    type="date"
+                    value={selectedDate}
+                    onChange={(e) => setSelectedDate(e.target.value)}
+                    className="date-picker"
+                />
                 <button onClick={goToToday} className="today-button">Hoje</button>
             </div>
 
