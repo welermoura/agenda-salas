@@ -120,7 +120,10 @@ const DashboardPage = () => {
             </div>
 
             {(loading || schedules === null) ? (
-                <p className="loading-message">Carregando Agendas para {displayDate}, favor aguarde</p>
+                <div className="loading-message">
+                    <div className="spinner"></div>
+                    <span>Carregando Agendas para {displayDate}, favor aguarde...</span>
+                </div>
             ) : (
                 <>
                     {rooms.length === 0 ? (
