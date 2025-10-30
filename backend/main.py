@@ -65,9 +65,11 @@ class ConnectionManager:
             await connection.send_text(message)
 
 manager = ConnectionManager()
+cached_statuses = {} # Cache para o estado atual
 
 # --- Tarefa de Atualização em Background ---
 async def update_scheduler():
+    global cached_statuses # Usa a variável global
     while True:
         try:
             agendas = await carregar_agendas()
@@ -84,7 +86,9 @@ async def update_scheduler():
 
                 if statuses:
                     today_str = arrow.now('America/Sao_Paulo').format('YYYY-MM-DD')
-                    await manager.broadcast(json.dumps({"date": today_str, "statuses": statuses}))
+                    # Atualiza o cache e faz o broadcast
+                    cached_statuses = {"date": today_str, "statuses": statuses}
+                    await manager.broadcast(json.dumps(cached_statuses))
 
         except Exception:
             # Captura qualquer outra exceção inesperada no loop principal
@@ -140,8 +144,12 @@ async def websocket_endpoint(websocket: WebSocket):
             response_date = date_str if date_str else arrow.now('America/Sao_Paulo').format('YYYY-MM-DD')
             await websocket.send_text(json.dumps({"date": response_date, "statuses": statuses}))
 
-        # Envia o estado do dia atual assim que o cliente se conecta
-        await send_status_for_date()
+        # Envia o estado atual do cache imediatamente, se disponível
+        if cached_statuses:
+            await websocket.send_text(json.dumps(cached_statuses))
+        else:
+            # Se o cache estiver vazio (ex: na primeira execução), busca os dados
+            await send_status_for_date()
 
         while True:
             # Aguarda por mensagens do cliente para buscar datas específicas

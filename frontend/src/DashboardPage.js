@@ -22,7 +22,7 @@ const addDays = (dateStr, days) => {
 
 
 const DashboardPage = () => {
-    const [schedules, setSchedules] = useState({});
+    const [schedules, setSchedules] = useState(null); // Inicia como null para diferenciar do estado "vazio"
     const [loading, setLoading] = useState(true);
     // Estado para controlar a data, inicializado com a data atual
     const [selectedDate, setSelectedDate] = useState(formatDate(new Date()));
@@ -73,8 +73,8 @@ const DashboardPage = () => {
     // Gera as horas cheias para as linhas, começando das 8:00
     const hours = Array.from({ length: 13 }, (_, i) => (i + 8).toString().padStart(2, '0'));
 
-    // Extrai as salas para as colunas
-    const rooms = Object.entries(schedules).map(([url, data]) => ({ url, nome: data.nome }));
+    // Extrai as salas para as colunas, garantindo que schedules não seja nulo
+    const rooms = schedules ? Object.entries(schedules).map(([url, data]) => ({ url, nome: data.nome })) : [];
 
     const currentHour = new Date().getHours();
     const isToday = selectedDate === formatDate(new Date());
@@ -119,11 +119,11 @@ const DashboardPage = () => {
                 <button onClick={goToToday} className="today-button">Hoje</button>
             </div>
 
-            {loading ? (
+            {(loading || schedules === null) ? (
                 <p className="loading-message">Carregando Agendas para {displayDate}, favor aguarde</p>
             ) : (
                 <>
-                    {Object.keys(schedules).length === 0 ? (
+                    {rooms.length === 0 ? (
                         <p>Nenhuma agenda cadastrada. Adicione uma na <a href="/admin">página de administração</a>.</p>
                     ) : (
                         <div className="table-scroll-container">
