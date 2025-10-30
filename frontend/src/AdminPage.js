@@ -6,19 +6,17 @@ const AdminPage = () => {
     const [url, setUrl] = useState('');
     const [error, setError] = useState('');
 
-    const API_URL = `http://${window.location.hostname}:8000`;
-
     // Função para buscar as agendas cadastradas, envolvida em useCallback
     const fetchAgendas = useCallback(async () => {
         try {
-            const response = await fetch(`${API_URL}/agendas`);
+            const response = await fetch(`/agendas`);
             const data = await response.json();
             setAgendas(data);
         } catch (error) {
             console.error("Erro ao buscar agendas:", error);
             setError("Não foi possível carregar as agendas.");
         }
-    }, [API_URL]);
+    }, []);
 
     // Efeito para carregar as agendas na montagem do componente
     useEffect(() => {
@@ -30,7 +28,7 @@ const AdminPage = () => {
         e.preventDefault();
         setError('');
         try {
-            const response = await fetch(`${API_URL}/agendas`, {
+            const response = await fetch(`/agendas`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ nome, url }),
@@ -52,7 +50,7 @@ const AdminPage = () => {
     // Função para deletar uma agenda
     const handleDelete = async (agendaUrl) => {
         try {
-            await fetch(`${API_URL}/agendas/${encodeURIComponent(agendaUrl)}`, {
+            await fetch(`/agendas/${encodeURIComponent(agendaUrl)}`, {
                 method: 'DELETE',
             });
             fetchAgendas(); // Recarrega a lista
