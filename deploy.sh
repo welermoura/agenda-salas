@@ -51,8 +51,13 @@ fi
 
 # --- 2. Instalação de Dependências ---
 if confirm "Deseja instalar/atualizar as dependências do sistema (apache2, python3-venv, npm)?"; then
+    log "Tentando corrigir possíveis pacotes quebrados..."
+    dpkg --configure -a
+    apt-get --fix-broken install -y
+
     log "Atualizando a lista de pacotes..."
     apt-get update
+
     log "Instalando dependências..."
     apt-get install -y apache2 python3-venv npm || error "Falha ao instalar dependências."
     success "Dependências instaladas."
