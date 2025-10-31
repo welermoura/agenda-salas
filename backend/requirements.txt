@@ -5,3 +5,4 @@ requests
 arrow
 icalendar
 aiofiles
+msal

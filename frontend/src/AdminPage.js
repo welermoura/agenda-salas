@@ -1,150 +1,228 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import './AdminPage.css';
 
+// Componente para um item da lista de salas
+const RoomItem = ({ room, onMove, onRemove, isFirst, isLast }) => (
+    <li>
+        <div className="agenda-info">
+            <strong>{room.name}</strong>
+            <span className="agenda-url">{room.email}</span>
+        </div>
+        <div className="agenda-actions">
+            <button onClick={() => onMove(-1)} disabled={isFirst}>↑</button>
+            <button onClick={() => onMove(1)} disabled={isLast}>↓</button>
+            <button onClick={onRemove} className="remove-button">Remover</button>
+        </div>
+    </li>
+);
+
+// Hook customizado para fazer requisições autenticadas
+const useAuthenticatedFetch = () => {
+    const token = localStorage.getItem('accessToken');
+
+    const authenticatedFetch = useCallback(async (url, options = {}) => {
+        const headers = {
+            ...options.headers,
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+        };
+
+        const response = await fetch(url, { ...options, headers });
+
+        if (response.status === 401) {
+            // Token inválido/expirado, força o logout
+            localStorage.removeItem('accessToken');
+            window.location.reload();
+            throw new Error('Sessão expirada. Por favor, faça o login novamente.');
+        }
+
+        return response;
+    }, [token]);
+
+    return authenticatedFetch;
+};
+
+
 const AdminPage = () => {
-    const [agendas, setAgendas] = useState([]);
-    const [originalAgendas, setOriginalAgendas] = useState([]);
-    const [nome, setNome] = useState('');
-    const [url, setUrl] = useState('');
+    const [rooms, setRooms] = useState([]);
+    const [newRoomName, setNewRoomName] = useState('');
+    const [newRoomEmail, setNewRoomEmail] = useState('');
+
+    const [tenantId, setTenantId] = useState('');
+    const [clientId, setClientId] = useState('');
+
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+
     const [error, setError] = useState('');
+    const [message, setMessage] = useState('');
 
-    // Função para buscar as agendas cadastradas, envolvida em useCallback
-    const fetchAgendas = useCallback(async () => {
+    const authenticatedFetch = useAuthenticatedFetch();
+
+    // Carrega os dados iniciais (salas e config)
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                // Carregar salas
+                const roomsResponse = await authenticatedFetch('/api/rooms');
+                if (!roomsResponse.ok) throw new Error('Falha ao carregar salas.');
+                const roomsData = await roomsResponse.json();
+                setRooms(roomsData);
+
+                // Carregar config do Graph
+                const configResponse = await authenticatedFetch('/api/config');
+                if (!configResponse.ok) throw new Error('Falha ao carregar configuração do Graph.');
+                const configData = await configResponse.json();
+                setTenantId(configData.tenant_id);
+                setClientId(configData.client_id);
+
+            } catch (err) {
+                setError(err.message);
+            }
+        };
+        fetchData();
+    }, [authenticatedFetch]);
+
+    const showMessage = (msg) => {
+        setMessage(msg);
+        setTimeout(() => setMessage(''), 3000);
+    };
+
+    // --- Funções de Manipulação ---
+
+    const handleAddRoom = async (e) => {
+        e.preventDefault();
+        const updatedRooms = [...rooms, { name: newRoomName, email: newRoomEmail }];
         try {
-            const response = await fetch(`/agendas`);
-            const data = await response.json();
-            setAgendas(data);
-        } catch (error) {
-            console.error("Erro ao buscar agendas:", error);
-            setError("Não foi possível carregar as agendas.");
+            const response = await authenticatedFetch('/api/rooms', {
+                method: 'POST',
+                body: JSON.stringify(updatedRooms),
+            });
+            if (!response.ok) throw new Error('Falha ao adicionar sala.');
+            setRooms(updatedRooms);
+            setNewRoomName('');
+            setNewRoomEmail('');
+            showMessage('Sala adicionada com sucesso!');
+        } catch (err) {
+            setError(err.message);
         }
-    }, []);
+    };
 
-    // Efeito para carregar as agendas na montagem do componente
-    useEffect(() => {
-        fetchAgendas();
-    }, [fetchAgendas]);
-
-    useEffect(() => {
-        // Guarda uma cópia profunda do estado inicial para comparação
-        if (agendas.length > 0 && originalAgendas.length === 0) {
-            setOriginalAgendas(JSON.parse(JSON.stringify(agendas)));
+    const handleRemoveRoom = async (indexToRemove) => {
+        const updatedRooms = rooms.filter((_, index) => index !== indexToRemove);
+        try {
+            const response = await authenticatedFetch('/api/rooms', {
+                method: 'POST',
+                body: JSON.stringify(updatedRooms),
+            });
+            if (!response.ok) throw new Error('Falha ao remover sala.');
+            setRooms(updatedRooms);
+            showMessage('Sala removida com sucesso!');
+        } catch (err) {
+            setError(err.message);
         }
-    }, [agendas, originalAgendas]);
+    };
 
-    const moveAgenda = (index, direction) => {
-        const newAgendas = [...agendas];
+    const handleMoveRoom = async (index, direction) => {
+        const newRooms = [...rooms];
         const targetIndex = index + direction;
+        if (targetIndex < 0 || targetIndex >= newRooms.length) return;
+        [newRooms[index], newRooms[targetIndex]] = [newRooms[targetIndex], newRooms[index]];
+        try {
+            const response = await authenticatedFetch('/api/rooms', {
+                method: 'POST',
+                body: JSON.stringify(newRooms),
+            });
+            if (!response.ok) throw new Error('Falha ao reordenar salas.');
+            setRooms(newRooms);
+        } catch (err) {
+            setError(err.message);
+        }
+    };
 
-        // Garante que o novo índice está dentro dos limites do array
-        if (targetIndex < 0 || targetIndex >= newAgendas.length) {
+    const handleSaveGraphConfig = async (e) => {
+        e.preventDefault();
+        try {
+            const response = await authenticatedFetch('/api/config', {
+                method: 'POST',
+                body: JSON.stringify({ tenant_id: tenantId, client_id: clientId }),
+            });
+            if (!response.ok) throw new Error('Falha ao salvar configuração do Graph.');
+            showMessage('Configuração do Graph salva com sucesso!');
+        } catch (err) {
+            setError(err.message);
+        }
+    };
+
+    const handleChangePassword = async (e) => {
+        e.preventDefault();
+        if (newPassword !== confirmPassword) {
+            setError('As novas senhas não coincidem.');
             return;
         }
-
-        // Troca os elementos de posição
-        [newAgendas[index], newAgendas[targetIndex]] = [newAgendas[targetIndex], newAgendas[index]];
-
-        setAgendas(newAgendas);
-    };
-
-    // Função para submeter o formulário de nova agenda
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setError('');
         try {
-            const response = await fetch(`/agendas`, {
+            const response = await authenticatedFetch('/api/change-password', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ nome, url }),
+                body: JSON.stringify({ new_password: newPassword }),
             });
-            if (response.status === 201) {
-                setNome('');
-                setUrl('');
-                fetchAgendas(); // Recarrega a lista
-            } else {
-                const data = await response.json();
-                setError(data.error || "Erro ao adicionar agenda.");
-            }
-        } catch (error) {
-            console.error("Erro ao adicionar agenda:", error);
-            setError("Erro de conexão. Verifique o backend.");
+            if (!response.ok) throw new Error('Falha ao alterar a senha.');
+            setNewPassword('');
+            setConfirmPassword('');
+            showMessage('Senha alterada com sucesso!');
+        } catch (err) {
+            setError(err.message);
         }
     };
 
-    // Função para deletar uma agenda
-    const handleDelete = async (agendaUrl) => {
-        try {
-            await fetch(`/agendas/${encodeURIComponent(agendaUrl)}`, {
-                method: 'DELETE',
-            });
-            fetchAgendas(); // Recarrega a lista
-        } catch (error) {
-            console.error("Erro ao deletar agenda:", error);
-            setError("Erro ao deletar agenda.");
-        }
-    };
-
-    const handleSaveOrder = async () => {
-        setError('');
-        try {
-            const response = await fetch('/agendas/reorder', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(agendas),
-            });
-            if (!response.ok) {
-                throw new Error('Falha ao salvar a ordem.');
-            }
-            alert('Ordem salva com sucesso!');
-        } catch (error) {
-            console.error("Erro ao salvar ordem:", error);
-            setError("Erro de conexão. Verifique o backend.");
-        }
-    };
 
     return (
-        <div className="admin-container admin-page">
-            <h1>Administração de Agendas</h1>
-            <form onSubmit={handleSubmit} className="agenda-form">
-                <input
-                    type="text"
-                    value={nome}
-                    onChange={(e) => setNome(e.target.value)}
-                    placeholder="Nome da Sala"
-                    required
-                />
-                <input
-                    type="url"
-                    value={url}
-                    onChange={(e) => setUrl(e.target.value)}
-                    placeholder="URL do Calendário (.ics)"
-                    required
-                />
-                <button type="submit">Adicionar</button>
-            </form>
+        <div className="admin-container">
+            <h1>Administração</h1>
             {error && <p className="error-message">{error}</p>}
+            {message && <p style={{ color: 'green', textAlign: 'center' }}>{message}</p>}
 
-            <h2>Agendas Cadastradas</h2>
-            {JSON.stringify(agendas) !== JSON.stringify(originalAgendas) && (
-                <button onClick={handleSaveOrder} className="save-order-button">
-                    Salvar Nova Ordem
-                </button>
-            )}
-            <ul className="agendas-list">
-                {agendas && agendas.map((agenda, index) => (
-                    <li key={agenda.url}>
-                        <div className="agenda-info">
-                            <strong>{agenda.nome}</strong>
-                            <span className="agenda-url">{agenda.url}</span>
-                        </div>
-                        <div className="agenda-actions">
-                            <button onClick={() => moveAgenda(index, -1)} disabled={index === 0}>↑</button>
-                            <button onClick={() => moveAgenda(index, 1)} disabled={index === agendas.length - 1}>↓</button>
-                            <button onClick={() => handleDelete(agenda.url)} className="remove-button">Remover</button>
-                        </div>
-                    </li>
-                ))}
-            </ul>
+            {/* Gerenciamento de Salas */}
+            <section>
+                <h2>Gerenciar Salas de Reunião</h2>
+                <form onSubmit={handleAddRoom} className="agenda-form">
+                    <input type="text" value={newRoomName} onChange={e => setNewRoomName(e.target.value)} placeholder="Nome da Sala" required />
+                    <input type="email" value={newRoomEmail} onChange={e => setNewRoomEmail(e.target.value)} placeholder="E-mail da Sala" required />
+                    <button type="submit">Adicionar Sala</button>
+                </form>
+                <ul className="agendas-list">
+                    {rooms.map((room, index) => (
+                        <RoomItem
+                            key={index}
+                            room={room}
+                            onMove={(dir) => handleMoveRoom(index, dir)}
+                            onRemove={() => handleRemoveRoom(index)}
+                            isFirst={index === 0}
+                            isLast={index === rooms.length - 1}
+                        />
+                    ))}
+                </ul>
+            </section>
+
+            {/* Configuração do Graph */}
+            <section>
+                <h2>Configuração da API Microsoft Graph</h2>
+                <form onSubmit={handleSaveGraphConfig} className="agenda-form">
+                    <input type="text" value={tenantId} onChange={e => setTenantId(e.target.value)} placeholder="Tenant ID" required />
+                    <input type="text" value={clientId} onChange={e => setClientId(e.target.value)} placeholder="Client ID" required />
+                    <button type="submit">Salvar Configuração do Graph</button>
+                </form>
+                <p>O Client Secret é configurado na inicialização e não pode ser visualizado ou alterado aqui por segurança.</p>
+            </section>
+
+            {/* Alteração de Senha */}
+            <section>
+                <h2>Alterar Senha de Administrador</h2>
+                <form onSubmit={handleChangePassword} className="agenda-form">
+                    <input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="Nova Senha" required />
+                    <input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="Confirmar Nova Senha" required />
+                    <button type="submit">Alterar Senha</button>
+                </form>
+            </section>
         </div>
     );
 };

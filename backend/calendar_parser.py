@@ -1,97 +1,134 @@
 import arrow
-from icalendar import Calendar
+import msal
 import requests
 from datetime import timedelta
-import time
 
-# --- Cache em Memória com TTL (Time-To-Live) ---
-_cache = {}
-CACHE_EXPIRATION_SECONDS = 300  # 5 minutos
+# Importa a instância do AppConfig e a classe Room do main
+from main import app_config, Room
 
-def _get_from_cache(key):
-    """Obtém um item do cache se ele existir e não tiver expirado."""
-    if key in _cache:
-        entry = _cache[key]
-        if time.time() - entry['timestamp'] < CACHE_EXPIRATION_SECONDS:
-            return entry['data']
-    return None
+# --- Cache Simples em Memória ---
+# Cache para tokens de acesso da API Graph para evitar requisições repetidas
+token_cache = {
+    "token": None,
+    "expires_at": None
+}
 
-def _set_in_cache(key, data):
-    """Define um item no cache com o timestamp atual."""
-    _cache[key] = {
-        'data': data,
-        'timestamp': time.time()
-    }
-# --- Fim da Implementação do Cache ---
+# Cache para os status das salas, para melhorar a performance de navegação de data
+calendar_cache = {}
+CACHE_TTL_MINUTES = 5
 
+# --- Lógica de Autenticação com MSAL ---
 
-def get_room_status(url, date_str=None):
+def get_graph_access_token():
     """
-    Busca e analisa um calendário .ics para determinar o status de uma sala de reunião.
-    Retorna um dicionário com a programação horária do dia especificado.
-    Utiliza um cache em memória para otimizar requisições repetidas.
+    Obtém um token de acesso para a API do Microsoft Graph usando as credenciais
+    configuradas na aplicação. Utiliza um cache em memória simples.
     """
-    # Define a data alvo para usar na chave do cache de forma consistente
-    target_date_key = date_str if date_str else arrow.now('America/Sao_Paulo').format('YYYY-MM-DD')
-    cache_key = (url, target_date_key)
+    now = arrow.utcnow()
 
-    # Tenta obter do cache primeiro
-    cached_schedule = _get_from_cache(cache_key)
-    if cached_schedule is not None:
-        return cached_schedule
+    # Verifica se há um token válido no cache
+    if token_cache["token"] and token_cache["expires_at"] > now:
+        return token_cache["token"]
 
-    # --- Se não estiver no cache, executa a lógica original ---
-    try:
-        response = requests.get(url, headers={'User-Agent': 'Mozilla/5.0'})
-        response.raise_for_status()
-        calendar_data = response.text
-    except requests.exceptions.RequestException as e:
-        raise ConnectionError(f"Falha ao buscar o calendário da URL: {url}. Erro: {e}") from e
+    # Garante que a aplicação está configurada
+    if not all([app_config.graph_tenant_id, app_config.graph_client_id, app_config.graph_client_secret]):
+        print("Erro: A configuração da API Graph está incompleta.")
+        return None
 
-    cal = Calendar.from_ical(calendar_data)
+    authority = f"https://login.microsoftonline.com/{app_config.graph_tenant_id}"
 
-    if date_str:
-        target_date = arrow.get(date_str, 'YYYY-MM-DD', tzinfo='America/Sao_Paulo')
+    app = msal.ConfidentialClientApplication(
+        client_id=app_config.graph_client_id,
+        authority=authority,
+        client_credential=app_config.graph_client_secret,
+    )
+
+    result = app.acquire_token_for_client(scopes=["https://graph.microsoft.com/.default"])
+
+    if "access_token" in result:
+        # Armazena o novo token e sua data de expiração no cache
+        token_cache["token"] = result['access_token']
+        # Adiciona um buffer de 5 minutos para segurança
+        token_cache["expires_at"] = now.shift(seconds=result.get('expires_in', 3600) - 300)
+        return result['access_token']
     else:
-        target_date = arrow.now('America/Sao_Paulo')
+        print("Erro ao adquirir token de acesso:", result.get("error_description"))
+        return None
 
-    day_start = target_date.floor('day')
-    day_end = target_date.ceil('day')
+# --- Lógica de Consulta ao Calendário ---
 
-    # Gera o schedule com intervalos de 30 minutos
-    schedule = {}
-    current_schedule_time = day_start.replace(hour=8, minute=0)
-    while current_schedule_time.hour < 21:
-        schedule[current_schedule_time.strftime("%H:%M")] = "livre"
-        current_schedule_time += timedelta(minutes=30)
+def get_room_status(room: Room, date_str: str | None = None):
+    """
+    Busca os eventos de uma sala para uma data específica usando a API do Microsoft Graph
+    e retorna o status (livre/ocupado) para cada intervalo de 30 minutos.
+    """
+    target_date = arrow.get(date_str) if date_str else arrow.now('America/Sao_Paulo')
 
+    # Verifica o cache de calendários
+    cache_key = (room.email, target_date.format('YYYY-MM-DD'))
+    now_utc = arrow.utcnow()
+    if cache_key in calendar_cache and \
+       (now_utc - calendar_cache[cache_key]['timestamp']).total_seconds() < CACHE_TTL_MINUTES * 60:
+        return calendar_cache[cache_key]['data']
 
-    for component in cal.walk():
-        if component.name == "VEVENT":
-            dtstart = component.get('dtstart').dt
-            dtend = component.get('dtend').dt
+    token = get_graph_access_token()
+    if not token:
+        return {"error": "Falha na autenticação com a API Graph."}
 
-            # Converte para arrow e ajusta o fuso horário se não houver
-            try:
-                start = arrow.get(dtstart).to('America/Sao_Paulo')
-                end = arrow.get(dtend).to('America/Sao_Paulo')
-            except arrow.parser.ParserError:
-                # Se houver erro de parsing, tenta adicionar fuso horário
-                start = arrow.get(dtstart.strftime('%Y-%m-%d %H:%M:%S')).replace(tzinfo='America/Sao_Paulo')
-                end = arrow.get(dtend.strftime('%Y-%m-%d %H:%M:%S')).replace(tzinfo='America/Sao_Paulo')
+    # Define o início e o fim do dia na timezone correta para a consulta
+    start_of_day = target_date.floor('day').to('utc').format('YYYY-MM-DDTHH:mm:ss') + "Z"
+    end_of_day = target_date.ceil('day').to('utc').format('YYYY-MM-DDTHH:mm:ss') + "Z"
 
-            if start < day_end and end > day_start:
-                # Arredonda a hora de início para o intervalo de 30 minutos anterior mais próximo
-                start_minute = 0 if start.minute < 30 else 30
-                current_time = start.replace(minute=start_minute, second=0, microsecond=0)
+    # Endpoint da API Graph para visualizar o calendário
+    url = f"https://graph.microsoft.com/v1.0/users/{room.email}/calendarView"
 
-                # Itera sobre cada intervalo de 30 minutos até o final do evento
-                while current_time < end:
-                    time_str = current_time.strftime("%H:%M")
-                    if time_str in schedule:
-                        schedule[time_str] = "ocupado"
-                    current_time += timedelta(minutes=30)
+    headers = {
+        'Authorization': f'Bearer {token}',
+        'Prefer': f'outlook.timezone="America/Sao_Paulo"'
+    }
 
-    # Armazena o resultado no cache antes de retornar
-    _set_in_cache(cache_key, schedule)
-    return schedule
+    params = {
+        'startDateTime': start_of_day,
+        'endDateTime': end_of_day,
+        '$select': 'subject,start,end'
+    }
+
+    try:
+        response = requests.get(url, headers=headers, params=params)
+        response.raise_for_status()
+        events = response.json().get('value', [])
+    except requests.RequestException as e:
+        print(f"Erro ao buscar eventos para {room.email}: {e}")
+        return {"error": "Erro de comunicação com a API Graph."}
+
+    # Inicializa o status de todos os horários como 'livre'
+    schedule_start_hour = 8
+    schedule_end_hour = 20
+    time_slots = {}
+    current_time = target_date.floor('day').replace(hour=schedule_start_hour)
+    while current_time.hour < schedule_end_hour:
+        time_slots[current_time.format('HH:mm')] = 'livre'
+        current_time = current_time.shift(minutes=30)
+
+    # Marca os horários ocupados com base nos eventos
+    for event in events:
+        start = arrow.get(event['start']['dateTime']).to('America/Sao_Paulo')
+        end = arrow.get(event['end']['dateTime']).to('America/Sao_Paulo')
+
+        # Arredonda o início para o intervalo de 30 minutos anterior mais próximo
+        start_rounded = start.floor('minute').replace(minute=(start.minute // 30) * 30, second=0, microsecond=0)
+
+        # Itera sobre os intervalos de 30 minutos que o evento ocupa
+        current_slot_time = start_rounded
+        while current_slot_time < end:
+            slot_key = current_slot_time.format('HH:mm')
+            if slot_key in time_slots:
+                time_slots[slot_key] = 'ocupado'
+            current_slot_time = current_slot_time.shift(minutes=30)
+
+    result = {"nome": room.name, "status": time_slots}
+
+    # Armazena o resultado no cache
+    calendar_cache[cache_key] = {'timestamp': now_utc, 'data': result}
+
+    return result
