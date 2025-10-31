@@ -99,6 +99,8 @@ chown -R $APP_USER:www-data $APP_DIR
 chown -R www-data:www-data $WEB_DIR
 chown -R $APP_USER:www-data $LOG_DIR
 chmod -R 775 $APP_DIR/tmp
+chmod -R g+w $APP_DIR
+chmod -R g+w $LOG_DIR
 
 success "Diretórios de produção configurados."
 
