@@ -208,7 +208,7 @@ nav a:hover {
 
 /* --- Tabela de Agendamento --- */
 .table-scroll-container {
-    max-height: calc(100vh - 250px); /* Ajuste a altura conforme necessário */
+    height: calc(100vh - 250px); /* Garante uma altura fixa para a janela de rolagem */
     overflow-y: auto;
     position: relative;
 }
