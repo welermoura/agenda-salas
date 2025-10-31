@@ -1,53 +1,22 @@
 import asyncio
 import json
-import os
 from contextlib import asynccontextmanager
 from datetime import datetime
+import secrets
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, HttpUrl
+from pydantic import BaseModel
 import uvicorn
 
 # --- Novos imports para segurança e configuração ---
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 from passlib.context import CryptContext
-import secrets
 
-# Importa a nova lógica do calendar_parser
+# Importa a lógica de configuração e os modelos partilhados
+from config_manager import app_config, Room, load_config, save_config
 import calendar_parser
-
-# --- Estrutura de Dados ---
-
-class Room(BaseModel):
-    email: str
-    name: str
-
-class AppConfig(BaseModel):
-    is_configured: bool = False
-    admin_password_hash: str | None = None
-    graph_tenant_id: str | None = None
-    graph_client_id: str | None = None
-    graph_client_secret: str | None = None
-    rooms: list[Room] = []
-
-# --- Gerenciamento de Configuração ---
-CONFIG_FILE = "backend/config.json"
-app_config = AppConfig()
-
-def load_config():
-    global app_config
-    if os.path.exists(CONFIG_FILE):
-        with open(CONFIG_FILE, "r") as f:
-            config_data = json.load(f)
-            app_config = AppConfig(**config_data)
-    else:
-        save_config()
-
-def save_config():
-    with open(CONFIG_FILE, "w") as f:
-        json.dump(app_config.model_dump(), f, indent=4)
 
 # --- Segurança e Autenticação ---
 SECRET_KEY = secrets.token_urlsafe(32)
@@ -82,16 +51,20 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
 # --- Lógica de atualização em segundo plano ---
 async def update_scheduler():
     while True:
-        if app_config.is_configured and app_config.rooms:
-            today_str = datetime.now().strftime('%Y-%m-%d')
-            statuses = {}
-            for room in app_config.rooms:
-                status = calendar_parser.get_room_status(room, today_str)
-                statuses[room.email] = status
+        try:
+            if app_config.is_configured and app_config.rooms:
+                today_str = datetime.now().strftime('%Y-%m-%d')
+                statuses = {}
+                for room in app_config.rooms:
+                    status = calendar_parser.get_room_status(room, today_str)
+                    statuses[room.email] = status
 
-            await manager.broadcast(json.dumps({"date": today_str, "statuses": statuses}))
+                await manager.broadcast(json.dumps({"date": today_str, "statuses": statuses}))
 
-        await asyncio.sleep(10) # Intervalo de atualização
+            await asyncio.sleep(10)
+        except Exception:
+            # Em caso de erro (ex: falha de rede), espera mais para evitar spam
+            await asyncio.sleep(60)
 
 
 # --- Ciclo de Vida da Aplicação ---
@@ -137,7 +110,6 @@ async def initialize_setup(data: SetupData):
     app_config.is_configured = True
     save_config()
 
-    # Inicia o scheduler após a configuração
     loop = asyncio.get_event_loop()
     loop.create_task(update_scheduler())
 
