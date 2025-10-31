@@ -1,57 +1,194 @@
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request
+import asyncio
+import json
+import os
+from contextlib import asynccontextmanager
+from datetime import datetime
+
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, HttpUrl
-import json
-import asyncio
-import aiofiles
-from typing import List, Dict
-import arrow
+import uvicorn
 
-# Importa a lógica de parsing do calendário
-from calendar_parser import get_room_status
+# --- Novos imports para segurança e configuração ---
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from jose import JWTError, jwt
+from passlib.context import CryptContext
+import secrets
 
-# --- Configuração do App FastAPI ---
-app = FastAPI()
+# Importa a nova lógica do calendar_parser
+import calendar_parser
 
-origins = ["*"]  # Para desenvolvimento local, aceita todas as origens
+# --- Estrutura de Dados ---
+
+class Room(BaseModel):
+    email: str
+    name: str
+
+class AppConfig(BaseModel):
+    is_configured: bool = False
+    admin_password_hash: str | None = None
+    graph_tenant_id: str | None = None
+    graph_client_id: str | None = None
+    graph_client_secret: str | None = None
+    rooms: list[Room] = []
+
+# --- Gerenciamento de Configuração ---
+CONFIG_FILE = "backend/config.json"
+app_config = AppConfig()
+
+def load_config():
+    global app_config
+    if os.path.exists(CONFIG_FILE):
+        with open(CONFIG_FILE, "r") as f:
+            config_data = json.load(f)
+            app_config = AppConfig(**config_data)
+    else:
+        save_config()
+
+def save_config():
+    with open(CONFIG_FILE, "w") as f:
+        json.dump(app_config.model_dump(), f, indent=4)
+
+# --- Segurança e Autenticação ---
+SECRET_KEY = secrets.token_urlsafe(32)
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/login")
+
+def verify_password(plain_password, hashed_password):
+    return pwd_context.verify(plain_password, hashed_password)
+
+def get_password_hash(password):
+    return pwd_context.hash(password)
+
+def create_access_token(data: dict):
+    to_encode = data.copy()
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
+
+async def get_current_user(token: str = Depends(oauth2_scheme)):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None:
+            raise HTTPException(status_code=401, detail="Invalid authentication credentials")
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Invalid authentication credentials")
+    return username
+
+
+# --- Lógica de atualização em segundo plano ---
+async def update_scheduler():
+    while True:
+        if app_config.is_configured and app_config.rooms:
+            today_str = datetime.now().strftime('%Y-%m-%d')
+            statuses = {}
+            for room in app_config.rooms:
+                status = calendar_parser.get_room_status(room, today_str)
+                statuses[room.email] = status
+
+            await manager.broadcast(json.dumps({"date": today_str, "statuses": statuses}))
+
+        await asyncio.sleep(10) # Intervalo de atualização
+
+
+# --- Ciclo de Vida da Aplicação ---
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    load_config()
+    if app_config.is_configured:
+        loop = asyncio.get_event_loop()
+        loop.create_task(update_scheduler())
+    yield
+
+
+app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# --- Modelos de Dados ---
-class Agenda(BaseModel):
-    nome: str
-    url: HttpUrl
+# --- Endpoints de Setup ---
+class SetupData(BaseModel):
+    admin_password: str
+    tenant_id: str
+    client_id: str
+    client_secret: str
 
-# --- Gerenciamento de Dados ---
-AGENDAS_FILE = "backend/agendas.json"
+@app.get("/api/setup/status")
+async def get_setup_status():
+    return {"is_configured": app_config.is_configured}
 
-async def carregar_agendas() -> List[Agenda]:
-    try:
-        async with aiofiles.open(AGENDAS_FILE, mode='r') as f:
-            content = await f.read()
-            if not content:
-                return []
-            data = json.loads(content)
-            return [Agenda(**item) for item in data]
-    except (FileNotFoundError, json.JSONDecodeError):
-        return []
+@app.post("/api/setup/initialize")
+async def initialize_setup(data: SetupData):
+    if app_config.is_configured:
+        raise HTTPException(status_code=403, detail="Application is already configured.")
 
-async def salvar_agendas(agendas: List[Agenda]):
-    async with aiofiles.open(AGENDAS_FILE, mode='w') as f:
-        # Garante que a URL seja convertida para string antes de salvar
-        agendas_list = [{"nome": a.nome, "url": str(a.url)} for a in agendas]
-        await f.write(json.dumps(agendas_list, indent=4))
+    app_config.admin_password_hash = get_password_hash(data.admin_password)
+    app_config.graph_tenant_id = data.tenant_id
+    app_config.graph_client_id = data.client_id
+    app_config.graph_client_secret = data.client_secret
+    app_config.is_configured = True
+    save_config()
 
-# --- Gerenciador de WebSocket ---
+    # Inicia o scheduler após a configuração
+    loop = asyncio.get_event_loop()
+    loop.create_task(update_scheduler())
+
+    return {"message": "Setup complete. Please log in."}
+
+# --- Endpoints de Autenticação e Admin ---
+@app.post("/api/login")
+async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
+    if not app_config.is_configured or not verify_password(form_data.password, app_config.admin_password_hash):
+        raise HTTPException(status_code=401, detail="Incorrect username or password", headers={"WWW-Authenticate": "Bearer"})
+    access_token = create_access_token(data={"sub": form_data.username})
+    return {"access_token": access_token, "token_type": "bearer"}
+
+@app.get("/api/rooms", response_model=list[Room])
+async def get_rooms(current_user: str = Depends(get_current_user)):
+    return app_config.rooms
+
+@app.post("/api/rooms")
+async def update_rooms(rooms: list[Room], current_user: str = Depends(get_current_user)):
+    app_config.rooms = rooms
+    save_config()
+    return {"message": "Rooms updated successfully."}
+
+class GraphConfig(BaseModel):
+    tenant_id: str
+    client_id: str
+
+@app.get("/api/config", response_model=GraphConfig)
+async def get_graph_config(current_user: str = Depends(get_current_user)):
+    return GraphConfig(tenant_id=app_config.graph_tenant_id, client_id=app_config.graph_client_id)
+
+@app.post("/api/config")
+async def update_graph_config(config: GraphConfig, current_user: str = Depends(get_current_user)):
+    app_config.graph_tenant_id = config.tenant_id
+    app_config.graph_client_id = config.client_id
+    save_config()
+    return {"message": "Graph configuration updated successfully."}
+
+class PasswordChange(BaseModel):
+    new_password: str
+
+@app.post("/api/change-password")
+async def change_password(password_data: PasswordChange, current_user: str = Depends(get_current_user)):
+    app_config.admin_password_hash = get_password_hash(password_data.new_password)
+    save_config()
+    return {"message": "Password updated successfully."}
+
+# --- WebSocket ---
 class ConnectionManager:
     def __init__(self):
-        self.active_connections: List[WebSocket] = []
+        self.active_connections: list[WebSocket] = []
 
     async def connect(self, websocket: WebSocket):
         await websocket.accept()
@@ -65,115 +202,25 @@ class ConnectionManager:
             await connection.send_text(message)
 
 manager = ConnectionManager()
-cached_statuses = {} # Cache para o estado atual
 
-# --- Tarefa de Atualização em Background ---
-async def update_scheduler():
-    global cached_statuses # Usa a variável global
-    while True:
-        try:
-            agendas = await carregar_agendas()
-            statuses = {}
-            if agendas:
-                for agenda in agendas:
-                    try:
-                        status = get_room_status(str(agenda.url))
-                        statuses[str(agenda.url)] = {"nome": agenda.nome, "status": status}
-                    except Exception:
-                        # Se a busca por um calendário específico falhar, pula para o próximo
-                        # O erro poderia ser logado em um sistema de monitoramento real
-                        pass
-
-                if statuses:
-                    today_str = arrow.now('America/Sao_Paulo').format('YYYY-MM-DD')
-                    # Atualiza o cache e faz o broadcast
-                    cached_statuses = {"date": today_str, "statuses": statuses}
-                    await manager.broadcast(json.dumps(cached_statuses))
-
-        except Exception:
-            # Captura qualquer outra exceção inesperada no loop principal
-            # para garantir que a tarefa nunca pare de ser executada.
-            # Em um ambiente de produção, isso seria um log de erro crítico.
-            pass
-
-        await asyncio.sleep(10) # Intervalo de atualização
-
-@app.on_event("startup")
-async def startup_event():
-    # Inicia a tarefa de atualização em background
-    asyncio.create_task(update_scheduler())
-
-# --- Endpoints da API ---
-@app.get("/agendas", response_model=List[Agenda])
-async def get_agendas():
-    return await carregar_agendas()
-
-@app.post("/agendas", status_code=201)
-async def add_agenda(agenda: Agenda):
-    agendas = await carregar_agendas()
-    if any(a.url == agenda.url for a in agendas):
-        return {"error": "URL já cadastrada."} # Adicionado feedback de erro
-    agendas.append(agenda)
-    await salvar_agendas(agendas)
-    return agenda
-
-@app.delete("/agendas/{url:path}", status_code=204)
-async def delete_agenda(url: str):
-    agendas = await carregar_agendas()
-    agendas_filtradas = [a for a in agendas if str(a.url) != url]
-    await salvar_agendas(agendas_filtradas)
-
-@app.post("/agendas/reorder", status_code=200)
-async def reorder_agendas(ordered_agendas: List[Agenda]):
-    # Simplesmente salva a lista recebida, que já está na ordem correta
-    await salvar_agendas(ordered_agendas)
-    return {"message": "Ordem das agendas atualizada com sucesso."}
-
-# --- Endpoint WebSocket ---
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await manager.connect(websocket)
     try:
-        # Função para buscar e enviar dados para uma data específica
-        async def send_status_for_date(date_str=None):
-            agendas = await carregar_agendas()
-            statuses = {}
-            for agenda in agendas:
-                try:
-                    # Passa a data para a função get_room_status
-                    status = get_room_status(str(agenda.url), date_str)
-                    statuses[str(agenda.url)] = {"nome": agenda.nome, "status": status}
-                except Exception as e:
-                    statuses[str(agenda.url)] = {"nome": agenda.nome, "status": {"error": str(e)}}
-
-            # Garante que a data enviada corresponda à data solicitada (ou hoje se for nula)
-            response_date = date_str if date_str else arrow.now('America/Sao_Paulo').format('YYYY-MM-DD')
-            await websocket.send_text(json.dumps({"date": response_date, "statuses": statuses}))
-
-        # Envia o estado atual do cache imediatamente, se disponível
-        if cached_statuses:
-            await websocket.send_text(json.dumps(cached_statuses))
-        else:
-            # Se o cache estiver vazio (ex: na primeira execução), busca os dados
-            await send_status_for_date()
-
         while True:
-            # Aguarda por mensagens do cliente para buscar datas específicas
             data = await websocket.receive_text()
-            try:
-                request = json.loads(data)
-                if "date" in request:
-                    await send_status_for_date(request["date"])
-            except json.JSONDecodeError:
-                # Ignora mensagens mal formatadas
-                pass
+            request = json.loads(data)
+            date_str = request.get('date')
+
+            if date_str and app_config.is_configured:
+                statuses = {}
+                for room in app_config.rooms:
+                    status = calendar_parser.get_room_status(room, date_str)
+                    statuses[room.email] = status
+
+                await websocket.send_text(json.dumps({"date": date_str, "statuses": statuses}))
     except WebSocketDisconnect:
         manager.disconnect(websocket)
-    except Exception as e:
-        # Log do erro no servidor
-        print(f"Erro no WebSocket: {e}")
-        manager.disconnect(websocket)
 
-@app.get("/")
-def read_root():
-    return {"message": "Backend is running"}
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
-import AdminPage from './AdminPage';
+import AdminGuard from './AdminGuard'; // Importa o novo componente
 import DashboardPage from './DashboardPage';
 import './App.css';
 
@@ -64,7 +64,7 @@ function App() {
 
         <main>
           <Routes>
-            <Route path="/admin" element={<AdminPage />} />
+            <Route path="/admin" element={<AdminGuard />} />
             <Route path="/" element={<DashboardPage />} />
           </Routes>
         </main>
