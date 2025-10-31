@@ -122,13 +122,18 @@ const DashboardPage = () => {
     // Efeito para rolar para a hora atual (agora depende de displayHour)
     useEffect(() => {
         if (!loading && isToday) {
-            const hour = displayHour.toString().padStart(2, '0');
-            const currentHourRowId = `hour-row-${hour}`;
+            // Adiciona um pequeno atraso para garantir que a renderização da tabela esteja completa
+            const scrollTimer = setTimeout(() => {
+                const hour = displayHour.toString().padStart(2, '0');
+                const currentHourRowId = `hour-row-${hour}`;
 
-            const element = document.getElementById(currentHourRowId);
-            if (element) {
-                element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
+                const element = document.getElementById(currentHourRowId);
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }, 100); // 100ms de atraso
+
+            return () => clearTimeout(scrollTimer); // Limpa o timer se o componente for desmontado
         }
     }, [loading, isToday, displayHour]);
 
