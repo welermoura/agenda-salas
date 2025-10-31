@@ -130,13 +130,9 @@ const DashboardPage = () => {
                 const container = scrollContainerRef.current;
 
                 if (element && container) {
-                    // Calcula a posição do topo do elemento em relação ao topo do contêiner da tabela
-                    const elementTop = element.offsetTop;
-                    // Calcula a posição do topo do cabeçalho da tabela
-                    const tableHeaderTop = container.querySelector('thead').offsetHeight;
-
-                    // Define a posição da barra de rolagem
-                    container.scrollTop = elementTop - tableHeaderTop;
+                    // Define a posição da barra de rolagem para o topo do elemento da hora atual.
+                    // O navegador lidará com o offset criado pelo cabeçalho "sticky".
+                    container.scrollTop = element.offsetTop;
                 }
             }, 100);
 
