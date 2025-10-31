@@ -111,7 +111,7 @@ const DashboardPage = () => {
 
             const element = document.getElementById(currentHourRowId);
             if (element) {
-                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                element.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
         }
     }, [loading, isToday]);
