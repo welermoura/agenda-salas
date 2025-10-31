@@ -33,7 +33,7 @@ class AppConfig(BaseModel):
     rooms: list[Room] = []
 
 # --- Gerenciamento de Configuração ---
-CONFIG_FILE = "config.json"
+CONFIG_FILE = "backend/config.json"
 app_config = AppConfig()
 
 def load_config():
