@@ -26,6 +26,7 @@ const DashboardPage = () => {
     const [loading, setLoading] = useState(true);
     const [selectedDate, setSelectedDate] = useState(formatDate(new Date()));
     const [scheduleCache, setScheduleCache] = useState({}); // Cache para as agendas
+    const [displayHour, setDisplayHour] = useState(new Date().getHours()); // Novo estado para a hora de exibição
 
     const ws = useRef(null);
     const WS_URL = `ws://${window.location.hostname}/ws`;
@@ -99,14 +100,29 @@ const DashboardPage = () => {
     // Extrai as salas para as colunas, garantindo que schedules não seja nulo
     const rooms = schedules ? Object.entries(schedules).map(([url, data]) => ({ url, nome: data.nome })) : [];
 
-    const currentHour = new Date().getHours();
     const isToday = selectedDate === formatDate(new Date());
 
+    // Efeito para monitorar a mudança da hora e acionar a rolagem
     useEffect(() => {
-        // Rola para a hora atual apenas se for hoje e os dados estiverem carregados
+        if (isToday) {
+            const timer = setInterval(() => {
+                const currentHour = new Date().getHours();
+                setDisplayHour(prevHour => {
+                    if (currentHour !== prevHour) {
+                        return currentHour;
+                    }
+                    return prevHour;
+                });
+            }, 1000 * 60); // Verifica a cada minuto
+
+            return () => clearInterval(timer);
+        }
+    }, [isToday]);
+
+    // Efeito para rolar para a hora atual (agora depende de displayHour)
+    useEffect(() => {
         if (!loading && isToday) {
-            const now = new Date();
-            const hour = now.getHours().toString().padStart(2, '0');
+            const hour = displayHour.toString().padStart(2, '0');
             const currentHourRowId = `hour-row-${hour}`;
 
             const element = document.getElementById(currentHourRowId);
@@ -114,7 +130,8 @@ const DashboardPage = () => {
                 element.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
         }
-    }, [loading, isToday]);
+    }, [loading, isToday, displayHour]);
+
 
     // Efeito para pré-carregar (pre-fetch) o dia seguinte
     useEffect(() => {
