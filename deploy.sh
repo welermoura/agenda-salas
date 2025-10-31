@@ -122,12 +122,13 @@ if confirm "Deseja configurar o Apache?"; then
 
     log "Habilitando o site 'agendasalas'..."
     a2ensite agendasalas || error "Falha ao habilitar o site."
-    a2dissite 000-default.conf # Opcional: desabilita o site padrão
+
+    # A linha que desabilitava o site padrão foi REMOVIDA para evitar conflitos.
 
     log "Verificando a sintaxe da configuração do Apache..."
     apache2ctl configtest || error "Erro de sintaxe na configuração do Apache. Abortando."
 
-    log "Reiniciando o Apache..."
+    log "Reiniciando o Apache para aplicar as mudanças..."
     systemctl restart apache2 || error "Falha ao reiniciar o Apache."
     success "Apache configurado."
 fi
@@ -153,11 +154,9 @@ fi
 success "O deploy da aplicação AgendaSalas foi concluído!"
 echo "--------------------------------------------------------"
 echo "Acesse a aplicação no seu navegador:"
-echo -e "${C_GREEN}http://agendasalas${C_NONE}"
+echo -e "Lembre-se de configurar o DNS local para que '${C_GREEN}agendasalas${C_NONE}' aponte para o IP deste servidor."
+echo -e "URL: ${C_GREEN}http://agendasalas${C_NONE}"
 echo "--------------------------------------------------------"
 echo "Para verificar o status do serviço do backend, use:"
 echo "sudo systemctl status agendasalas.service"
-echo "Para ver os logs do Apache, verifique:"
-echo "/var/log/apache2/agendasalas_access.log"
-echo "/var/log/apache2/agendasalas_error.log"
 echo "--------------------------------------------------------"
