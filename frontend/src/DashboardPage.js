@@ -29,6 +29,7 @@ const DashboardPage = () => {
     const [displayHour, setDisplayHour] = useState(new Date().getHours()); // Novo estado para a hora de exibição
 
     const ws = useRef(null);
+    const scrollContainerRef = useRef(null); // Ref para o contêiner de rolagem
     const WS_URL = `ws://${window.location.hostname}/ws`;
     const selectedDateRef = useRef(selectedDate); // Ref para evitar closure estagnado
 
@@ -122,18 +123,24 @@ const DashboardPage = () => {
     // Efeito para rolar para a hora atual (agora depende de displayHour)
     useEffect(() => {
         if (!loading && isToday) {
-            // Adiciona um pequeno atraso para garantir que a renderização da tabela esteja completa
             const scrollTimer = setTimeout(() => {
                 const hour = displayHour.toString().padStart(2, '0');
                 const currentHourRowId = `hour-row-${hour}`;
-
                 const element = document.getElementById(currentHourRowId);
-                if (element) {
-                    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
-            }, 100); // 100ms de atraso
+                const container = scrollContainerRef.current;
 
-            return () => clearTimeout(scrollTimer); // Limpa o timer se o componente for desmontado
+                if (element && container) {
+                    // Calcula a posição do topo do elemento em relação ao topo do contêiner da tabela
+                    const elementTop = element.offsetTop;
+                    // Calcula a posição do topo do cabeçalho da tabela
+                    const tableHeaderTop = container.querySelector('thead').offsetHeight;
+
+                    // Define a posição da barra de rolagem
+                    container.scrollTop = elementTop - tableHeaderTop;
+                }
+            }, 100);
+
+            return () => clearTimeout(scrollTimer);
         }
     }, [loading, isToday, displayHour]);
 
@@ -197,7 +204,7 @@ const DashboardPage = () => {
                     {rooms.length === 0 ? (
                         <p>Nenhuma agenda cadastrada. Adicione uma na <a href="/admin">página de administração</a>.</p>
                     ) : (
-                        <div className="table-scroll-container">
+                        <div className="table-scroll-container" ref={scrollContainerRef}>
                             <table className="schedule-table schedule-table-vertical">
                                 <thead>
                                     <tr>
