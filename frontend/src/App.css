@@ -207,6 +207,12 @@ nav a:hover {
 }
 
 /* --- Tabela de Agendamento --- */
+.table-scroll-container {
+    max-height: calc(100vh - 250px); /* Ajuste a altura conforme necessário */
+    overflow-y: auto;
+    position: relative;
+}
+
 .schedule-table-vertical {
     width: 100%;
     border-collapse: collapse;
@@ -229,6 +235,9 @@ nav a:hover {
     background-color: var(--header-background-color);
     color: var(--text-color-strong);
     font-weight: 600;
+    position: sticky;
+    top: 0;
+    z-index: 1;
 }
 
 .time-header-cell, .time-cell {
@@ -261,11 +270,6 @@ nav a:hover {
 .status-indisponivel {
     background-color: var(--status-indisponivel-bg);
     color: var(--status-indisponivel-text);
-}
-
-.past-time-slot {
-    opacity: 0.4;
-    transition: opacity 0.3s ease-in-out;
 }
 
 /* --- Spinner de Carregamento --- */

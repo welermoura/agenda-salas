@@ -185,7 +185,7 @@ const DashboardPage = () => {
                                 </thead>
                                 <tbody>
                                     {hours.map(hour => (
-                                        <tr key={hour} id={`hour-row-${hour}`} className={(isToday && parseInt(hour) < currentHour) ? 'past-time-slot' : ''}>
+                                        <tr key={hour} id={`hour-row-${hour}`}>
                                             <th className="time-cell">{hour}:00</th>
                                             {rooms.map(room => {
                                                 // Garante que schedules e schedules[room.url] existam
