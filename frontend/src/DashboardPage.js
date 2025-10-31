@@ -213,10 +213,23 @@ const DashboardPage = () => {
                                         <tr key={hour} id={`hour-row-${hour}`}>
                                             <th className="time-cell">{hour}:00</th>
                                             {rooms.map(room => {
-                                                // Garante que schedules e schedules[room.url] existam
-                                                const status = schedules && schedules[room.url] ? schedules[room.url].status : {};
+                                                const roomData = schedules && schedules[room.url];
+
+                                                // Se não houver dados ou se houver um erro, exibe uma célula de erro.
+                                                if (!roomData || roomData.error) {
+                                                    return (
+                                                        <td key={room.url} className="status-cell">
+                                                            <div className="status-error">
+                                                                Erro ao carregar
+                                                            </div>
+                                                        </td>
+                                                    );
+                                                }
+
+                                                const status = roomData.status || {};
                                                 const slot1_status = status[`${hour}:00`] || 'indisponivel';
-                                                const slot2_status = schedules[room.url]?.status[`${hour}:30`] || 'indisponivel';
+                                                const slot2_status = status[`${hour}:30`] || 'indisponivel';
+
                                                 return (
                                                     <td key={room.url} className="status-cell">
                                                         <div className={`half-hour-slot slot-top status-${slot1_status}`}>
