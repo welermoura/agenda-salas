@@ -6,3 +6,6 @@ arrow
 icalendar
 aiofiles
 msal
+python-jose[cryptography]
+passlib[bcrypt]
+python-multipart
