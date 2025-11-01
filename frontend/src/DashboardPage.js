@@ -217,10 +217,11 @@ const DashboardPage = () => {
 
                                                 // Se não houver dados ou se houver um erro, exibe uma célula de erro.
                                                 if (!roomData || roomData.error) {
+                                                    const errorMessage = roomData?.error || "Erro ao carregar dados.";
                                                     return (
                                                         <td key={room.url} className="status-cell">
-                                                            <div className="status-error">
-                                                                Erro ao carregar
+                                                            <div className="status-error" title={errorMessage}>
+                                                                {errorMessage}
                                                             </div>
                                                         </td>
                                                     );
