@@ -125,15 +125,17 @@ def get_room_status(room: Room, date_str: str | None = None):
         print(f"Erro ao buscar eventos para {room.email}: {error_message}")
         return {"error": error_message}
 
-    # Processamento dos horários (inalterado)
-    schedule_start_hour = 8
-    schedule_end_hour = 21  # Alterado para 21 para incluir o intervalo das 20:00 - 20:30
+    # --- Lógica de Geração de Horários ---
     time_slots = {}
-    current_time = target_date.floor('day').replace(hour=schedule_start_hour)
-    while current_time.hour < schedule_end_hour:
+    schedule_start = target_date.floor('day').replace(hour=8, minute=0)
+    schedule_end = target_date.floor('day').replace(hour=20, minute=30)
+    current_time = schedule_start
+
+    while current_time <= schedule_end:
         time_slots[current_time.format('HH:mm')] = 'livre'
         current_time = current_time.shift(minutes=30)
 
+    # Marca os horários ocupados com base nos eventos
     for event in events:
         start = arrow.get(event['start']['dateTime']).to('America/Sao_Paulo')
         end = arrow.get(event['end']['dateTime']).to('America/Sao_Paulo')
