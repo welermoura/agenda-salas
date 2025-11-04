@@ -81,13 +81,14 @@ def load_config():
 
 def save_config():
     """Guarda a instância global app_config atual no ficheiro JSON, forçando a escrita em disco."""
+    config_path = os.path.abspath(CONFIG_FILE)
+    logging.info(f"A iniciar o processo de guardar a configuração em: {config_path}")
     try:
-        logging.info(f"A guardar a configuração em: {CONFIG_FILE}")
-        with open(CONFIG_FILE, "w") as f:
+        with open(config_path, "w") as f:
             json.dump(app_config.model_dump(), f, indent=4)
             f.flush()
             os.fsync(f.fileno())
-        logging.info("Configuração guardada e sincronizada com o disco com sucesso.")
+        logging.info(f"Configuração guardada e sincronizada com o disco com sucesso em: {config_path}")
     except Exception as e:
-        logging.error(f"ERRO CRÍTICO ao guardar a configuração: {e}", exc_info=True)
+        logging.error(f"ERRO CRÍTICO ao guardar a configuração em {config_path}: {e}", exc_info=True)
         raise
