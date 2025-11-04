@@ -95,8 +95,8 @@ const DashboardPage = () => {
         }
     }, [selectedDate, scheduleCache]);
 
-    // Gera as horas cheias para as linhas, começando das 8:00
-    const hours = Array.from({ length: 13 }, (_, i) => (i + 8).toString().padStart(2, '0'));
+    // Gera as horas cheias para as linhas, das 8:00 às 19:00
+    const hours = Array.from({ length: 12 }, (_, i) => (i + 8).toString().padStart(2, '0'));
 
     // Extrai as salas para as colunas, garantindo que schedules não seja nulo
     const rooms = schedules ? Object.entries(schedules).map(([url, data]) => ({ url, nome: data.nome })) : [];

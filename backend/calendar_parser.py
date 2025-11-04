@@ -128,7 +128,7 @@ def get_room_status(room: Room, date_str: str | None = None):
     # --- Lógica de Geração de Horários ---
     time_slots = {}
     schedule_start = target_date.floor('day').replace(hour=8, minute=0)
-    schedule_end = target_date.floor('day').replace(hour=20, minute=30)
+    schedule_end = target_date.floor('day').replace(hour=19, minute=30)
     current_time = schedule_start
 
     while current_time <= schedule_end:
