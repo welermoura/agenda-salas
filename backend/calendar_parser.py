@@ -84,7 +84,8 @@ def get_room_status(room: Room, date_str: str | None = None):
         return {"error": "Falha na autenticação. Verifique as credenciais, o Tenant ID e a conectividade de rede do servidor."}
 
     headers = {
-        'Authorization': f'Bearer {token}'
+        'Authorization': f'Bearer {token}',
+        'Prefer': f'outlook.timezone="America/Sao_Paulo"'
     }
 
     try:
@@ -137,12 +138,9 @@ def get_room_status(room: Room, date_str: str | None = None):
 
     # Marca os horários ocupados com base nos eventos
     for event in events:
-        # Corrige o parsing de data para usar o timezone fornecido pela API
-        start_tz = event['start'].get('timeZone', 'UTC')
-        end_tz = event['end'].get('timeZone', 'UTC')
-
-        start = arrow.get(event['start']['dateTime'], tzinfo=start_tz).to('America/Sao_Paulo')
-        end = arrow.get(event['end']['dateTime'], tzinfo=end_tz).to('America/Sao_Paulo')
+        # A API agora retorna o horário já convertido para Sao_Paulo devido ao header
+        start = arrow.get(event['start']['dateTime'])
+        end = arrow.get(event['end']['dateTime'])
 
         start_rounded = start.floor('minute').replace(minute=(start.minute // 30) * 30, second=0, microsecond=0)
 
