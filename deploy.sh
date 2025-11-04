@@ -85,37 +85,24 @@ LOG_DIR="/var/log/$APP_HOSTNAME"
 log "Criando diretórios em $APP_DIR, $WEB_DIR e $LOG_DIR..."
 mkdir -p $APP_DIR/backend $APP_DIR/tmp $WEB_DIR $LOG_DIR
 
-log "Fazendo backup do config.json existente..."
-CONFIG_PATH="$APP_DIR/backend/config.json"
-CONFIG_BACKUP_PATH="$APP_DIR/tmp/config.json.bkp"
-if [ -f "$CONFIG_PATH" ]; then
-    mv "$CONFIG_PATH" "$CONFIG_BACKUP_PATH"
-    log "Backup do config.json criado em $CONFIG_BACKUP_PATH"
-fi
-
-log "Copiando arquivos da aplicação..."
-cp -r backend $APP_DIR/
+log "Copiando arquivos da aplicação (o config.json não será sobreposto)..."
+# Copia o backend, mas sem o config.json do repositório
+rsync -a --exclude 'config.json' backend/ $APP_DIR/backend/
 cp start.sh install.sh $APP_DIR/ 2>/dev/null || true
 cp -r frontend/build/* $WEB_DIR/
 
-log "Restaurando o config.json..."
-if [ -f "$CONFIG_BACKUP_PATH" ]; then
-    mv "$CONFIG_BACKUP_PATH" "$CONFIG_PATH"
-    log "config.json restaurado."
-else
-    # Se não houver backup, garante que um ficheiro de config inicial exista
-    # (importante para a primeira instalação)
-    if [ ! -f "$CONFIG_PATH" ]; then
-        log "Nenhum config.json encontrado. Criando um ficheiro de configuração inicial."
-        echo '{
-            "is_configured": false,
-            "admin_password_hash": null,
-            "graph_tenant_id": null,
-            "graph_client_id": null,
-            "graph_client_secret": null,
-            "rooms": []
-        }' > "$CONFIG_PATH"
-    fi
+# Garante que um ficheiro de configuração inicial exista se necessário
+CONFIG_PATH="$APP_DIR/config.json"
+if [ ! -f "$CONFIG_PATH" ]; then
+    log "Nenhum config.json encontrado em $CONFIG_PATH. Criando um ficheiro de configuração inicial."
+    echo '{
+        "is_configured": false,
+        "admin_password_hash": null,
+        "graph_tenant_id": null,
+        "graph_client_id": null,
+        "graph_client_secret": null,
+        "rooms": []
+    }' > "$CONFIG_PATH"
 fi
 
 log "Configurando o ambiente virtual Python..."
