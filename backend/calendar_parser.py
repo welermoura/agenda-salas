@@ -84,8 +84,7 @@ def get_room_status(room: Room, date_str: str | None = None):
         return {"error": "Falha na autenticação. Verifique as credenciais, o Tenant ID e a conectividade de rede do servidor."}
 
     headers = {
-        'Authorization': f'Bearer {token}',
-        'Prefer': f'outlook.timezone="America/Sao_Paulo"'
+        'Authorization': f'Bearer {token}'
     }
 
     try:
