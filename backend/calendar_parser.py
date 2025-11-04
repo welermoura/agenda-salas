@@ -127,7 +127,7 @@ def get_room_status(room: Room, date_str: str | None = None):
 
     # Processamento dos horários (inalterado)
     schedule_start_hour = 8
-    schedule_end_hour = 20
+    schedule_end_hour = 21  # Alterado para 21 para incluir o intervalo das 20:00 - 20:30
     time_slots = {}
     current_time = target_date.floor('day').replace(hour=schedule_start_hour)
     while current_time.hour < schedule_end_hour:
