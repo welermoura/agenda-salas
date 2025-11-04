@@ -123,14 +123,13 @@ python3 -m venv $APP_DIR/venv || error "Falha ao criar venv."
 $APP_DIR/venv/bin/pip install --no-cache-dir -r $APP_DIR/backend/requirements.txt || error "Falha ao instalar dependências Python."
 
 log "Ajustando permissões..."
-chown -R $APP_USER:www-data $APP_DIR/backend
-chown -R $APP_USER:www-data $APP_DIR/venv
-chown -R $APP_USER:www-data $APP_DIR/tmp
-chown $APP_USER:www-data $CONFIG_PATH 2>/dev/null || true # Permite falhar se o ficheiro não existir
+# O dono do diretório principal deve ser o usuário da app para permitir a criação do config.json
+chown -R $APP_USER:www-data $APP_DIR
 chown -R www-data:www-data $WEB_DIR
 chown -R $APP_USER:www-data $LOG_DIR
-chmod 664 $CONFIG_PATH 2>/dev/null || true # Permite leitura/escrita pelo dono e grupo
-chmod -R 775 $APP_DIR/tmp
+# Garante que o grupo possa escrever no config.json e nos diretórios temporários
+chmod -R g+w $APP_DIR
+chmod g+w $LOG_DIR
 
 success "Diretórios de produção configurados."
 
