@@ -34,8 +34,10 @@ def load_config():
                 app_config = AppConfig(**config_data)
             logging.info("Configuração carregada com sucesso.")
         else:
-            logging.warning("Ficheiro de configuração não encontrado. A criar um novo.")
-            save_config()
+            # Agora, se o ficheiro não existir, é um erro crítico, pois o deploy.sh deveria tê-lo criado.
+            logging.error("ERRO CRÍTICO: config.json não encontrado! O script de deploy pode ter falhado.")
+            # Opcionalmente, pode-se levantar uma exceção para impedir o arranque
+            raise FileNotFoundError("config.json não foi encontrado. Execute o deploy.sh.")
     except Exception as e:
         logging.error(f"ERRO CRÍTICO ao carregar a configuração: {e}", exc_info=True)
         raise
