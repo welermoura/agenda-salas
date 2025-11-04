@@ -93,8 +93,11 @@ cp -r frontend/build/* $WEB_DIR/
 
 # Garante que um ficheiro de configuração inicial exista se necessário
 CONFIG_PATH="$APP_DIR/config.json"
+log "Verificando o estado do config.json em $CONFIG_PATH..."
+ls -la "$CONFIG_PATH" 2>/dev/null || log "O ficheiro de configuração ainda não existe."
+
 if [ ! -f "$CONFIG_PATH" ]; then
-    log "Nenhum config.json encontrado em $CONFIG_PATH. Criando um ficheiro de configuração inicial."
+    log "Nenhum config.json encontrado. Criando um ficheiro de configuração inicial."
     echo '{
         "is_configured": false,
         "admin_password_hash": null,
@@ -103,6 +106,8 @@ if [ ! -f "$CONFIG_PATH" ]; then
         "graph_client_secret": null,
         "rooms": []
     }' > "$CONFIG_PATH"
+    log "Ficheiro de configuração criado. Estado atual:"
+    ls -la "$CONFIG_PATH"
 fi
 
 log "Configurando o ambiente virtual Python..."
@@ -114,8 +119,17 @@ chown -R $APP_USER:www-data $APP_DIR
 chown -R www-data:www-data $WEB_DIR
 chown -R $APP_USER:www-data $LOG_DIR
 chmod -R 775 $APP_DIR/tmp
-chmod -R g+w $APP_DIR
-chmod -R g+w $LOG_DIR
+
+log "Verificando permissões do config.json antes do ajuste final..."
+ls -la "$CONFIG_PATH" 2>/dev/null || true
+
+# Garante que o utilizador da aplicação seja o dono do ficheiro de configuração
+# e que o grupo tenha permissões de escrita.
+chown $APP_USER:www-data "$CONFIG_PATH"
+chmod g+w "$CONFIG_PATH"
+
+log "Permissões do config.json ajustadas. Estado final:"
+ls -la "$CONFIG_PATH"
 
 success "Diretórios de produção configurados."
 
