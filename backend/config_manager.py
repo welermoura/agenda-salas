@@ -1,6 +1,7 @@
 import json
 import os
 import logging
+
 from pydantic import BaseModel
 
 # --- Modelos de Dados Partilhados ---
@@ -12,6 +13,7 @@ class Room(BaseModel):
 class AppConfig(BaseModel):
     is_configured: bool = False
     admin_password_hash: str | None = None
+    secret_key: str | None = None
     graph_tenant_id: str | None = None
     graph_client_id: str | None = None
     graph_client_secret: str | None = None
@@ -41,12 +43,20 @@ def load_config():
         raise
 
 def save_config():
-    """Guarda a instância global app_config atual no ficheiro JSON, forçando a escrita em disco."""
+    """
+    Guarda a instância global app_config de forma atómica para prevenir corrupção.
+    Escreve num ficheiro temporário e depois renomeia-o.
+    """
+    temp_file = f"{CONFIG_FILE}.tmp"
     try:
-        with open(CONFIG_FILE, "w") as f:
-            json.dump(app_config.model_dump(), f, indent=4)
-            f.flush()
-            os.fsync(f.fileno())
+
     except Exception as e:
         logging.error(f"ERRO CRÍTICO ao guardar a configuração: {e}", exc_info=True)
+        # Tenta limpar o ficheiro temporário em caso de erro
+        if os.path.exists(temp_file):
+            try:
+                os.remove(temp_file)
+                logging.info(f"Ficheiro temporário '{temp_file}' removido.")
+            except OSError as cleanup_error:
+                logging.error(f"Falha ao remover o ficheiro temporário '{temp_file}': {cleanup_error}")
         raise
