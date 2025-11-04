@@ -1,6 +1,9 @@
 [Unit]
 Description=Backend Service for __HOSTNAME__
-After=network.target
+# Garante que a rede e os discos estejam prontos antes de iniciar
+After=network-online.target local-fs.target
+Wants=network-online.target
+Requires=local-fs.target
 
 [Service]
 User=seu_usuario
