@@ -20,9 +20,23 @@ class AppConfig(BaseModel):
 
 # --- Instância e Funções de Gerenciamento de Configuração ---
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-CONFIG_FILE = os.path.join(BASE_DIR, "config.json")
+def _get_config_path():
+    """
+    Determina o caminho para o ficheiro de configuração.
+    Prioriza a variável de ambiente CONFIG_FILE_PATH.
+    Caso contrário, assume que o ficheiro está na raiz do projeto, um nível acima deste script.
+    """
+    env_path = os.getenv("CONFIG_FILE_PATH")
+    if env_path:
+        return env_path
 
+    # Constrói o caminho para a raiz do projeto (um nível acima do diretório 'backend')
+    backend_dir = os.path.dirname(os.path.abspath(__file__))
+    project_root = os.path.dirname(backend_dir)
+    default_path = os.path.join(project_root, "config.json")
+    return default_path
+
+CONFIG_FILE = _get_config_path()
 app_config = AppConfig()
 
 def load_config():
