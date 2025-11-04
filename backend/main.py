@@ -3,6 +3,7 @@ import asyncio
 import json
 from contextlib import asynccontextmanager
 from datetime import datetime
+import secrets
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
@@ -113,6 +114,7 @@ async def initialize_setup(data: SetupData):
     app_config.graph_client_id = data.client_id
     app_config.graph_client_secret = data.client_secret
     app_config.is_configured = True
+    app_config.secret_key = secrets.token_urlsafe(32)
     save_config()
 
     loop = asyncio.get_event_loop()
@@ -125,6 +127,12 @@ async def initialize_setup(data: SetupData):
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
     if not app_config.is_configured or not verify_password(form_data.password, app_config.admin_password_hash):
         raise HTTPException(status_code=401, detail="Incorrect username or password", headers={"WWW-Authenticate": "Bearer"})
+
+    # Gera a secret_key no primeiro login, se ainda não existir
+    if not app_config.secret_key:
+        app_config.secret_key = secrets.token_urlsafe(32)
+        save_config()
+
     access_token = create_access_token(data={"sub": form_data.username})
     return {"access_token": access_token, "token_type": "bearer"}
 

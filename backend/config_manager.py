@@ -56,13 +56,6 @@ def load_config():
                 app_config = AppConfig(**config_data)
 
             logging.info("Configuração carregada com sucesso.")
-
-            # Garante que a chave secreta existe para sessões JWT
-            if not app_config.secret_key:
-                logging.warning("A secret_key não estava definida. A gerar uma nova e a guardar a configuração.")
-                app_config.secret_key = secrets.token_urlsafe(32)
-                save_config() # Guarda a nova chave para persistência
-
             return  # Sucesso, sai da função
 
         except (json.JSONDecodeError, FileNotFoundError) as e:
