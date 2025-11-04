@@ -1,7 +1,8 @@
 import json
 import os
 import logging
-
+import time
+import secrets
 from pydantic import BaseModel
 
 # --- Modelos de Dados Partilhados ---
@@ -27,20 +28,44 @@ CONFIG_FILE = os.path.join(BASE_DIR, "config.json")
 app_config = AppConfig()
 
 def load_config():
-    """Carrega a configuração do ficheiro JSON para a instância global app_config."""
+    """
+    Carrega a configuração do ficheiro JSON, com lógica de repetição para resiliência
+    durante o arranque do sistema.
+    """
     global app_config
-    try:
-        if os.path.exists(CONFIG_FILE):
+    max_retries = 3
+    retry_delay = 2  # segundos
+
+    for attempt in range(max_retries):
+        try:
+            logging.info(f"Tentativa {attempt + 1}/{max_retries} de carregar a configuração de: {CONFIG_FILE}")
+
+            if not os.path.exists(CONFIG_FILE):
+                # O ficheiro deve existir. Se não existir, é um erro de deploy.
+                raise FileNotFoundError("config.json não foi encontrado. O script de deploy pode ter falhado.")
+
             with open(CONFIG_FILE, "r") as f:
+                # Se o ficheiro estiver vazio, o json.load() irá falhar com um erro.
+                if os.fstat(f.fileno()).st_size == 0:
+                    logging.warning("config.json está vazio, a tratar como não configurado.")
+                    # Assume a configuração padrão, não levanta erro
+                    app_config = AppConfig()
+                    return
+
                 config_data = json.load(f)
                 app_config = AppConfig(**config_data)
-        else:
-            msg = "ERRO CRÍTICO: config.json não encontrado! Execute o deploy.sh."
-            logging.error(msg)
-            raise FileNotFoundError(msg)
-    except Exception as e:
-        logging.error(f"ERRO CRÍTICO ao carregar a configuração: {e}", exc_info=True)
-        raise
+
+            logging.info("Configuração carregada com sucesso.")
+            return  # Sucesso, sai da função
+
+        except (json.JSONDecodeError, FileNotFoundError) as e:
+            logging.warning(f"Falha ao carregar/processar o config.json na tentativa {attempt + 1}: {e}")
+            if attempt < max_retries - 1:
+                logging.info(f"A aguardar {retry_delay} segundos antes de tentar novamente...")
+                time.sleep(retry_delay)
+            else:
+                logging.error("ERRO CRÍTICO: Não foi possível carregar o config.json após várias tentativas.")
+                raise  # Levanta a última exceção após esgotar as tentativas
 
 def save_config():
     """
@@ -49,6 +74,14 @@ def save_config():
     """
     temp_file = f"{CONFIG_FILE}.tmp"
     try:
+        logging.info(f"A guardar a configuração de forma atómica em: {CONFIG_FILE}")
+        with open(temp_file, "w") as f:
+            json.dump(app_config.model_dump(), f, indent=4)
+            f.flush()
+            os.fsync(f.fileno())
+
+        os.rename(temp_file, CONFIG_FILE)
+        logging.info("Configuração guardada e sincronizada com o disco com sucesso.")
 
     except Exception as e:
         logging.error(f"ERRO CRÍTICO ao guardar a configuração: {e}", exc_info=True)
