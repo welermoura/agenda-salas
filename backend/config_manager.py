@@ -13,6 +13,7 @@ class Room(BaseModel):
 class AppConfig(BaseModel):
     is_configured: bool = False
     admin_password_hash: str | None = None
+    jwt_secret_key: str | None = None
     graph_tenant_id: str | None = None
     graph_client_id: str | None = None
     graph_client_secret: str | None = None
@@ -20,91 +21,87 @@ class AppConfig(BaseModel):
 
 # --- Instância e Funções de Gerenciamento de Configuração ---
 
+app_config = AppConfig()
+_config_file_path = None
+
 def get_config_path():
     """
     Obtém o caminho para o config.json a partir de uma variável de ambiente,
     com um fallback para desenvolvimento local.
     """
-    # Para produção, o caminho DEVE ser definido via variável de ambiente
+    global _config_file_path
+    if _config_file_path:
+        return _config_file_path
+
     prod_path = os.getenv("CONFIG_FILE_PATH")
     if prod_path:
+        _config_file_path = prod_path
         return prod_path
 
-    # Fallback para desenvolvimento local (executando de dentro do diretório 'backend')
     logging.warning("A variável de ambiente 'CONFIG_FILE_PATH' não está definida. A usar o caminho de fallback para desenvolvimento.")
     base_dir = os.path.dirname(os.path.abspath(__file__))
-    return os.path.join(base_dir, "config.json")
-
-CONFIG_FILE = get_config_path()
-app_config = AppConfig()
+    _config_file_path = os.path.join(base_dir, "config.json")
+    return _config_file_path
 
 def load_config():
     """
-    Carrega a configuração do ficheiro JSON, com lógica de repetição para resiliência
-    durante o arranque do sistema.
+    Carrega a configuração do ficheiro JSON. Deve ser chamada no arranque da aplicação.
     """
     global app_config
+    config_file = get_config_path()
     max_retries = 3
-    retry_delay = 2  # segundos
+    retry_delay = 2
 
     for attempt in range(max_retries):
         try:
-            logging.info(f"Tentativa {attempt + 1}/{max_retries} de carregar a configuração de: {CONFIG_FILE}")
+            logging.info(f"Tentativa {attempt + 1}/{max_retries} de carregar a configuração de: {config_file}")
 
-            if not os.path.exists(CONFIG_FILE):
-                # O ficheiro deve existir. Se não existir, é um erro de deploy.
-                raise FileNotFoundError("config.json não foi encontrado. O script de deploy pode ter falhado.")
+            if not os.path.exists(config_file):
+                raise FileNotFoundError(f"{config_file} não foi encontrado. O script de deploy pode ter falhado.")
 
-            with open(CONFIG_FILE, "r") as f:
-                # Se o ficheiro estiver vazio, o json.load() irá falhar com um erro.
+            with open(config_file, "r") as f:
                 if os.fstat(f.fileno()).st_size == 0:
-                    logging.warning("config.json está vazio, a tratar como não configurado.")
-                    # Assume a configuração padrão, não levanta erro
+                    logging.warning(f"{config_file} está vazio, a tratar como não configurado.")
                     app_config = AppConfig()
                     return
 
                 config_data = json.load(f)
                 app_config = AppConfig(**config_data)
-
             logging.info("Configuração carregada com sucesso.")
-            return  # Sucesso, sai da função
+            return
 
         except (json.JSONDecodeError, FileNotFoundError) as e:
-            logging.warning(f"Falha ao carregar/processar o config.json na tentativa {attempt + 1}: {e}")
+            logging.warning(f"Falha ao carregar/processar o {config_file} na tentativa {attempt + 1}: {e}")
             if attempt < max_retries - 1:
-                logging.info(f"A aguardar {retry_delay} segundos antes de tentar novamente...")
                 time.sleep(retry_delay)
             else:
-                logging.error("ERRO CRÍTICO: Não foi possível carregar o config.json após várias tentativas.")
-                raise  # Levanta a última exceção após esgotar as tentativas
+                logging.error(f"ERRO CRÍTICO: Não foi possível carregar o {config_file} após várias tentativas.")
+                raise
 
 def save_config():
     """
-    Guarda a instância de configuração atual num ficheiro JSON usando uma escrita atómica
-    para prevenir a corrupção de dados.
+    Guarda a instância de configuração atual num ficheiro JSON usando uma escrita atómica.
     """
-    TEMP_FILE = CONFIG_FILE + ".tmp"
+    config_file = get_config_path()
+    temp_file = config_file + ".tmp"
     try:
-        logging.info(f"A iniciar a escrita atómica da configuração em: {CONFIG_FILE}")
+        logging.info(f"A iniciar a escrita atómica da configuração em: {config_file}")
 
-        # Passo 1: Escrever a nova configuração num ficheiro temporário
-        with open(TEMP_FILE, "w") as f:
+        with open(temp_file, "w") as f:
             json.dump(app_config.model_dump(), f, indent=4)
             f.flush()
-            os.fsync(f.fileno()) # Garante que os dados são escritos no disco
+            os.fsync(f.fileno())
 
-        # Passo 2: Renomear (mover) atomicamente o ficheiro temporário para o ficheiro final
-        os.rename(TEMP_FILE, CONFIG_FILE)
+        os.rename(temp_file, config_file)
 
         logging.info("Configuração guardada com sucesso usando escrita atómica.")
 
     except Exception as e:
         logging.error(f"ERRO CRÍTICO ao guardar a configuração: {e}", exc_info=True)
-        # Se algo falhar, tenta remover o ficheiro temporário se ele existir
-        if os.path.exists(TEMP_FILE):
+        if os.path.exists(temp_file):
             try:
-                os.remove(TEMP_FILE)
-                logging.info(f"Ficheiro temporário de configuração ({TEMP_FILE}) removido.")
+                os.remove(temp_file)
+                logging.info(f"Ficheiro temporário de configuração ({temp_file}) removido.")
             except OSError as remove_e:
-                logging.error(f"Não foi possível remover o ficheiro temporário {TEMP_FILE}: {remove_e}")
+                logging.error(f"Não foi possível remover o ficheiro temporário {temp_file}: {remove_e}")
         raise
