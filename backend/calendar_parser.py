@@ -14,7 +14,7 @@ token_cache = {
 }
 # Cache para os status das salas, para melhorar a performance de navegação de data
 calendar_cache = {}
-CACHE_TTL_MINUTES = 5
+CACHE_TTL_SECONDS = 2
 
 # Novo cache para mapear e-mails para IDs de objeto imutáveis
 user_id_cache = {}
@@ -76,7 +76,7 @@ def get_room_status(room: Room, date_str: str | None = None):
     cache_key = (room.email, target_date.format('YYYY-MM-DD'))
     now_utc = arrow.utcnow()
     if cache_key in calendar_cache and \
-       (now_utc - calendar_cache[cache_key]['timestamp']).total_seconds() < CACHE_TTL_MINUTES * 60:
+       (now_utc - calendar_cache[cache_key]['timestamp']).total_seconds() < CACHE_TTL_SECONDS:
         return calendar_cache[cache_key]['data']
 
     token = get_graph_access_token()

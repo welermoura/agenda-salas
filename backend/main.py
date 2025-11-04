@@ -67,7 +67,7 @@ async def update_scheduler():
 
                 await manager.broadcast(json.dumps({"date": today_str, "statuses": statuses}))
 
-            await asyncio.sleep(10)
+            await asyncio.sleep(3)
         except Exception:
             # Em caso de erro (ex: falha de rede), espera mais para evitar spam
             await asyncio.sleep(60)
