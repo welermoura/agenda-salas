@@ -19,7 +19,13 @@ class AppConfig(BaseModel):
 
 # --- Instância e Funções de Gerenciamento de Configuração ---
 
-CONFIG_FILE = "config.json"
+# Constrói um caminho absoluto para o config.json, garantindo que seja sempre encontrado
+# __file__ é o caminho deste ficheiro (config_manager.py)
+# os.path.dirname(__file__) obtém o diretório 'backend'
+# os.path.join(...) junta o diretório com o nome do ficheiro
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+CONFIG_FILE = os.path.join(BASE_DIR, "config.json")
+
 app_config = AppConfig()
 
 def load_config():
