@@ -93,8 +93,18 @@ def get_room_status(room: Room, date_str: str | None = None):
         response.raise_for_status()
         events = response.json().get('value', [])
     except requests.RequestException as e:
-        print(f"Erro ao buscar eventos para {room.email}: {e}")
-        return {"error": "Erro de comunicação com a API Graph."}
+        error_message = "Erro de comunicação com a API Graph."
+        if e.response is not None:
+            try:
+                # Tenta extrair a mensagem de erro específica da resposta da API
+                error_details = e.response.json()
+                msg = error_details.get("error", {}).get("message", str(e))
+                error_message = f"API Error: {msg}"
+            except json.JSONDecodeError:
+                error_message = f"API Error: {e.response.status_code} - {e.response.text}"
+
+        print(f"Erro ao buscar eventos para {room.email}: {error_message}")
+        return {"error": error_message}
 
     schedule_start_hour = 8
     schedule_end_hour = 20
