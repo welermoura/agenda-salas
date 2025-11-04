@@ -102,6 +102,20 @@ log "Restaurando o config.json..."
 if [ -f "$CONFIG_BACKUP_PATH" ]; then
     mv "$CONFIG_BACKUP_PATH" "$CONFIG_PATH"
     log "config.json restaurado."
+else
+    # Se não houver backup, garante que um ficheiro de config inicial exista
+    # (importante para a primeira instalação)
+    if [ ! -f "$CONFIG_PATH" ]; then
+        log "Nenhum config.json encontrado. Criando um ficheiro de configuração inicial."
+        echo '{
+            "is_configured": false,
+            "admin_password_hash": null,
+            "graph_tenant_id": null,
+            "graph_client_id": null,
+            "graph_client_secret": null,
+            "rooms": []
+        }' > "$CONFIG_PATH"
+    fi
 fi
 
 log "Configurando o ambiente virtual Python..."
