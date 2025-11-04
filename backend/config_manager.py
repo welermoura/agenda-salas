@@ -2,6 +2,7 @@ import json
 import os
 import logging
 import time
+import secrets
 from pydantic import BaseModel
 
 # --- Modelos de Dados Partilhados ---
@@ -13,6 +14,7 @@ class Room(BaseModel):
 class AppConfig(BaseModel):
     is_configured: bool = False
     admin_password_hash: str | None = None
+    secret_key: str | None = None
     graph_tenant_id: str | None = None
     graph_client_id: str | None = None
     graph_client_secret: str | None = None
@@ -54,6 +56,13 @@ def load_config():
                 app_config = AppConfig(**config_data)
 
             logging.info("Configuração carregada com sucesso.")
+
+            # Garante que a chave secreta existe para sessões JWT
+            if not app_config.secret_key:
+                logging.warning("A secret_key não estava definida. A gerar uma nova e a guardar a configuração.")
+                app_config.secret_key = secrets.token_urlsafe(32)
+                save_config() # Guarda a nova chave para persistência
+
             return  # Sucesso, sai da função
 
         except (json.JSONDecodeError, FileNotFoundError) as e:
@@ -66,14 +75,28 @@ def load_config():
                 raise  # Levanta a última exceção após esgotar as tentativas
 
 def save_config():
-    """Guarda a instância global app_config atual no ficheiro JSON, forçando a escrita em disco."""
+    """
+    Guarda a instância global app_config de forma atómica para prevenir corrupção.
+    Escreve num ficheiro temporário e depois renomeia-o.
+    """
+    temp_file = f"{CONFIG_FILE}.tmp"
     try:
-        logging.info(f"A guardar a configuração em: {CONFIG_FILE}")
-        with open(CONFIG_FILE, "w") as f:
+        logging.info(f"A guardar a configuração de forma atómica em: {CONFIG_FILE}")
+        with open(temp_file, "w") as f:
             json.dump(app_config.model_dump(), f, indent=4)
             f.flush()
             os.fsync(f.fileno())
+
+        os.rename(temp_file, CONFIG_FILE)
         logging.info("Configuração guardada e sincronizada com o disco com sucesso.")
+
     except Exception as e:
         logging.error(f"ERRO CRÍTICO ao guardar a configuração: {e}", exc_info=True)
+        # Tenta limpar o ficheiro temporário em caso de erro
+        if os.path.exists(temp_file):
+            try:
+                os.remove(temp_file)
+                logging.info(f"Ficheiro temporário '{temp_file}' removido.")
+            except OSError as cleanup_error:
+                logging.error(f"Falha ao remover o ficheiro temporário '{temp_file}': {cleanup_error}")
         raise
