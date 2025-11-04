@@ -137,8 +137,13 @@ def get_room_status(room: Room, date_str: str | None = None):
 
     # Marca os horários ocupados com base nos eventos
     for event in events:
-        start = arrow.get(event['start']['dateTime']).to('America/Sao_Paulo')
-        end = arrow.get(event['end']['dateTime']).to('America/Sao_Paulo')
+        # Corrige o parsing de data para usar o timezone fornecido pela API
+        start_tz = event['start'].get('timeZone', 'UTC')
+        end_tz = event['end'].get('timeZone', 'UTC')
+
+        start = arrow.get(event['start']['dateTime'], tzinfo=start_tz).to('America/Sao_Paulo')
+        end = arrow.get(event['end']['dateTime'], tzinfo=end_tz).to('America/Sao_Paulo')
+
         start_rounded = start.floor('minute').replace(minute=(start.minute // 30) * 30, second=0, microsecond=0)
 
         current_slot_time = start_rounded
