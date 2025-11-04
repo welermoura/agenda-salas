@@ -85,10 +85,24 @@ LOG_DIR="/var/log/$APP_HOSTNAME"
 log "Criando diretórios em $APP_DIR, $WEB_DIR e $LOG_DIR..."
 mkdir -p $APP_DIR/backend $APP_DIR/tmp $WEB_DIR $LOG_DIR
 
+log "Fazendo backup do config.json existente..."
+CONFIG_PATH="$APP_DIR/backend/config.json"
+CONFIG_BACKUP_PATH="$APP_DIR/tmp/config.json.bkp"
+if [ -f "$CONFIG_PATH" ]; then
+    mv "$CONFIG_PATH" "$CONFIG_BACKUP_PATH"
+    log "Backup do config.json criado em $CONFIG_BACKUP_PATH"
+fi
+
 log "Copiando arquivos da aplicação..."
 cp -r backend $APP_DIR/
 cp start.sh install.sh $APP_DIR/ 2>/dev/null || true
 cp -r frontend/build/* $WEB_DIR/
+
+log "Restaurando o config.json..."
+if [ -f "$CONFIG_BACKUP_PATH" ]; then
+    mv "$CONFIG_BACKUP_PATH" "$CONFIG_PATH"
+    log "config.json restaurado."
+fi
 
 log "Configurando o ambiente virtual Python..."
 python3 -m venv $APP_DIR/venv || error "Falha ao criar venv."
