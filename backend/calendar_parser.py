@@ -1,25 +1,28 @@
 import arrow
 import msal
 import requests
+import json
 from datetime import timedelta
 
 # Importa a configuração e os modelos partilhados do novo módulo
 from config_manager import app_config, Room
 
-# --- Cache Simples em Memória ---
+# --- Caches em Memória ---
 token_cache = {
     "token": None,
     "expires_at": None
 }
+# Cache para os status das salas, para melhorar a performance de navegação de data
 calendar_cache = {}
 CACHE_TTL_MINUTES = 5
+
+# Novo cache para mapear e-mails para IDs de objeto imutáveis
+user_id_cache = {}
 
 # --- Lógica de Autenticação com MSAL ---
 
 def get_graph_access_token():
-    """
-    Obtém um token de acesso para a API do Microsoft Graph.
-    """
+    """Obtém um token de acesso para a API do Microsoft Graph."""
     now = arrow.utcnow()
 
     if token_cache["token"] and token_cache["expires_at"] > now:
@@ -37,12 +40,9 @@ def get_graph_access_token():
             authority=authority,
             client_credential=app_config.graph_client_secret,
         )
-
         result = app.acquire_token_for_client(scopes=["https://graph.microsoft.com/.default"])
     except ValueError as e:
-        # Este erro acontece se o Tenant ID for inválido ou se não houver conectividade
         print(f"Erro de configuração da autoridade MSAL: {e}")
-        # Retorna None para indicar falha
         return None
 
     if "access_token" in result:
@@ -55,10 +55,22 @@ def get_graph_access_token():
 
 # --- Lógica de Consulta ao Calendário ---
 
+def get_room_user_id(room_email: str, headers: dict):
+    """Obtém o ID de objeto imutável de um utilizador/recurso a partir do seu e-mail."""
+    if room_email in user_id_cache:
+        return user_id_cache[room_email]
+
+    url = f"https://graph.microsoft.com/v1.0/users/{room_email}?$select=id"
+    response = requests.get(url, headers=headers)
+    response.raise_for_status() # Lança exceção para erros HTTP
+    user_id = response.json().get('id')
+    if user_id:
+        user_id_cache[room_email] = user_id
+    return user_id
+
+
 def get_room_status(room: Room, date_str: str | None = None):
-    """
-    Busca os eventos de uma sala para uma data específica.
-    """
+    """Busca os eventos de uma sala para uma data específica."""
     target_date = arrow.get(date_str) if date_str else arrow.now('America/Sao_Paulo')
 
     cache_key = (room.email, target_date.format('YYYY-MM-DD'))
@@ -69,43 +81,52 @@ def get_room_status(room: Room, date_str: str | None = None):
 
     token = get_graph_access_token()
     if not token:
-        # A falha pode ser por credenciais inválidas ou pelo erro de ValueError
         return {"error": "Falha na autenticação. Verifique as credenciais, o Tenant ID e a conectividade de rede do servidor."}
-
-    start_of_day = target_date.floor('day').to('utc').format('YYYY-MM-DDTHH:mm:ss') + "Z"
-    end_of_day = target_date.ceil('day').to('utc').format('YYYY-MM-DDTHH:mm:ss') + "Z"
-
-    url = f"https://graph.microsoft.com/v1.0/users/{room.email}/calendarView"
 
     headers = {
         'Authorization': f'Bearer {token}',
         'Prefer': f'outlook.timezone="America/Sao_Paulo"'
     }
 
-    params = {
-        'startDateTime': start_of_day,
-        'endDateTime': end_of_day,
-        '$select': 'subject,start,end'
-    }
-
     try:
+        # PASSO 1: Obter o ID do utilizador/recurso
+        user_id = get_room_user_id(room.email, headers)
+        if not user_id:
+            return {"error": f"Não foi possível encontrar o ID para o e-mail: {room.email}"}
+
+        # PASSO 2: Usar o ID para obter o calendarView
+        start_of_day = target_date.floor('day').to('utc').format('YYYY-MM-DDTHH:mm:ss') + "Z"
+        end_of_day = target_date.ceil('day').to('utc').format('YYYY-MM-DDTHH:mm:ss') + "Z"
+
+        url = f"https://graph.microsoft.com/v1.0/users/{user_id}/calendarView"
+        params = {
+            'startDateTime': start_of_day,
+            'endDateTime': end_of_day,
+            '$select': 'subject,start,end'
+        }
+
         response = requests.get(url, headers=headers, params=params)
         response.raise_for_status()
         events = response.json().get('value', [])
+
+    except requests.exceptions.ConnectionError as e:
+        error_message = "Falha de Rede: Não foi possível conectar à API Graph. Verifique a firewall e o DNS do servidor."
+        print(f"Erro de conexão para {room.email}: {e}")
+        return {"error": error_message}
     except requests.RequestException as e:
-        error_message = "Erro de comunicação com a API Graph."
+        error_message = "Erro na resposta da API Graph."
         if e.response is not None:
             try:
-                # Tenta extrair a mensagem de erro específica da resposta da API
                 error_details = e.response.json()
-                msg = error_details.get("error", {}).get("message", str(e))
-                error_message = f"API Error: {msg}"
+                msg = error_details.get("error", {}).get("message", "N/A")
+                error_message = f"Erro da API ({e.response.status_code}): {msg}"
             except json.JSONDecodeError:
-                error_message = f"API Error: {e.response.status_code} - {e.response.text}"
+                error_message = f"Erro da API ({e.response.status_code}): Resposta inválida."
 
         print(f"Erro ao buscar eventos para {room.email}: {error_message}")
         return {"error": error_message}
 
+    # Processamento dos horários (inalterado)
     schedule_start_hour = 8
     schedule_end_hour = 20
     time_slots = {}
