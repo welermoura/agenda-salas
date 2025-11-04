@@ -85,28 +85,28 @@ LOG_DIR="/var/log/$APP_HOSTNAME"
 log "Criando diretórios em $APP_DIR, $WEB_DIR e $LOG_DIR..."
 mkdir -p $APP_DIR/backend $APP_DIR/tmp $WEB_DIR $LOG_DIR
 
-log "Fazendo backup do config.json existente..."
-CONFIG_PATH="$APP_DIR/backend/config.json"
+# --- Gerenciamento Centralizado do config.json ---
+CONFIG_PATH="$APP_DIR/config.json"
 CONFIG_BACKUP_PATH="$APP_DIR/tmp/config.json.bkp"
+
+log "Fazendo backup do config.json existente de $CONFIG_PATH..."
 if [ -f "$CONFIG_PATH" ]; then
     mv "$CONFIG_PATH" "$CONFIG_BACKUP_PATH"
     log "Backup do config.json criado em $CONFIG_BACKUP_PATH"
 fi
 
-log "Copiando arquivos da aplicação..."
-cp -r backend $APP_DIR/
+log "Copiando arquivos da aplicação (excluindo o config.json do backend)..."
+rsync -a --exclude 'config.json' backend/ "$APP_DIR/backend/"
 cp start.sh install.sh $APP_DIR/ 2>/dev/null || true
 cp -r frontend/build/* $WEB_DIR/
 
 log "Restaurando o config.json..."
 if [ -f "$CONFIG_BACKUP_PATH" ]; then
     mv "$CONFIG_BACKUP_PATH" "$CONFIG_PATH"
-    log "config.json restaurado."
+    log "config.json restaurado para $CONFIG_PATH."
 else
-    # Se não houver backup, garante que um ficheiro de config inicial exista
-    # (importante para a primeira instalação)
     if [ ! -f "$CONFIG_PATH" ]; then
-        log "Nenhum config.json encontrado. Criando um ficheiro de configuração inicial."
+        log "Nenhum config.json encontrado. Criando um ficheiro de configuração inicial em $CONFIG_PATH."
         echo '{
             "is_configured": false,
             "admin_password_hash": null,
@@ -123,12 +123,14 @@ python3 -m venv $APP_DIR/venv || error "Falha ao criar venv."
 $APP_DIR/venv/bin/pip install --no-cache-dir -r $APP_DIR/backend/requirements.txt || error "Falha ao instalar dependências Python."
 
 log "Ajustando permissões..."
-chown -R $APP_USER:www-data $APP_DIR
+chown -R $APP_USER:www-data $APP_DIR/backend
+chown -R $APP_USER:www-data $APP_DIR/venv
+chown -R $APP_USER:www-data $APP_DIR/tmp
+chown $APP_USER:www-data $CONFIG_PATH 2>/dev/null || true # Permite falhar se o ficheiro não existir
 chown -R www-data:www-data $WEB_DIR
 chown -R $APP_USER:www-data $LOG_DIR
+chmod 664 $CONFIG_PATH 2>/dev/null || true # Permite leitura/escrita pelo dono e grupo
 chmod -R 775 $APP_DIR/tmp
-chmod -R g+w $APP_DIR
-chmod -R g+w $LOG_DIR
 
 success "Diretórios de produção configurados."
 
