@@ -31,13 +31,19 @@ def get_graph_access_token():
 
     authority = f"https://login.microsoftonline.com/{app_config.graph_tenant_id}"
 
-    app = msal.ConfidentialClientApplication(
-        client_id=app_config.graph_client_id,
-        authority=authority,
-        client_credential=app_config.graph_client_secret,
-    )
+    try:
+        app = msal.ConfidentialClientApplication(
+            client_id=app_config.graph_client_id,
+            authority=authority,
+            client_credential=app_config.graph_client_secret,
+        )
 
-    result = app.acquire_token_for_client(scopes=["https://graph.microsoft.com/.default"])
+        result = app.acquire_token_for_client(scopes=["https://graph.microsoft.com/.default"])
+    except ValueError as e:
+        # Este erro acontece se o Tenant ID for inválido ou se não houver conectividade
+        print(f"Erro de configuração da autoridade MSAL: {e}")
+        # Retorna None para indicar falha
+        return None
 
     if "access_token" in result:
         token_cache["token"] = result['access_token']
@@ -63,7 +69,8 @@ def get_room_status(room: Room, date_str: str | None = None):
 
     token = get_graph_access_token()
     if not token:
-        return {"error": "Falha na autenticação com a API Graph."}
+        # A falha pode ser por credenciais inválidas ou pelo erro de ValueError
+        return {"error": "Falha na autenticação. Verifique as credenciais, o Tenant ID e a conectividade de rede do servidor."}
 
     start_of_day = target_date.floor('day').to('utc').format('YYYY-MM-DDTHH:mm:ss') + "Z"
     end_of_day = target_date.ceil('day').to('utc').format('YYYY-MM-DDTHH:mm:ss') + "Z"
