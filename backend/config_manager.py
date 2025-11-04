@@ -1,6 +1,7 @@
 import json
 import os
 import logging
+import time
 from pydantic import BaseModel
 
 # --- Modelos de Dados Partilhados ---
@@ -19,42 +20,60 @@ class AppConfig(BaseModel):
 
 # --- Instância e Funções de Gerenciamento de Configuração ---
 
-# Constrói um caminho absoluto para o config.json, garantindo que seja sempre encontrado
-# __file__ é o caminho deste ficheiro (config_manager.py)
-# os.path.dirname(__file__) obtém o diretório 'backend'
-# os.path.join(...) junta o diretório com o nome do ficheiro
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 CONFIG_FILE = os.path.join(BASE_DIR, "config.json")
 
 app_config = AppConfig()
 
 def load_config():
-    """Carrega a configuração do ficheiro JSON para a instância global app_config."""
+    """
+    Carrega a configuração do ficheiro JSON, com lógica de repetição para resiliência
+    durante o arranque do sistema.
+    """
     global app_config
-    logging.info(f"A tentar carregar o ficheiro de configuração de: {os.path.abspath(CONFIG_FILE)}")
-    try:
-        if os.path.exists(CONFIG_FILE):
-            logging.info("Ficheiro de configuração encontrado. A ler...")
+    max_retries = 3
+    retry_delay = 2  # segundos
+
+    for attempt in range(max_retries):
+        try:
+            logging.info(f"Tentativa {attempt + 1}/{max_retries} de carregar a configuração de: {CONFIG_FILE}")
+
+            if not os.path.exists(CONFIG_FILE):
+                # O ficheiro deve existir. Se não existir, é um erro de deploy.
+                raise FileNotFoundError("config.json não foi encontrado. O script de deploy pode ter falhado.")
+
             with open(CONFIG_FILE, "r") as f:
+                # Se o ficheiro estiver vazio, o json.load() irá falhar com um erro.
+                if os.fstat(f.fileno()).st_size == 0:
+                    logging.warning("config.json está vazio, a tratar como não configurado.")
+                    # Assume a configuração padrão, não levanta erro
+                    app_config = AppConfig()
+                    return
+
                 config_data = json.load(f)
                 app_config = AppConfig(**config_data)
+
             logging.info("Configuração carregada com sucesso.")
-        else:
-            # Agora, se o ficheiro não existir, é um erro crítico, pois o deploy.sh deveria tê-lo criado.
-            logging.error("ERRO CRÍTICO: config.json não encontrado! O script de deploy pode ter falhado.")
-            # Opcionalmente, pode-se levantar uma exceção para impedir o arranque
-            raise FileNotFoundError("config.json não foi encontrado. Execute o deploy.sh.")
-    except Exception as e:
-        logging.error(f"ERRO CRÍTICO ao carregar a configuração: {e}", exc_info=True)
-        raise
+            return  # Sucesso, sai da função
+
+        except (json.JSONDecodeError, FileNotFoundError) as e:
+            logging.warning(f"Falha ao carregar/processar o config.json na tentativa {attempt + 1}: {e}")
+            if attempt < max_retries - 1:
+                logging.info(f"A aguardar {retry_delay} segundos antes de tentar novamente...")
+                time.sleep(retry_delay)
+            else:
+                logging.error("ERRO CRÍTICO: Não foi possível carregar o config.json após várias tentativas.")
+                raise  # Levanta a última exceção após esgotar as tentativas
 
 def save_config():
-    """Guarda a instância global app_config atual no ficheiro JSON."""
+    """Guarda a instância global app_config atual no ficheiro JSON, forçando a escrita em disco."""
     try:
-        logging.info(f"A guardar a configuração em: {os.path.abspath(CONFIG_FILE)}")
+        logging.info(f"A guardar a configuração em: {CONFIG_FILE}")
         with open(CONFIG_FILE, "w") as f:
             json.dump(app_config.model_dump(), f, indent=4)
-        logging.info("Configuração guardada com sucesso.")
+            f.flush()
+            os.fsync(f.fileno())
+        logging.info("Configuração guardada e sincronizada com o disco com sucesso.")
     except Exception as e:
         logging.error(f"ERRO CRÍTICO ao guardar a configuração: {e}", exc_info=True)
         raise
