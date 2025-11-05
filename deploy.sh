@@ -122,13 +122,25 @@ log "Configurando o ambiente virtual Python..."
 python3 -m venv $APP_DIR/venv || error "Falha ao criar venv."
 $APP_DIR/venv/bin/pip install --no-cache-dir -r $APP_DIR/backend/requirements.txt || error "Falha ao instalar dependências Python."
 
+# --- Limpeza de Cache de Python ---
+log "Limpando a cache de Python para forçar o recarregamento do código..."
+find "$APP_DIR" -type d -name "__pycache__" -exec rm -r "{}" \;
+find "$APP_DIR" -type f -name "*.pyc" -delete
+
 log "Ajustando permissões..."
 chown -R $APP_USER:www-data $APP_DIR
 chown -R www-data:www-data $WEB_DIR
 chown -R $APP_USER:www-data $LOG_DIR
 chmod -R 775 $APP_DIR/tmp
-chmod -R g+w $APP_DIR
-chmod -R g+w $LOG_DIR
+
+# --- Permissões explícitas para o ficheiro de configuração ---
+log "Ajustando permissões de escrita para o diretório de configuração..."
+chmod g+w "$APP_DIR/backend"
+CONFIG_FILE_PATH="$APP_DIR/backend/config.json"
+if [ -f "$CONFIG_FILE_PATH" ]; then
+    log "Ajustando permissões para o config.json..."
+    chmod g+w "$CONFIG_FILE_PATH"
+fi
 
 success "Diretórios de produção configurados."
 
