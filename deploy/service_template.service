@@ -9,6 +9,8 @@ Requires=local-fs.target
 User=seu_usuario
 Group=www-data
 WorkingDirectory=/opt/__HOSTNAME__
+# Permite explicitamente a escrita no diretório do backend, crucial para guardar o config.json
+ReadWritePaths=/opt/__HOSTNAME__/backend
 ExecStart=/opt/__HOSTNAME__/venv/bin/uvicorn main:app --host 0.0.0.0 --port 8000 --app-dir backend
 Restart=always
 RestartSec=3
