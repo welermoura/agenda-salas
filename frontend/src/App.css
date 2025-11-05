@@ -1,0 +1,314 @@
+/* --- Definição das Variáveis de Tema --- */
+
+[data-theme='light'] {
+    --background-color: #f0f2f5;
+    --text-color: #333333;
+    --text-color-strong: #000000;
+    --header-background-color: #e9ecef;
+    --border-color: #dcdcdc;
+    --table-border-color: #dee2e6;
+    --link-color: #007bff;
+    --link-hover-color: #0056b3;
+    --button-background-color: #e0e0e0;
+    --button-hover-background-color: #cccccc;
+    --button-text-color: #1c1e21;
+    --today-button-background-color: #007bff;
+    --today-button-text-color: #ffffff;
+    --date-picker-background: #e0e0e0;
+    --date-picker-filter: invert(0);
+    --status-indisponivel-bg: #d6d8db;
+    --status-indisponivel-text: #6c757d;
+}
+
+[data-theme='dark'] {
+    /* Tema Escuro (Dark) */
+    --background-color: #1a1d21;
+    --text-color: #e0e0e0;
+    --text-color-strong: #ffffff;
+    --header-background-color: #2c2f33;
+    --border-color: #333;
+    --table-border-color: #2c2f33;
+    --link-color: #8ab4f8;
+    --link-hover-color: #ffffff;
+    --button-background-color: #3a3f44;
+    --button-hover-background-color: #4a4f54;
+    --button-text-color: #e0e0e0;
+    --today-button-background-color: #8ab4f8;
+    --today-button-text-color: #1a1d21;
+    --date-picker-background: #3a3f44;
+    --date-picker-filter: invert(0.8);
+    --status-indisponivel-bg: #424242;
+    --status-indisponivel-text: #9e9e9e;
+}
+
+
+/* --- Estilos Globais --- */
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    margin: 0;
+}
+
+.App {
+    margin: 0;
+    padding: 24px;
+}
+
+/* --- Cabeçalho e Navegação --- */
+.app-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 16px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.header-left-controls {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
+.theme-toggle-button {
+    background-color: var(--button-background-color);
+    color: var(--button-text-color);
+    border: 1px solid var(--border-color);
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 18px; /* Tamanho do ícone (emoji) */
+    line-height: 1;
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+.theme-toggle-button:hover {
+    background-color: var(--button-hover-background-color);
+}
+
+.theme-toggle-button:active {
+    transform: scale(0.95);
+}
+
+.app-title {
+    color: var(--text-color-strong);
+    font-size: 24px;
+    margin: 0;
+    text-align: center;
+    flex-grow: 1;
+}
+
+nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    gap: 24px;
+}
+
+nav a {
+    text-decoration: none;
+    color: var(--link-color);
+    font-weight: 600;
+    font-size: 16px;
+}
+
+nav a:hover {
+    color: var(--link-hover-color);
+}
+
+.real-time-clock {
+    text-align: right;
+}
+
+.date-display {
+    font-size: 16px;
+    color: var(--text-color);
+}
+
+.time-display {
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--text-color-strong);
+}
+
+/* --- Mensagens e Carregamento --- */
+.loading-message {
+    color: var(--text-color);
+    font-size: 18px;
+    text-align: center;
+    padding: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+}
+
+/* --- Navegação de Data --- */
+.date-navigation {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.date-picker {
+    background-color: var(--date-picker-background);
+    color: var(--text-color);
+    border: none;
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.date-picker:hover {
+    background-color: var(--button-hover-background-color);
+}
+
+.date-picker::-webkit-calendar-picker-indicator {
+    filter: var(--date-picker-filter);
+}
+
+.nav-button, .today-button {
+    background-color: var(--button-background-color);
+    color: var(--button-text-color);
+    border: none;
+    padding: 10px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+}
+
+.nav-button:hover, .today-button:hover {
+    background-color: var(--button-hover-background-color);
+}
+
+.nav-button:active, .today-button:active {
+    transform: scale(0.95);
+}
+
+.today-button {
+    background-color: var(--today-button-background-color);
+    color: var(--today-button-text-color);
+}
+
+.today-button:hover {
+    opacity: 0.9;
+}
+
+/* --- Tabela de Agendamento --- */
+.table-scroll-container {
+    height: calc(100vh - 250px); /* Garante uma altura fixa para a janela de rolagem */
+    overflow-y: auto;
+    position: relative;
+}
+
+.schedule-table-vertical {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.schedule-table-vertical th, .schedule-table-vertical td {
+    border-right: 1px solid var(--table-border-color);
+    border-bottom: 1px solid var(--table-border-color);
+    padding: 0;
+    text-align: center;
+    font-size: 14px;
+}
+
+.schedule-table-vertical th {
+    padding: 12px 8px;
+}
+
+.schedule-table-vertical thead th {
+    background-color: var(--header-background-color);
+    color: var(--text-color-strong);
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.time-header-cell, .time-cell {
+    width: 100px;
+    background-color: var(--header-background-color);
+    color: var(--text-color-strong);
+    font-weight: 600;
+}
+
+.status-cell {
+    position: relative;
+    padding: 2px;
+    border-top: 1px solid var(--table-border-color);
+    border-left: 1px solid var(--table-border-color);
+}
+
+.half-hour-slot {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 50%;
+    font-weight: 500;
+    color: #fff; /* O texto dentro dos slots coloridos é sempre branco para contraste */
+    border-radius: 6px;
+}
+
+.status-livre { background-color: #66bb6a; }
+.status-ocupado { background-color: #e57373; }
+.status-indisponivel {
+    background-color: var(--status-indisponivel-bg);
+    color: var(--status-indisponivel-text);
+}
+
+/* --- Spinner de Carregamento --- */
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.spinner {
+    width: 24px;
+    height: 24px;
+    border: 4px solid var(--button-hover-background-color);
+    border-top-color: var(--link-color);
+    border-radius: 50%;
+    animation: rotate 1s linear infinite;
+}
+
+/* --- Responsividade --- */
+@media (max-width: 768px) {
+    .App {
+        padding: 16px;
+    }
+
+    .app-header {
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .app-title {
+        font-size: 20px;
+        order: -1; /* Move o título para cima */
+    }
+
+    nav ul {
+        gap: 16px;
+    }
+
+    .schedule-table-vertical th, .schedule-table-vertical td {
+        padding: 8px 4px;
+        font-size: 12px;
+    }
+}
