@@ -127,19 +127,8 @@ chown -R $APP_USER:www-data $APP_DIR
 chown -R www-data:www-data $WEB_DIR
 chown -R $APP_USER:www-data $LOG_DIR
 chmod -R 775 $APP_DIR/tmp
-
-# --- Permissões explícitas para o ficheiro de configuração ---
-# O diretório 'backend' precisa de permissão de escrita para o grupo, pois o serviço
-# do systemd corre como um utilizador ('www-data') que precisa de modificar o config.json.
-log "Ajustando permissões de escrita para o diretório de configuração..."
-chmod g+w "$APP_DIR/backend"
-
-# Garante que o ficheiro de configuração em si também seja gravável pelo grupo.
-CONFIG_FILE_PATH="$APP_DIR/backend/config.json"
-if [ -f "$CONFIG_FILE_PATH" ]; then
-    log "Ajustando permissões para o config.json..."
-    chmod g+w "$CONFIG_FILE_PATH"
-fi
+chmod -R g+w $APP_DIR
+chmod -R g+w $LOG_DIR
 
 success "Diretórios de produção configurados."
 
