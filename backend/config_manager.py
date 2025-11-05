@@ -40,8 +40,12 @@ def load_config():
             logging.info(f"Tentativa {attempt + 1}/{max_retries} de carregar a configuração de: {CONFIG_FILE}")
 
             if not os.path.exists(CONFIG_FILE):
-                # O ficheiro deve existir. Se não existir, é um erro de deploy.
-                raise FileNotFoundError("config.json não foi encontrado. O script de deploy pode ter falhado.")
+                logging.warning("config.json não encontrado. A criar um ficheiro de configuração padrão.")
+                # Usa o save_config para criar o ficheiro inicial com as permissões corretas
+                save_config()
+                logging.info("Ficheiro de configuração padrão criado. A continuar com a configuração em memória.")
+                # A configuração já estará no padrão, basta sair da função
+                return
 
             with open(CONFIG_FILE, "r") as f:
                 # Se o ficheiro estiver vazio, o json.load() irá falhar com um erro.
@@ -79,7 +83,7 @@ def save_config():
             os.fsync(f.fileno())  # Solicita ao SO que escreva o buffer para o disco
         logging.info(f"Configuração guardada e sincronizada com o disco com sucesso em {config_path}.")
     except PermissionError as e:
-        logging.error(f"ERRO DE PERMISSÃO ao guardar em {config_path}: {e}. Verifique as permissões de escrita para o utilizador que executa o serviço.", exc_info=True)
+        logging.error(f"ERRO DE PERMISSÃO ao guardar em {config_path}: {e}. Verifique as permissões de escrita para o utilizador que executa o serviço.")
         raise
     except IOError as e:
         logging.error(f"ERRO DE I/O ao guardar em {config_path}: {e}", exc_info=True)
