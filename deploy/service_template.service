@@ -6,8 +6,6 @@ Wants=network-online.target
 Requires=local-fs.target
 
 [Service]
-# Define o caminho para o ficheiro de configuração como uma variável de ambiente
-Environment="CONFIG_FILE_PATH=/opt/__HOSTNAME__/config.json"
 User=seu_usuario
 Group=www-data
 WorkingDirectory=/opt/__HOSTNAME__
