@@ -102,6 +102,9 @@ log "Restaurando o config.json..."
 if [ -f "$CONFIG_BACKUP_PATH" ]; then
     mv "$CONFIG_BACKUP_PATH" "$CONFIG_PATH"
     log "config.json restaurado."
+    # Garante que o ficheiro restaurado tenha as permissões corretas
+    chown $APP_USER:www-data "$CONFIG_PATH"
+    chmod g+w "$CONFIG_PATH"
 else
     # Se não houver backup, garante que um ficheiro de config inicial exista
     # (importante para a primeira instalação)
