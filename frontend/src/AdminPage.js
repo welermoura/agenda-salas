@@ -29,6 +29,18 @@ const useAuthenticatedFetch = () => {
 
         const response = await fetch(url, { ...options, headers });
 
+        // --- INÍCIO DA INSTRUMENTAÇÃO DE DIAGNÓSTICO ---
+        const responseData = await response.clone().json().catch(() => response.text());
+        console.log('Resposta da API recebida:', {
+            url: url,
+            status: response.status,
+            statusText: response.statusText,
+            ok: response.ok,
+            headers: Object.fromEntries(response.headers.entries()),
+            body: responseData,
+        });
+        // --- FIM DA INSTRUMENTAÇÃO DE DIAGNÓSTICO ---
+
         if (response.status === 401) {
             // Token inválido/expirado, força o logout
             localStorage.removeItem('accessToken');
