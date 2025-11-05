@@ -19,7 +19,7 @@ from config_manager import app_config, Room, load_config, save_config
 import calendar_parser
 
 # --- Segurança e Autenticação ---
-SECRET_KEY = secrets.token_urlsafe(32)
+SECRET_KEY = None  # Carregado a partir do config.json no arranque
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
@@ -76,8 +76,10 @@ async def update_scheduler():
 # --- Ciclo de Vida da Aplicação ---
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    global SECRET_KEY
     load_config()
     if app_config.is_configured:
+        SECRET_KEY = app_config.jwt_secret_key
         loop = asyncio.get_event_loop()
         loop.create_task(update_scheduler())
     yield
@@ -106,8 +108,13 @@ async def get_setup_status():
 
 @app.post("/api/setup/initialize")
 async def initialize_setup(data: SetupData):
+    global SECRET_KEY
     if app_config.is_configured:
         raise HTTPException(status_code=403, detail="Application is already configured.")
+
+    # Gera e guarda a chave secreta JWT
+    app_config.jwt_secret_key = secrets.token_urlsafe(32)
+    SECRET_KEY = app_config.jwt_secret_key # Define a chave para a sessão atual
 
     app_config.admin_password_hash = get_password_hash(data.admin_password)
     app_config.graph_tenant_id = data.tenant_id
