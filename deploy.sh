@@ -127,8 +127,19 @@ chown -R $APP_USER:www-data $APP_DIR
 chown -R www-data:www-data $WEB_DIR
 chown -R $APP_USER:www-data $LOG_DIR
 chmod -R 775 $APP_DIR/tmp
-chmod -R g+w $APP_DIR
-chmod -R g+w $LOG_DIR
+
+# --- Permissões explícitas para o ficheiro de configuração ---
+# O diretório 'backend' precisa de permissão de escrita para o grupo, pois o serviço
+# do systemd corre como um utilizador ('www-data') que precisa de modificar o config.json.
+log "Ajustando permissões de escrita para o diretório de configuração..."
+chmod g+w "$APP_DIR/backend"
+
+# Garante que o ficheiro de configuração em si também seja gravável pelo grupo.
+CONFIG_FILE_PATH="$APP_DIR/backend/config.json"
+if [ -f "$CONFIG_FILE_PATH" ]; then
+    log "Ajustando permissões para o config.json..."
+    chmod g+w "$CONFIG_FILE_PATH"
+fi
 
 success "Diretórios de produção configurados."
 
@@ -158,7 +169,7 @@ if confirm "Deseja configurar o serviço do backend com systemd?"; then
     log "Gerando o arquivo de serviço do systemd em $SERVICE_FILE..."
 
     # Substitui o hostname e o usuário no template
-    sed -e "s/__HOSTNAME__/$APP_HOSTNAME/g" -e "s/seu_usuario/$APP_USER/g" deploy/service_template.service > $SERVICE_FILE
+    sed -e "s/__HOSTNAME__/$APP_HOSTNAME/g" -e "s/User=seu_usuario/User=$APP_USER/" deploy/service_template.service > $SERVICE_FILE
 
     log "Recarregando o daemon do systemd..."
     systemctl daemon-reload
