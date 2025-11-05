@@ -77,6 +77,7 @@ async def update_scheduler():
 # --- Ciclo de Vida da Aplicação ---
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    logging.basicConfig(level=logging.INFO)
     global SECRET_KEY
     load_config()
     if app_config.is_configured:
