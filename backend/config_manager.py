@@ -40,11 +40,9 @@ def load_config():
             logging.info(f"Tentativa {attempt + 1}/{max_retries} de carregar a configuração de: {CONFIG_FILE}")
 
             if not os.path.exists(CONFIG_FILE):
-                logging.warning("config.json não encontrado. A criar um ficheiro de configuração padrão.")
-                # Usa o save_config para criar o ficheiro inicial com as permissões corretas
-                save_config()
-                logging.info("Ficheiro de configuração padrão criado. A continuar com a configuração em memória.")
-                # A configuração já estará no padrão, basta sair da função
+                logging.warning("config.json não encontrado. A aplicação continuará com a configuração padrão em memória.")
+                # O ficheiro será criado na primeira vez que a configuração for guardada.
+                app_config = AppConfig()
                 return
 
             with open(CONFIG_FILE, "r") as f:
