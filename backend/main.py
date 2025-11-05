@@ -1,5 +1,6 @@
 import asyncio
 import json
+import logging
 from contextlib import asynccontextmanager
 from datetime import datetime
 import secrets
@@ -108,25 +109,40 @@ async def get_setup_status():
 
 @app.post("/api/setup/initialize")
 async def initialize_setup(data: SetupData):
+    logging.info("Endpoint /api/setup/initialize alcançado. A iniciar o processo de configuração.")
     global SECRET_KEY
     if app_config.is_configured:
+        logging.warning("Tentativa de configurar uma aplicação já configurada.")
         raise HTTPException(status_code=403, detail="Application is already configured.")
 
-    # Gera e guarda a chave secreta JWT
-    app_config.jwt_secret_key = secrets.token_urlsafe(32)
-    SECRET_KEY = app_config.jwt_secret_key # Define a chave para a sessão atual
+    try:
+        # Gera e guarda a chave secreta JWT
+        app_config.jwt_secret_key = secrets.token_urlsafe(32)
+        SECRET_KEY = app_config.jwt_secret_key # Define a chave para a sessão atual
+        logging.info("Chave secreta JWT gerada.")
 
-    app_config.admin_password_hash = get_password_hash(data.admin_password)
-    app_config.graph_tenant_id = data.tenant_id
-    app_config.graph_client_id = data.client_id
-    app_config.graph_client_secret = data.client_secret
-    app_config.is_configured = True
-    save_config()
+        app_config.admin_password_hash = get_password_hash(data.admin_password)
+        logging.info("Hash da palavra-passe de administrador gerado.")
 
-    loop = asyncio.get_event_loop()
-    loop.create_task(update_scheduler())
+        app_config.graph_tenant_id = data.tenant_id
+        app_config.graph_client_id = data.client_id
+        app_config.graph_client_secret = data.client_secret
+        app_config.is_configured = True
+        logging.info("Dados de configuração aplicados ao objeto app_config.")
 
-    return {"message": "Setup complete. Please log in."}
+        logging.info("A chamar save_config() para persistir as alterações...")
+        save_config()
+        logging.info("save_config() chamado com sucesso.")
+
+        loop = asyncio.get_event_loop()
+        loop.create_task(update_scheduler())
+        logging.info("Tarefa de atualização em segundo plano iniciada.")
+
+        return {"message": "Setup complete. Please log in."}
+    except Exception as e:
+        logging.error(f"ERRO CRÍTICO durante o processo de setup em initialize_setup: {e}", exc_info=True)
+        # Levanta uma exceção HTTP para garantir que o cliente recebe um erro claro
+        raise HTTPException(status_code=500, detail="Ocorreu um erro interno durante o setup.")
 
 # --- Endpoints de Autenticação e Admin ---
 @app.post("/api/login")
