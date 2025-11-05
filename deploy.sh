@@ -85,29 +85,37 @@ LOG_DIR="/var/log/$APP_HOSTNAME"
 log "Criando diretórios em $APP_DIR, $WEB_DIR e $LOG_DIR..."
 mkdir -p $APP_DIR/backend $APP_DIR/tmp $WEB_DIR $LOG_DIR
 
-log "Copiando arquivos da aplicação (o config.json não será sobreposto)..."
-# Copia o backend, mas sem o config.json do repositório
-rsync -a --exclude 'config.json' backend/ $APP_DIR/backend/
+log "Fazendo backup do config.json existente..."
+CONFIG_PATH="$APP_DIR/backend/config.json"
+CONFIG_BACKUP_PATH="$APP_DIR/tmp/config.json.bkp"
+if [ -f "$CONFIG_PATH" ]; then
+    mv "$CONFIG_PATH" "$CONFIG_BACKUP_PATH"
+    log "Backup do config.json criado em $CONFIG_BACKUP_PATH"
+fi
+
+log "Copiando arquivos da aplicação..."
+cp -r backend $APP_DIR/
 cp start.sh install.sh $APP_DIR/ 2>/dev/null || true
 cp -r frontend/build/* $WEB_DIR/
 
-# Garante que um ficheiro de configuração inicial exista se necessário
-CONFIG_PATH="$APP_DIR/config.json"
-log "Verificando o estado do config.json em $CONFIG_PATH..."
-ls -la "$CONFIG_PATH" 2>/dev/null || log "O ficheiro de configuração ainda não existe."
-
-if [ ! -f "$CONFIG_PATH" ]; then
-    log "Nenhum config.json encontrado. Criando um ficheiro de configuração inicial."
-    echo '{
-        "is_configured": false,
-        "admin_password_hash": null,
-        "graph_tenant_id": null,
-        "graph_client_id": null,
-        "graph_client_secret": null,
-        "rooms": []
-    }' > "$CONFIG_PATH"
-    log "Ficheiro de configuração criado. Estado atual:"
-    ls -la "$CONFIG_PATH"
+log "Restaurando o config.json..."
+if [ -f "$CONFIG_BACKUP_PATH" ]; then
+    mv "$CONFIG_BACKUP_PATH" "$CONFIG_PATH"
+    log "config.json restaurado."
+else
+    # Se não houver backup, garante que um ficheiro de config inicial exista
+    # (importante para a primeira instalação)
+    if [ ! -f "$CONFIG_PATH" ]; then
+        log "Nenhum config.json encontrado. Criando um ficheiro de configuração inicial."
+        echo '{
+            "is_configured": false,
+            "admin_password_hash": null,
+            "graph_tenant_id": null,
+            "graph_client_id": null,
+            "graph_client_secret": null,
+            "rooms": []
+        }' > "$CONFIG_PATH"
+    fi
 fi
 
 log "Configurando o ambiente virtual Python..."
@@ -119,17 +127,8 @@ chown -R $APP_USER:www-data $APP_DIR
 chown -R www-data:www-data $WEB_DIR
 chown -R $APP_USER:www-data $LOG_DIR
 chmod -R 775 $APP_DIR/tmp
-
-log "Verificando permissões do config.json antes do ajuste final..."
-ls -la "$CONFIG_PATH" 2>/dev/null || true
-
-# Garante que o utilizador da aplicação seja o dono do ficheiro de configuração
-# e que o grupo tenha permissões de escrita.
-chown $APP_USER:www-data "$CONFIG_PATH"
-chmod g+w "$CONFIG_PATH"
-
-log "Permissões do config.json ajustadas. Estado final:"
-ls -la "$CONFIG_PATH"
+chmod -R g+w $APP_DIR
+chmod -R g+w $LOG_DIR
 
 success "Diretórios de produção configurados."
 
@@ -159,7 +158,7 @@ if confirm "Deseja configurar o serviço do backend com systemd?"; then
     log "Gerando o arquivo de serviço do systemd em $SERVICE_FILE..."
 
     # Substitui o hostname e o usuário no template
-    sed -e "s/__HOSTNAME__/$APP_HOSTNAME/g" -e "s/User=seu_usuario/User=$APP_USER/" deploy/service_template.service > $SERVICE_FILE
+    sed -e "s/__HOSTNAME__/$APP_HOSTNAME/g" -e "s/seu_usuario/$APP_USER/g" deploy/service_template.service > $SERVICE_FILE
 
     log "Recarregando o daemon do systemd..."
     systemctl daemon-reload

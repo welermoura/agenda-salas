@@ -20,23 +20,9 @@ class AppConfig(BaseModel):
 
 # --- Instância e Funções de Gerenciamento de Configuração ---
 
-def _get_config_path():
-    """
-    Determina o caminho para o ficheiro de configuração.
-    Prioriza a variável de ambiente CONFIG_FILE_PATH.
-    Caso contrário, assume que o ficheiro está na raiz do projeto, um nível acima deste script.
-    """
-    env_path = os.getenv("CONFIG_FILE_PATH")
-    if env_path:
-        return env_path
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+CONFIG_FILE = os.path.join(BASE_DIR, "config.json")
 
-    # Constrói o caminho para a raiz do projeto (um nível acima do diretório 'backend')
-    backend_dir = os.path.dirname(os.path.abspath(__file__))
-    project_root = os.path.dirname(backend_dir)
-    default_path = os.path.join(project_root, "config.json")
-    return default_path
-
-CONFIG_FILE = _get_config_path()
 app_config = AppConfig()
 
 def load_config():
@@ -81,14 +67,13 @@ def load_config():
 
 def save_config():
     """Guarda a instância global app_config atual no ficheiro JSON, forçando a escrita em disco."""
-    config_path = os.path.abspath(CONFIG_FILE)
-    logging.info(f"A iniciar o processo de guardar a configuração em: {config_path}")
     try:
-        with open(config_path, "w") as f:
+        logging.info(f"A guardar a configuração em: {CONFIG_FILE}")
+        with open(CONFIG_FILE, "w") as f:
             json.dump(app_config.model_dump(), f, indent=4)
             f.flush()
             os.fsync(f.fileno())
-        logging.info(f"Configuração guardada e sincronizada com o disco com sucesso em: {config_path}")
+        logging.info("Configuração guardada e sincronizada com o disco com sucesso.")
     except Exception as e:
-        logging.error(f"ERRO CRÍTICO ao guardar a configuração em {config_path}: {e}", exc_info=True)
+        logging.error(f"ERRO CRÍTICO ao guardar a configuração: {e}", exc_info=True)
         raise
