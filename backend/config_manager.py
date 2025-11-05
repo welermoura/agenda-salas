@@ -20,8 +20,8 @@ class AppConfig(BaseModel):
 
 # --- Instância e Funções de Gerenciamento de Configuração ---
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-CONFIG_FILE = os.path.join(BASE_DIR, "config.json")
+# Força o caminho absoluto para o ficheiro de configuração para eliminar ambiguidades.
+CONFIG_FILE = "/opt/agendasalasteste/backend/config.json"
 
 app_config = AppConfig()
 
@@ -67,17 +67,16 @@ def load_config():
 
 def save_config():
     """Guarda a instância global app_config atual no ficheiro JSON, forçando a escrita em disco."""
-    config_path_abs = os.path.abspath(CONFIG_FILE)
-    logging.info(f"Tentando guardar a configuração em: {config_path_abs}")
+    logging.info(f"Tentando guardar a configuração em: {CONFIG_FILE}")
     try:
-        with open(config_path_abs, "w") as f:
+        with open(CONFIG_FILE, "w") as f:
             json.dump(app_config.model_dump(), f, indent=4)
             f.flush()
             os.fsync(f.fileno())
-        logging.info(f"Configuração guardada com sucesso em {config_path_abs}.")
+        logging.info(f"Configuração guardada com sucesso em {CONFIG_FILE}.")
     except PermissionError as e:
-        logging.error(f"ERRO DE PERMISSÃO ao guardar a configuração em {config_path_abs}: {e}", exc_info=True)
+        logging.error(f"ERRO DE PERMISSÃO ao guardar a configuração em {CONFIG_FILE}: {e}", exc_info=True)
         raise
     except Exception as e:
-        logging.error(f"ERRO CRÍTICO INESPERADO ao guardar a configuração em {config_path_abs}: {e}", exc_info=True)
+        logging.error(f"ERRO CRÍTICO INESPERADO ao guardar a configuração em {CONFIG_FILE}: {e}", exc_info=True)
         raise
