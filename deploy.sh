@@ -175,10 +175,10 @@ if confirm "Deseja configurar o serviço do backend com systemd?"; then
     log "Recarregando o daemon do systemd..."
     systemctl daemon-reload
 
-    log "Habilitando e iniciando o serviço '$APP_HOSTNAME'..."
+    log "Habilitando e reiniciando o serviço '$APP_HOSTNAME'..."
     systemctl enable $APP_HOSTNAME.service || error "Falha ao habilitar o serviço."
-    systemctl start $APP_HOSTNAME.service || error "Falha ao iniciar o serviço."
-    success "Serviço do backend configurado e iniciado."
+    systemctl restart $APP_HOSTNAME.service || error "Falha ao reiniciar o serviço."
+    success "Serviço do backend configurado e reiniciado."
 fi
 
 # --- Conclusão ---
