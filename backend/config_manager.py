@@ -13,6 +13,7 @@ class Room(BaseModel):
 class AppConfig(BaseModel):
     is_configured: bool = False
     admin_password_hash: str | None = None
+    jwt_secret_key: str | None = None
     graph_tenant_id: str | None = None
     graph_client_id: str | None = None
     graph_client_secret: str | None = None
