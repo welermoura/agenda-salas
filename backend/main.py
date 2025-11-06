@@ -16,6 +16,7 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 
 # Importa a lógica de configuração e os modelos partilhados
+import config_manager
 from config_manager import app_config, Room, load_config, save_config
 import calendar_parser
 
@@ -79,9 +80,11 @@ async def update_scheduler():
 async def lifespan(app: FastAPI):
     logging.basicConfig(level=logging.INFO)
     global SECRET_KEY
-    load_config()
-    if app_config.is_configured:
-        SECRET_KEY = app_config.jwt_secret_key
+    # Carrega a configuração e reatribui a variável global no módulo config_manager
+    config_manager.app_config = load_config()
+
+    if config_manager.app_config.is_configured:
+        SECRET_KEY = config_manager.app_config.jwt_secret_key
         loop = asyncio.get_event_loop()
         loop.create_task(update_scheduler())
     yield
