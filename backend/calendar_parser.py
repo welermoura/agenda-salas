@@ -5,7 +5,8 @@ import json
 from datetime import timedelta
 
 # Importa a configuração e os modelos partilhados do novo módulo
-from config_manager import app_config, Room
+import config_manager
+from config_manager import Room
 
 # --- Caches em Memória ---
 token_cache = {
@@ -28,17 +29,17 @@ def get_graph_access_token():
     if token_cache["token"] and token_cache["expires_at"] > now:
         return token_cache["token"]
 
-    if not all([app_config.graph_tenant_id, app_config.graph_client_id, app_config.graph_client_secret]):
+    if not all([config_manager.app_config.graph_tenant_id, config_manager.app_config.graph_client_id, config_manager.app_config.graph_client_secret]):
         print("Erro: A configuração da API Graph está incompleta.")
         return None
 
-    authority = f"https://login.microsoftonline.com/{app_config.graph_tenant_id}"
+    authority = f"https://login.microsoftonline.com/{config_manager.app_config.graph_tenant_id}"
 
     try:
         app = msal.ConfidentialClientApplication(
-            client_id=app_config.graph_client_id,
+            client_id=config_manager.app_config.graph_client_id,
             authority=authority,
-            client_credential=app_config.graph_client_secret,
+            client_credential=config_manager.app_config.graph_client_secret,
         )
         result = app.acquire_token_for_client(scopes=["https://graph.microsoft.com/.default"])
     except ValueError as e:

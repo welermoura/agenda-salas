@@ -169,15 +169,23 @@ async def update_rooms(rooms: list[Room], current_user: str = Depends(get_curren
 class GraphConfig(BaseModel):
     tenant_id: str
     client_id: str
+    client_secret: str | None = None
 
 @app.get("/api/config", response_model=GraphConfig)
 async def get_graph_config(current_user: str = Depends(get_current_user)):
-    return GraphConfig(tenant_id=config_manager.app_config.graph_tenant_id, client_id=config_manager.app_config.graph_client_id)
+    # Retorna a configuração SEM o client_secret por segurança
+    return GraphConfig(
+        tenant_id=config_manager.app_config.graph_tenant_id,
+        client_id=config_manager.app_config.graph_client_id
+    )
 
 @app.post("/api/config")
 async def update_graph_config(config: GraphConfig, current_user: str = Depends(get_current_user)):
     config_manager.app_config.graph_tenant_id = config.tenant_id
     config_manager.app_config.graph_client_id = config.client_id
+    # Atualiza o segredo apenas se um novo valor não-vazio for fornecido
+    if config.client_secret:
+        config_manager.app_config.graph_client_secret = config.client_secret
     save_config(config_manager.app_config)
     return {"message": "Graph configuration updated successfully."}
 

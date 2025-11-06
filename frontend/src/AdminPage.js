@@ -50,6 +50,7 @@ const AdminPage = () => {
 
     const [tenantId, setTenantId] = useState('');
     const [clientId, setClientId] = useState('');
+    const [newClientSecret, setNewClientSecret] = useState('');
 
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -143,11 +144,19 @@ const AdminPage = () => {
     const handleSaveGraphConfig = async (e) => {
         e.preventDefault();
         try {
+            const body = {
+                tenant_id: tenantId,
+                client_id: clientId,
+                client_secret: newClientSecret,
+            };
             const response = await authenticatedFetch('/api/config', {
                 method: 'POST',
-                body: JSON.stringify({ tenant_id: tenantId, client_id: clientId }),
+                body: JSON.stringify(body),
             });
             if (!response.ok) throw new Error('Falha ao salvar configuração do Graph.');
+
+            // Limpa o campo do segredo após o envio bem-sucedido
+            setNewClientSecret('');
             showMessage('Configuração do Graph salva com sucesso!');
         } catch (err) {
             setError(err.message);
@@ -209,9 +218,10 @@ const AdminPage = () => {
                 <form onSubmit={handleSaveGraphConfig} className="agenda-form">
                     <input type="text" value={tenantId} onChange={e => setTenantId(e.target.value)} placeholder="Tenant ID" required />
                     <input type="text" value={clientId} onChange={e => setClientId(e.target.value)} placeholder="Client ID" required />
+                    <input type="password" value={newClientSecret} onChange={e => setNewClientSecret(e.target.value)} placeholder="Novo Client Secret (deixe em branco para manter o atual)" />
                     <button type="submit">Salvar Configuração do Graph</button>
                 </form>
-                <p>O Client Secret é configurado na inicialização e não pode ser visualizado ou alterado aqui por segurança.</p>
+                <p>O Client Secret não é visualizado por segurança. Para o alterar, insira um novo valor no campo acima.</p>
             </section>
 
             {/* Alteração de Senha */}
