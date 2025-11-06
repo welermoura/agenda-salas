@@ -97,6 +97,10 @@ log "Configurando o ambiente virtual Python..."
 python3 -m venv $APP_DIR/venv || error "Falha ao criar venv."
 $APP_DIR/venv/bin/pip install --no-cache-dir -r $APP_DIR/backend/requirements.txt || error "Falha ao instalar dependências Python."
 
+log "Limpando o cache de bytecode do Python..."
+find $APP_DIR -type f -name "*.pyc" -delete
+find $APP_DIR -type d -name "__pycache__" -delete
+
 log "Ajustando permissões..."
 chown -R $APP_USER:www-data $APP_DIR
 chown -R www-data:www-data $WEB_DIR
@@ -138,10 +142,10 @@ if confirm "Deseja configurar o serviço do backend com systemd?"; then
     log "Recarregando o daemon do systemd..."
     systemctl daemon-reload
 
-    log "Habilitando e iniciando o serviço '$APP_HOSTNAME'..."
+    log "Habilitando e reiniciando o serviço '$APP_HOSTNAME'..."
     systemctl enable $APP_HOSTNAME.service || error "Falha ao habilitar o serviço."
-    systemctl start $APP_HOSTNAME.service || error "Falha ao iniciar o serviço."
-    success "Serviço do backend configurado e iniciado."
+    systemctl restart $APP_HOSTNAME.service || error "Falha ao reiniciar o serviço."
+    success "Serviço do backend configurado e reiniciado."
 fi
 
 # --- Conclusão ---
