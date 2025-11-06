@@ -86,12 +86,13 @@ log "Criando diretórios em $APP_DIR, $WEB_DIR e $LOG_DIR..."
 mkdir -p $APP_DIR/backend $APP_DIR/tmp $WEB_DIR $LOG_DIR
 
 log "Copiando arquivos da aplicação..."
-# Exclui o config.json do diretório de origem para garantir que não sobrescreva o de produção
-rsync -a --exclude 'config.json' backend/ $APP_DIR/backend/
+cp -r backend $APP_DIR/
+# Remove o config.json do código-fonte para garantir que a aplicação crie o seu próprio
+rm -f $APP_DIR/backend/config.json
 cp start.sh install.sh $APP_DIR/ 2>/dev/null || true
 cp -r frontend/build/* $WEB_DIR/
 
-log "O ficheiro config.json será gerido pela aplicação."
+log "O ficheiro config.json será gerido pela aplicação na primeira inicialização."
 
 log "Configurando o ambiente virtual Python..."
 python3 -m venv $APP_DIR/venv || error "Falha ao criar venv."
