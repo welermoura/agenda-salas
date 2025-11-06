@@ -13,7 +13,6 @@ class Room(BaseModel):
 class AppConfig(BaseModel):
     is_configured: bool = False
     admin_password_hash: str | None = None
-    jwt_secret_key: str | None = None
     graph_tenant_id: str | None = None
     graph_client_id: str | None = None
     graph_client_secret: str | None = None
@@ -21,13 +20,8 @@ class AppConfig(BaseModel):
 
 # --- Instância e Funções de Gerenciamento de Configuração ---
 
-# --- ALTERAÇÃO DE DIAGNÓSTICO TEMPORÁRIA ---
-# O caminho do ficheiro foi alterado para /tmp para verificar se a aplicação
-# consegue escrever em qualquer local do disco.
-# BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-# CONFIG_FILE = os.path.join(BASE_DIR, "config.json")
-CONFIG_FILE = "/tmp/config.json"
-
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+CONFIG_FILE = os.path.join(BASE_DIR, "config.json")
 
 app_config = AppConfig()
 
@@ -75,22 +69,13 @@ def load_config():
 
 def save_config():
     """Guarda a instância global app_config atual no ficheiro JSON, forçando a escrita em disco."""
-    config_path = os.path.abspath(CONFIG_FILE)
-    logging.info(f"A iniciar o processo de guardar a configuração. Caminho absoluto do ficheiro: {config_path}")
-
     try:
-        logging.info("A tentar escrever no ficheiro...")
-        with open(config_path, "w") as f:
+        logging.info(f"A guardar a configuração em: {CONFIG_FILE}")
+        with open(CONFIG_FILE, "w") as f:
             json.dump(app_config.model_dump(), f, indent=4)
-            f.flush()  # Força a escrita do buffer interno do Python para o buffer do SO
-            os.fsync(f.fileno())  # Solicita ao SO que escreva o buffer para o disco
-        logging.info(f"Configuração guardada e sincronizada com o disco com sucesso em {config_path}.")
-    except PermissionError as e:
-        logging.error(f"ERRO DE PERMISSÃO ao guardar em {config_path}: {e}. Verifique as permissões de escrita para o utilizador que executa o serviço.")
-        raise
-    except IOError as e:
-        logging.error(f"ERRO DE I/O ao guardar em {config_path}: {e}", exc_info=True)
-        raise
+            f.flush()
+            os.fsync(f.fileno())
+        logging.info("Configuração guardada e sincronizada com o disco com sucesso.")
     except Exception as e:
-        logging.error(f"ERRO CRÍTICO inesperado ao guardar a configuração em {config_path}: {e}", exc_info=True)
+        logging.error(f"ERRO CRÍTICO ao guardar a configuração: {e}", exc_info=True)
         raise
