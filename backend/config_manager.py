@@ -21,8 +21,13 @@ class AppConfig(BaseModel):
 
 # --- Instância e Funções de Gerenciamento de Configuração ---
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-CONFIG_FILE = os.path.join(BASE_DIR, "config.json")
+# --- ALTERAÇÃO DE DIAGNÓSTICO TEMPORÁRIA ---
+# O caminho do ficheiro foi alterado para /tmp para verificar se a aplicação
+# consegue escrever em qualquer local do disco.
+# BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# CONFIG_FILE = os.path.join(BASE_DIR, "config.json")
+CONFIG_FILE = "/tmp/config.json"
+
 
 app_config = AppConfig()
 
