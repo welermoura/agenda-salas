@@ -41,7 +41,6 @@ def load_config():
 
             if not os.path.exists(CONFIG_FILE):
                 logging.warning("config.json não encontrado. A aplicação continuará com a configuração padrão em memória.")
-                # O ficheiro será criado na primeira vez que a configuração for guardada.
                 app_config = AppConfig()
                 return
 
@@ -68,15 +67,13 @@ def load_config():
                 logging.error("ERRO CRÍTICO: Não foi possível carregar o config.json após várias tentativas.")
                 raise  # Levanta a última exceção após esgotar as tentativas
 
-def save_config():
-    """Guarda a instância global app_config atual no ficheiro JSON, forçando a escrita em disco."""
+def save_config(config_to_save: AppConfig):
+    """Guarda o objeto de configuração fornecido no ficheiro JSON, forçando a escrita em disco."""
     try:
-        logging.info(f"A guardar a configuração em: {CONFIG_FILE}")
         with open(CONFIG_FILE, "w") as f:
-            json.dump(app_config.model_dump(), f, indent=4)
+            json.dump(config_to_save.model_dump(), f, indent=4)
             f.flush()
             os.fsync(f.fileno())
-        logging.info("Configuração guardada e sincronizada com o disco com sucesso.")
     except Exception as e:
         logging.error(f"ERRO CRÍTICO ao guardar a configuração: {e}", exc_info=True)
         raise

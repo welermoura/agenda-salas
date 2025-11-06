@@ -129,11 +129,10 @@ async def initialize_setup(data: SetupData):
         app_config.graph_client_id = data.client_id
         app_config.graph_client_secret = data.client_secret
         app_config.is_configured = True
-        logging.info(f"Dados recebidos do formulário: {data.model_dump_json()}")
-        logging.info(f"Estado do app_config ANTES de salvar: {app_config.model_dump_json()}")
+        logging.info("Dados de configuração aplicados ao objeto app_config.")
 
         logging.info("A chamar save_config() para persistir as alterações...")
-        save_config()
+        save_config(app_config)
         logging.info("save_config() chamado com sucesso.")
 
         loop = asyncio.get_event_loop()
@@ -161,7 +160,7 @@ async def get_rooms(current_user: str = Depends(get_current_user)):
 @app.post("/api/rooms")
 async def update_rooms(rooms: list[Room], current_user: str = Depends(get_current_user)):
     app_config.rooms = rooms
-    save_config()
+    save_config(app_config)
     return {"message": "Rooms updated successfully."}
 
 class GraphConfig(BaseModel):
@@ -176,7 +175,7 @@ async def get_graph_config(current_user: str = Depends(get_current_user)):
 async def update_graph_config(config: GraphConfig, current_user: str = Depends(get_current_user)):
     app_config.graph_tenant_id = config.tenant_id
     app_config.graph_client_id = config.client_id
-    save_config()
+    save_config(app_config)
     return {"message": "Graph configuration updated successfully."}
 
 class PasswordChange(BaseModel):
@@ -185,7 +184,7 @@ class PasswordChange(BaseModel):
 @app.post("/api/change-password")
 async def change_password(password_data: PasswordChange, current_user: str = Depends(get_current_user)):
     app_config.admin_password_hash = get_password_hash(password_data.new_password)
-    save_config()
+    save_config(app_config)
     return {"message": "Password updated successfully."}
 
 # --- WebSocket ---
