@@ -129,7 +129,8 @@ async def initialize_setup(data: SetupData):
         app_config.graph_client_id = data.client_id
         app_config.graph_client_secret = data.client_secret
         app_config.is_configured = True
-        logging.info("Dados de configuração aplicados ao objeto app_config.")
+        logging.info(f"Dados recebidos do formulário: {data.model_dump_json()}")
+        logging.info(f"Estado do app_config ANTES de salvar: {app_config.model_dump_json()}")
 
         logging.info("A chamar save_config() para persistir as alterações...")
         save_config()
