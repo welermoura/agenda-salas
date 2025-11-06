@@ -26,10 +26,10 @@ CONFIG_FILE = os.path.join(BASE_DIR, "config.json")
 
 app_config = AppConfig()
 
-def load_config():
+def load_config() -> AppConfig:
     """
     Carrega a configuração do ficheiro JSON, com lógica de repetição para resiliência
-    durante o arranque do sistema.
+    durante o arranque do sistema. Retorna o objeto de configuração carregado.
     """
     global app_config
     max_retries = 3
@@ -42,7 +42,7 @@ def load_config():
             if not os.path.exists(CONFIG_FILE):
                 logging.warning("config.json não encontrado. A aplicação continuará com a configuração padrão em memória.")
                 app_config = AppConfig()
-                return
+                return app_config
 
             with open(CONFIG_FILE, "r") as f:
                 # Se o ficheiro estiver vazio, o json.load() irá falhar com um erro.
@@ -50,13 +50,13 @@ def load_config():
                     logging.warning("config.json está vazio, a tratar como não configurado.")
                     # Assume a configuração padrão, não levanta erro
                     app_config = AppConfig()
-                    return
+                    return app_config
 
                 config_data = json.load(f)
                 app_config = AppConfig(**config_data)
 
             logging.info("Configuração carregada com sucesso.")
-            return  # Sucesso, sai da função
+            return app_config # Sucesso, sai da função
 
         except (json.JSONDecodeError, FileNotFoundError) as e:
             logging.warning(f"Falha ao carregar/processar o config.json na tentativa {attempt + 1}: {e}")
