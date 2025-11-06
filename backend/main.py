@@ -17,7 +17,7 @@ from passlib.context import CryptContext
 
 # Importa a lógica de configuração e os modelos partilhados
 import config_manager
-from config_manager import app_config, Room, load_config, save_config
+from config_manager import Room, load_config, save_config
 import calendar_parser
 
 # --- Segurança e Autenticação ---
@@ -60,10 +60,10 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
 async def update_scheduler():
     while True:
         try:
-            if app_config.is_configured and app_config.rooms:
+            if config_manager.app_config.is_configured and config_manager.app_config.rooms:
                 today_str = datetime.now().strftime('%Y-%m-%d')
                 statuses = {}
-                for room in app_config.rooms:
+                for room in config_manager.app_config.rooms:
                     status = calendar_parser.get_room_status(room, today_str)
                     statuses[room.email] = status
 
@@ -109,33 +109,33 @@ class SetupData(BaseModel):
 
 @app.get("/api/setup/status")
 async def get_setup_status():
-    return {"is_configured": app_config.is_configured}
+    return {"is_configured": config_manager.app_config.is_configured}
 
 @app.post("/api/setup/initialize")
 async def initialize_setup(data: SetupData):
     logging.info("Endpoint /api/setup/initialize alcançado. A iniciar o processo de configuração.")
     global SECRET_KEY
-    if app_config.is_configured:
+    if config_manager.app_config.is_configured:
         logging.warning("Tentativa de configurar uma aplicação já configurada.")
         raise HTTPException(status_code=403, detail="Application is already configured.")
 
     try:
         # Gera e guarda a chave secreta JWT
-        app_config.jwt_secret_key = secrets.token_urlsafe(32)
-        SECRET_KEY = app_config.jwt_secret_key # Define a chave para a sessão atual
+        config_manager.app_config.jwt_secret_key = secrets.token_urlsafe(32)
+        SECRET_KEY = config_manager.app_config.jwt_secret_key # Define a chave para a sessão atual
         logging.info("Chave secreta JWT gerada.")
 
-        app_config.admin_password_hash = get_password_hash(data.admin_password)
+        config_manager.app_config.admin_password_hash = get_password_hash(data.admin_password)
         logging.info("Hash da palavra-passe de administrador gerado.")
 
-        app_config.graph_tenant_id = data.tenant_id
-        app_config.graph_client_id = data.client_id
-        app_config.graph_client_secret = data.client_secret
-        app_config.is_configured = True
+        config_manager.app_config.graph_tenant_id = data.tenant_id
+        config_manager.app_config.graph_client_id = data.client_id
+        config_manager.app_config.graph_client_secret = data.client_secret
+        config_manager.app_config.is_configured = True
         logging.info("Dados de configuração aplicados ao objeto app_config.")
 
         logging.info("A chamar save_config() para persistir as alterações...")
-        save_config(app_config)
+        save_config(config_manager.app_config)
         logging.info("save_config() chamado com sucesso.")
 
         loop = asyncio.get_event_loop()
@@ -151,19 +151,19 @@ async def initialize_setup(data: SetupData):
 # --- Endpoints de Autenticação e Admin ---
 @app.post("/api/login")
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
-    if not app_config.is_configured or not verify_password(form_data.password, app_config.admin_password_hash):
+    if not config_manager.app_config.is_configured or not verify_password(form_data.password, config_manager.app_config.admin_password_hash):
         raise HTTPException(status_code=401, detail="Incorrect username or password", headers={"WWW-Authenticate": "Bearer"})
     access_token = create_access_token(data={"sub": form_data.username})
     return {"access_token": access_token, "token_type": "bearer"}
 
 @app.get("/api/rooms", response_model=list[Room])
 async def get_rooms(current_user: str = Depends(get_current_user)):
-    return app_config.rooms
+    return config_manager.app_config.rooms
 
 @app.post("/api/rooms")
 async def update_rooms(rooms: list[Room], current_user: str = Depends(get_current_user)):
-    app_config.rooms = rooms
-    save_config(app_config)
+    config_manager.app_config.rooms = rooms
+    save_config(config_manager.app_config)
     return {"message": "Rooms updated successfully."}
 
 class GraphConfig(BaseModel):
@@ -172,13 +172,13 @@ class GraphConfig(BaseModel):
 
 @app.get("/api/config", response_model=GraphConfig)
 async def get_graph_config(current_user: str = Depends(get_current_user)):
-    return GraphConfig(tenant_id=app_config.graph_tenant_id, client_id=app_config.graph_client_id)
+    return GraphConfig(tenant_id=config_manager.app_config.graph_tenant_id, client_id=config_manager.app_config.graph_client_id)
 
 @app.post("/api/config")
 async def update_graph_config(config: GraphConfig, current_user: str = Depends(get_current_user)):
-    app_config.graph_tenant_id = config.tenant_id
-    app_config.graph_client_id = config.client_id
-    save_config(app_config)
+    config_manager.app_config.graph_tenant_id = config.tenant_id
+    config_manager.app_config.graph_client_id = config.client_id
+    save_config(config_manager.app_config)
     return {"message": "Graph configuration updated successfully."}
 
 class PasswordChange(BaseModel):
@@ -186,8 +186,8 @@ class PasswordChange(BaseModel):
 
 @app.post("/api/change-password")
 async def change_password(password_data: PasswordChange, current_user: str = Depends(get_current_user)):
-    app_config.admin_password_hash = get_password_hash(password_data.new_password)
-    save_config(app_config)
+    config_manager.app_config.admin_password_hash = get_password_hash(password_data.new_password)
+    save_config(config_manager.app_config)
     return {"message": "Password updated successfully."}
 
 # --- WebSocket ---
@@ -217,9 +217,9 @@ async def websocket_endpoint(websocket: WebSocket):
             request = json.loads(data)
             date_str = request.get('date')
 
-            if date_str and app_config.is_configured:
+            if date_str and config_manager.app_config.is_configured:
                 statuses = {}
-                for room in app_config.rooms:
+                for room in config_manager.app_config.rooms:
                     status = calendar_parser.get_room_status(room, date_str)
                     statuses[room.email] = status
 
