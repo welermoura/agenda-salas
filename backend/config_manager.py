@@ -21,16 +21,23 @@ class AppConfig(BaseModel):
 
 # --- Instância e Funções de Gerenciamento de Configuração ---
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-CONFIG_FILE = os.path.join(BASE_DIR, "config.json")
+# O diretório de trabalho no Dockerfile é /app. O config.json ficará em /app/data/config.json
+# O volume do Docker Compose irá persistir o conteúdo de /app/data.
+DATA_DIR = "/app/data"
+CONFIG_FILE = os.path.join(DATA_DIR, "config.json")
 
 app_config = AppConfig()
+
+def ensure_data_dir_exists():
+    """Garante que o diretório de dados exista."""
+    os.makedirs(DATA_DIR, exist_ok=True)
 
 def load_config() -> AppConfig:
     """
     Carrega a configuração do ficheiro JSON, com lógica de repetição para resiliência
     durante o arranque do sistema. Retorna o objeto de configuração carregado.
     """
+    ensure_data_dir_exists() # Garante que o diretório /app/data exista
     global app_config
     max_retries = 3
     retry_delay = 2  # segundos
