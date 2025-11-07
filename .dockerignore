@@ -1,0 +1,26 @@
+# Ignore os próprios ficheiros do Docker
+Dockerfile
+.dockerignore
+docker-compose.yml
+
+# Ignore o diretório do Git
+.git
+.gitignore
+
+# Ignore o ambiente virtual do Python
+venv/
+
+# Ignore as dependências do Node.js (serão instaladas dentro do container)
+frontend/node_modules
+
+# Ignore ficheiros de log e outros artefactos
+*.log
+*.pyc
+__pycache__/
+
+# Ignore o diretório de dados persistentes do Docker Compose
+data/
+
+# Ignore ficheiros de sistema operativo
+.DS_Store
+Thumbs.db
