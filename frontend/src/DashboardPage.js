@@ -30,7 +30,7 @@ const DashboardPage = () => {
 
     const ws = useRef(null);
     const scrollContainerRef = useRef(null); // Ref para o contêiner de rolagem
-    const WS_URL = `ws://${window.location.hostname}/ws`;
+    const WS_URL = `ws://${window.location.host}/ws`;
     const selectedDateRef = useRef(selectedDate); // Ref para evitar closure estagnado
 
     // Atualiza a ref sempre que a data selecionada mudar
