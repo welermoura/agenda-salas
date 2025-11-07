@@ -13,6 +13,11 @@ RUN npm install
 # Copia o resto do código do frontend
 COPY . .
 
+# Declara o argumento que pode ser passado durante a build
+ARG REACT_APP_WS_URL
+# Define a variável de ambiente para ser usada pela aplicação React
+ENV REACT_APP_WS_URL=$REACT_APP_WS_URL
+
 # Faz a build da aplicação para produção
 RUN npm run build
 

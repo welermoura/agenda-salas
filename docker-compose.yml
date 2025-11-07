@@ -14,6 +14,11 @@ services:
   frontend:
     build:
       context: ./frontend
+      args:
+        # Para resolver problemas de conexão WebSocket ao aceder por um hostname
+        # sem porta (ex: http://agendasalas), descomente a linha abaixo e
+        # substitua pelo IP e porta corretos do seu servidor.
+        # REACT_APP_WS_URL: ws://10.10.1.206:8080/ws
     restart: unless-stopped
     ports:
       # Expõe a porta 80 do container na porta 8080 do host

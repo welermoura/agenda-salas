@@ -30,7 +30,8 @@ const DashboardPage = () => {
 
     const ws = useRef(null);
     const scrollContainerRef = useRef(null); // Ref para o contêiner de rolagem
-    const WS_URL = `ws://${window.location.host}/ws`;
+    // Usa a variável de ambiente se definida, senão usa o host da janela como fallback
+    const WS_URL = process.env.REACT_APP_WS_URL || `ws://${window.location.host}/ws`;
     const selectedDateRef = useRef(selectedDate); // Ref para evitar closure estagnado
 
     // Atualiza a ref sempre que a data selecionada mudar
