@@ -6,9 +6,8 @@ services:
       context: ./backend
     restart: unless-stopped
     volumes:
-      # Monta um volume para persistir o ficheiro de configuração
-      # O ficheiro será criado no diretório 'data' na raiz do projeto
-      - ./data/config.json:/app/config.json
+      # Monta o diretório 'data' para persistir a configuração e outros dados
+      - ./data:/app/data
     networks:
       - app-network
 
