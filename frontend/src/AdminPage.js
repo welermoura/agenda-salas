@@ -1,20 +1,47 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import './AdminPage.css';
 
-// Componente para um item da lista de salas
-const RoomItem = ({ room, onMove, onRemove, isFirst, isLast }) => (
-    <li>
-        <div className="agenda-info">
-            <strong>{room.name}</strong>
-            <span className="agenda-url">{room.email}</span>
-        </div>
-        <div className="agenda-actions">
-            <button onClick={() => onMove(-1)} disabled={isFirst}>↑</button>
-            <button onClick={() => onMove(1)} disabled={isLast}>↓</button>
-            <button onClick={onRemove} className="remove-button">Remover</button>
-        </div>
-    </li>
-);
+// Componente para um item da lista de salas, agora com estado de edição
+const RoomItem = ({ room, onMove, onRemove, onSave, isFirst, isLast }) => {
+    const [isEditing, setIsEditing] = useState(false);
+    const [editedName, setEditedName] = useState(room.name);
+    const [editedEmail, setEditedEmail] = useState(room.email);
+
+    const handleSave = () => {
+        onSave({ name: editedName, email: editedEmail });
+        setIsEditing(false);
+    };
+
+    if (isEditing) {
+        return (
+            <li>
+                <div className="agenda-info">
+                    <input type="text" value={editedName} onChange={(e) => setEditedName(e.target.value)} />
+                    <input type="email" value={editedEmail} onChange={(e) => setEditedEmail(e.target.value)} />
+                </div>
+                <div className="agenda-actions">
+                    <button onClick={handleSave}>Salvar</button>
+                    <button onClick={() => setIsEditing(false)}>Cancelar</button>
+                </div>
+            </li>
+        );
+    }
+
+    return (
+        <li>
+            <div className="agenda-info">
+                <strong>{room.name}</strong>
+                <span className="agenda-url">{room.email}</span>
+            </div>
+            <div className="agenda-actions">
+                <button onClick={() => onMove(-1)} disabled={isFirst}>↑</button>
+                <button onClick={() => onMove(1)} disabled={isLast}>↓</button>
+                <button onClick={() => setIsEditing(true)}>Editar</button>
+                <button onClick={onRemove} className="remove-button">Remover</button>
+            </div>
+        </li>
+    );
+};
 
 // Hook customizado para fazer requisições autenticadas
 const useAuthenticatedFetch = () => {
@@ -141,6 +168,23 @@ const AdminPage = () => {
         }
     };
 
+    const handleSaveRoom = async (indexToUpdate, updatedRoom) => {
+        const updatedRooms = rooms.map((room, index) =>
+            index === indexToUpdate ? updatedRoom : room
+        );
+        try {
+            const response = await authenticatedFetch('/api/rooms', {
+                method: 'POST',
+                body: JSON.stringify(updatedRooms),
+            });
+            if (!response.ok) throw new Error('Falha ao salvar a sala.');
+            setRooms(updatedRooms);
+            showMessage('Sala atualizada com sucesso!');
+        } catch (err) {
+            setError(err.message);
+        }
+    };
+
     const handleSaveGraphConfig = async (e) => {
         e.preventDefault();
         try {
@@ -205,6 +249,7 @@ const AdminPage = () => {
                             room={room}
                             onMove={(dir) => handleMoveRoom(index, dir)}
                             onRemove={() => handleRemoveRoom(index)}
+                            onSave={(updatedRoom) => handleSaveRoom(index, updatedRoom)}
                             isFirst={index === 0}
                             isLast={index === rooms.length - 1}
                         />

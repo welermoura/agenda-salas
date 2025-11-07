@@ -1,1 +1,10 @@
--bash: ./start.sh: Permission denied
+--- Iniciando servidor Backend ---
+Backend rodando no PID: 10654
+
+--- Iniciando servidor Frontend ---
+./start.sh: line 16: ./venv/bin/uvicorn: No such file or directory
+Frontend rodando no PID: 10655
+
+Aplicação iniciada!
+Acesse o frontend em http://localhost:3000
+Pressione Ctrl+C para parar todos os servidores.
