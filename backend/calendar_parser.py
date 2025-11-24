@@ -2,6 +2,7 @@ import arrow
 import msal
 import requests
 import json
+import logging
 from datetime import timedelta
 
 # Importa a configuração e os modelos partilhados do novo módulo
@@ -22,18 +23,19 @@ user_id_cache = {}
 
 # --- Lógica de Autenticação com MSAL ---
 
-def get_graph_access_token():
+def get_graph_access_token(force_refresh=False):
     """Obtém um token de acesso para a API do Microsoft Graph."""
     now = arrow.utcnow()
 
-    if token_cache["token"] and token_cache["expires_at"] > now:
+    if not force_refresh and token_cache["token"] and token_cache["expires_at"] > now:
         return token_cache["token"]
 
     if not all([config_manager.app_config.graph_tenant_id, config_manager.app_config.graph_client_id, config_manager.app_config.graph_client_secret]):
-        print("Erro: A configuração da API Graph está incompleta.")
+        logging.error("Erro: A configuração da API Graph está incompleta.")
         return None
 
     authority = f"https://login.microsoftonline.com/{config_manager.app_config.graph_tenant_id}"
+    logging.info(f"A adquirir novo token Graph. Force refresh: {force_refresh}")
 
     try:
         app = msal.ConfidentialClientApplication(
@@ -43,15 +45,18 @@ def get_graph_access_token():
         )
         result = app.acquire_token_for_client(scopes=["https://graph.microsoft.com/.default"])
     except ValueError as e:
-        print(f"Erro de configuração da autoridade MSAL: {e}")
+        logging.error(f"Erro de configuração da autoridade MSAL: {e}")
         return None
 
     if "access_token" in result:
         token_cache["token"] = result['access_token']
-        token_cache["expires_at"] = now.shift(seconds=result.get('expires_in', 3600) - 300)
+        # Define expiração com margem de segurança de 5 minutos
+        expires_in = result.get('expires_in', 3600)
+        token_cache["expires_at"] = now.shift(seconds=expires_in - 300)
+        logging.info(f"Token Graph adquirido com sucesso. Expira em {expires_in} segundos.")
         return result['access_token']
     else:
-        print("Erro ao adquirir token de acesso:", result.get("error_description"))
+        logging.error(f"Erro ao adquirir token de acesso: {result.get('error_description')}")
         return None
 
 # --- Lógica de Consulta ao Calendário ---
@@ -62,7 +67,8 @@ def get_room_user_id(room_email: str, headers: dict):
         return user_id_cache[room_email]
 
     url = f"https://graph.microsoft.com/v1.0/users/{room_email}?$select=id"
-    response = requests.get(url, headers=headers)
+    # Timeout adicionado para prevenir threads travadas
+    response = requests.get(url, headers=headers, timeout=10)
     response.raise_for_status() # Lança exceção para erros HTTP
     user_id = response.json().get('id')
     if user_id:
@@ -106,26 +112,50 @@ def get_room_status(room: Room, date_str: str | None = None):
             '$select': 'subject,start,end'
         }
 
-        response = requests.get(url, headers=headers, params=params)
+        # Timeout adicionado
+        response = requests.get(url, headers=headers, params=params, timeout=10)
         response.raise_for_status()
         events = response.json().get('value', [])
 
     except requests.exceptions.ConnectionError as e:
         error_message = "Falha de Rede: Não foi possível conectar à API Graph. Verifique a firewall e o DNS do servidor."
-        print(f"Erro de conexão para {room.email}: {e}")
+        logging.error(f"Erro de conexão para {room.email}: {e}")
         return {"error": error_message}
     except requests.RequestException as e:
-        error_message = "Erro na resposta da API Graph."
-        if e.response is not None:
-            try:
-                error_details = e.response.json()
-                msg = error_details.get("error", {}).get("message", "N/A")
-                error_message = f"Erro da API ({e.response.status_code}): {msg}"
-            except json.JSONDecodeError:
-                error_message = f"Erro da API ({e.response.status_code}): Resposta inválida."
+        # Lógica de Retry para Token Expirado (401)
+        if e.response is not None and e.response.status_code == 401:
+            logging.warning(f"Token expirado (401) detectado para {room.email}. Tentando renovar e repetir a operação.")
+            # Força renovação do token
+            new_token = get_graph_access_token(force_refresh=True)
+            if new_token:
+                headers['Authorization'] = f'Bearer {new_token}'
+                try:
+                    # Tenta novamente a operação inteira (obter ID e depois CalendarView)
+                    # Nota: Simples repetição. Se o ID já estiver em cache, get_room_user_id retorna rápido.
+                    user_id = get_room_user_id(room.email, headers)
+                    url = f"https://graph.microsoft.com/v1.0/users/{user_id}/calendarView"
+                    response = requests.get(url, headers=headers, params=params, timeout=10)
+                    response.raise_for_status()
+                    events = response.json().get('value', [])
+                    # Se tiver sucesso, processa os eventos no bloco normal abaixo
+                except Exception as retry_exc:
+                    logging.error(f"Falha na tentativa de retry após 401: {retry_exc}")
+                    return {"error": "Falha na autenticação após renovação do token."}
+            else:
+                 return {"error": "Sessão expirada. Não foi possível renovar o token de acesso."}
+        else:
+            # Tratamento de erro padrão
+            error_message = "Erro na resposta da API Graph."
+            if e.response is not None:
+                try:
+                    error_details = e.response.json()
+                    msg = error_details.get("error", {}).get("message", "N/A")
+                    error_message = f"Erro da API ({e.response.status_code}): {msg}"
+                except json.JSONDecodeError:
+                    error_message = f"Erro da API ({e.response.status_code}): Resposta inválida."
 
-        print(f"Erro ao buscar eventos para {room.email}: {error_message}")
-        return {"error": error_message}
+            logging.error(f"Erro ao buscar eventos para {room.email}: {error_message}")
+            return {"error": error_message}
 
     # --- Lógica de Geração de Horários ---
     time_slots = {}
