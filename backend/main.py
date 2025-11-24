@@ -70,7 +70,8 @@ async def update_scheduler():
                 await manager.broadcast(json.dumps({"date": today_str, "statuses": statuses}))
 
             await asyncio.sleep(3)
-        except Exception:
+        except Exception as e:
+            logging.error(f"Erro no loop de atualização do scheduler: {e}", exc_info=True)
             # Em caso de erro (ex: falha de rede), espera mais para evitar spam
             await asyncio.sleep(60)
 
@@ -221,19 +222,28 @@ async def websocket_endpoint(websocket: WebSocket):
     await manager.connect(websocket)
     try:
         while True:
-            data = await websocket.receive_text()
-            request = json.loads(data)
-            date_str = request.get('date')
+            try:
+                data = await websocket.receive_text()
+                request = json.loads(data)
+                date_str = request.get('date')
 
-            if date_str and config_manager.app_config.is_configured:
-                statuses = {}
-                for room in config_manager.app_config.rooms:
-                    status = calendar_parser.get_room_status(room, date_str)
-                    statuses[room.email] = status
+                if date_str and config_manager.app_config.is_configured:
+                    statuses = {}
+                    for room in config_manager.app_config.rooms:
+                        status = calendar_parser.get_room_status(room, date_str)
+                        statuses[room.email] = status
 
-                await websocket.send_text(json.dumps({"date": date_str, "statuses": statuses}))
+                    await websocket.send_text(json.dumps({"date": date_str, "statuses": statuses}))
+            except Exception as e:
+                logging.error(f"Erro ao processar mensagem WebSocket: {e}", exc_info=True)
+                # Envia uma mensagem de erro genérica para o cliente, se possível, ou apenas continua
+                # Aqui optamos por continuar ouvindo, mas logando o erro.
+                # Um pequeno sleep evita loops muito rápidos em caso de erro persistente na leitura
+                await asyncio.sleep(1)
+
     except WebSocketDisconnect:
         manager.disconnect(websocket)
+        logging.info("WebSocket desconectado pelo cliente.")
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)

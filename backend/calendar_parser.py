@@ -138,22 +138,28 @@ def get_room_status(room: Room, date_str: str | None = None):
         current_time = current_time.shift(minutes=30)
 
     # Marca os horários ocupados com base nos eventos
-    for event in events:
-        # A API agora retorna o horário já convertido para Sao_Paulo devido ao header
-        start = arrow.get(event['start']['dateTime'])
-        end = arrow.get(event['end']['dateTime'])
+    try:
+        for event in events:
+            # A API agora retorna o horário já convertido para Sao_Paulo devido ao header
+            start = arrow.get(event['start']['dateTime'])
+            end = arrow.get(event['end']['dateTime'])
 
-        start_rounded = start.floor('minute').replace(minute=(start.minute // 30) * 30, second=0, microsecond=0)
+            start_rounded = start.floor('minute').replace(minute=(start.minute // 30) * 30, second=0, microsecond=0)
 
-        current_slot_time = start_rounded
-        while current_slot_time < end:
-            slot_key = current_slot_time.format('HH:mm')
-            if slot_key in time_slots:
-                time_slots[slot_key] = 'ocupado'
-            current_slot_time = current_slot_time.shift(minutes=30)
+            current_slot_time = start_rounded
+            while current_slot_time < end:
+                slot_key = current_slot_time.format('HH:mm')
+                if slot_key in time_slots:
+                    time_slots[slot_key] = 'ocupado'
+                current_slot_time = current_slot_time.shift(minutes=30)
 
-    result = {"nome": room.name, "status": time_slots}
+        result = {"nome": room.name, "status": time_slots}
+        calendar_cache[cache_key] = {'timestamp': now_utc, 'data': result}
+        return result
 
-    calendar_cache[cache_key] = {'timestamp': now_utc, 'data': result}
-
-    return result
+    except Exception as e:
+        import traceback
+        error_msg = f"Erro ao processar eventos para {room.email}: {str(e)}"
+        print(error_msg)
+        traceback.print_exc()
+        return {"error": error_msg}
