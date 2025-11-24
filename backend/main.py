@@ -234,6 +234,8 @@ async def websocket_endpoint(websocket: WebSocket):
                         statuses[room.email] = status
 
                     await websocket.send_text(json.dumps({"date": date_str, "statuses": statuses}))
+            except WebSocketDisconnect:
+                raise  # Re-levanta para ser tratado pelo bloco externo
             except Exception as e:
                 logging.error(f"Erro ao processar mensagem WebSocket: {e}", exc_info=True)
                 # Envia uma mensagem de erro genérica para o cliente, se possível, ou apenas continua
