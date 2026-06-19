@@ -50,35 +50,53 @@ const RoomItem = ({ room, onMove, onRemove, onSave, onUploadLogo, isFirst, isLas
 
     if (isEditing) {
         return (
-            <li>
-                <div style={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
+            <li className="room-item-editing">
+                <div className="room-item-content">
                     {logoContainer}
-                    <div className="agenda-info" style={{ marginLeft: '12px', flexGrow: 1 }}>
-                        <input type="text" value={editedName} onChange={(e) => setEditedName(e.target.value)} style={{ marginBottom: '8px', width: '100%' }} />
-                        <input type="email" value={editedEmail} onChange={(e) => setEditedEmail(e.target.value)} style={{ width: '100%' }} />
+                    <div className="room-edit-fields">
+                        <div className="input-group">
+                            <label>Nome da Sala</label>
+                            <input 
+                                type="text" 
+                                value={editedName} 
+                                onChange={(e) => setEditedName(e.target.value)} 
+                                required 
+                            />
+                        </div>
+                        <div className="input-group">
+                            <label>E-mail da Sala</label>
+                            <input 
+                                type="email" 
+                                value={editedEmail} 
+                                onChange={(e) => setEditedEmail(e.target.value)} 
+                                required 
+                            />
+                        </div>
                     </div>
                 </div>
                 <div className="agenda-actions">
-                    <button onClick={handleSave}>Salvar</button>
-                    <button onClick={() => setIsEditing(false)}>Cancelar</button>
+                    <button onClick={handleSave} className="save-btn">Salvar</button>
+                    <button onClick={() => setIsEditing(false)} className="cancel-btn">Cancelar</button>
                 </div>
             </li>
         );
     }
 
     return (
-        <li>
-            <div style={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
+        <li className="room-item-view">
+            <div className="room-item-content">
                 {logoContainer}
-                <div className="agenda-info" style={{ marginLeft: '12px' }}>
-                    <strong>{room.name}</strong>
+                <div className="agenda-info">
+                    <strong className="room-title-name">{room.name}</strong>
                     <span className="agenda-url">{room.email}</span>
                 </div>
             </div>
             <div className="agenda-actions">
-                <button onClick={() => onMove(-1)} disabled={isFirst}>↑</button>
-                <button onClick={() => onMove(1)} disabled={isLast}>↓</button>
-                <button onClick={() => setIsEditing(true)}>Editar</button>
+                <div className="order-buttons">
+                    <button onClick={() => onMove(-1)} disabled={isFirst} title="Mover para Cima">↑</button>
+                    <button onClick={() => onMove(1)} disabled={isLast} title="Mover para Baixo">↓</button>
+                </div>
+                <button onClick={() => setIsEditing(true)} className="edit-btn">Editar</button>
                 <button onClick={onRemove} className="remove-button">Remover</button>
             </div>
         </li>
@@ -116,6 +134,7 @@ const useAuthenticatedFetch = () => {
 
 
 const AdminPage = ({ onThemeLoaded }) => {
+    const [activeTab, setActiveTab] = useState('rooms');
     const [rooms, setRooms] = useState([]);
     const [newRoomName, setNewRoomName] = useState('');
     const [newRoomEmail, setNewRoomEmail] = useState('');
@@ -185,6 +204,11 @@ const AdminPage = ({ onThemeLoaded }) => {
         setTimeout(() => setMessage(''), 3000);
     };
 
+    const showValidationError = (msg) => {
+        setError(msg);
+        setTimeout(() => setError(''), 5000);
+    };
+
     // --- Funções de Manipulação ---
 
     const handleAddRoom = async (e) => {
@@ -201,11 +225,12 @@ const AdminPage = ({ onThemeLoaded }) => {
             setNewRoomEmail('');
             showMessage('Sala adicionada com sucesso!');
         } catch (err) {
-            setError(err.message);
+            showValidationError(err.message);
         }
     };
 
     const handleRemoveRoom = async (indexToRemove) => {
+        if (!window.confirm('Deseja realmente remover esta sala?')) return;
         const updatedRooms = rooms.filter((_, index) => index !== indexToRemove);
         try {
             const response = await authenticatedFetch('/api/rooms', {
@@ -216,7 +241,7 @@ const AdminPage = ({ onThemeLoaded }) => {
             setRooms(updatedRooms);
             showMessage('Sala removida com sucesso!');
         } catch (err) {
-            setError(err.message);
+            showValidationError(err.message);
         }
     };
 
@@ -233,7 +258,7 @@ const AdminPage = ({ onThemeLoaded }) => {
             if (!response.ok) throw new Error('Falha ao reordenar salas.');
             setRooms(newRooms);
         } catch (err) {
-            setError(err.message);
+            showValidationError(err.message);
         }
     };
 
@@ -250,7 +275,7 @@ const AdminPage = ({ onThemeLoaded }) => {
             setRooms(updatedRooms);
             showMessage('Sala atualizada com sucesso!');
         } catch (err) {
-            setError(err.message);
+            showValidationError(err.message);
         }
     };
 
@@ -273,7 +298,7 @@ const AdminPage = ({ onThemeLoaded }) => {
             setRooms(updatedRooms);
             showMessage('Logotipo enviado com sucesso!');
         } catch (err) {
-            setError(err.message);
+            showValidationError(err.message);
         }
     };
 
@@ -300,14 +325,14 @@ const AdminPage = ({ onThemeLoaded }) => {
             setNewClientSecret('');
             showMessage('Configurações salvas com sucesso!');
         } catch (err) {
-            setError(err.message);
+            showValidationError(err.message);
         }
     };
 
     const handleChangePassword = async (e) => {
         e.preventDefault();
         if (newPassword !== confirmPassword) {
-            setError('As novas senhas não coincidem.');
+            showValidationError('As novas senhas não coincidem.');
             return;
         }
         try {
@@ -320,115 +345,252 @@ const AdminPage = ({ onThemeLoaded }) => {
             setConfirmPassword('');
             showMessage('Senha alterada com sucesso!');
         } catch (err) {
-            setError(err.message);
+            showValidationError(err.message);
         }
     };
 
 
     return (
         <div className="admin-container">
-            <h1>Administração</h1>
-
-            {/* Diagnósticos de Conexão */}
-            <div className={`diagnostics-bar status-${diagStatus.status}`}>
-                <div>
-                    <strong>Status de Conexão Azure AD:</strong>{' '}
-                    {diagStatus.loading ? (
-                        <span className="diag-loading">Carregando diagnóstico...</span>
-                    ) : (
-                        <span>{diagStatus.message}</span>
-                    )}
-                </div>
-                {!diagStatus.loading && (
-                    <button onClick={runDiagnostics} className="retry-diag-button">
-                        Testar Novamente
-                    </button>
-                )}
+            <div className="admin-header">
+                <h1>Painel de Administração</h1>
+                <p className="admin-subtitle">Gerencie suas salas, credenciais da API Microsoft Graph, aparência do Dashboard e segurança.</p>
             </div>
 
-            {error && <p className="error-message">{error}</p>}
-            {message && <p style={{ color: 'green', textAlign: 'center' }}>{message}</p>}
+            {/* Notificações flutuantes temporárias */}
+            {message && <div className="toast-notification success">{message}</div>}
+            {error && <div className="toast-notification error">{error}</div>}
 
-            {/* Gerenciamento de Salas */}
-            <section>
-                <h2>Gerenciar Salas de Reunião</h2>
-                <form onSubmit={handleAddRoom} className="agenda-form">
-                    <input type="text" value={newRoomName} onChange={e => setNewRoomName(e.target.value)} placeholder="Nome da Sala" required />
-                    <input type="email" value={newRoomEmail} onChange={e => setNewRoomEmail(e.target.value)} placeholder="E-mail da Sala" required />
-                    <button type="submit">Adicionar Sala</button>
-                </form>
-                <ul className="agendas-list">
-                    {rooms.map((room, index) => (
-                        <RoomItem
-                            key={index}
-                            room={room}
-                            onMove={(dir) => handleMoveRoom(index, dir)}
-                            onRemove={() => handleRemoveRoom(index)}
-                            onSave={(updatedRoom) => handleSaveRoom(index, updatedRoom)}
-                            onUploadLogo={(file) => handleUploadLogo(index, file)}
-                            isFirst={index === 0}
-                            isLast={index === rooms.length - 1}
-                        />
-                    ))}
-                </ul>
-            </section>
-
-            {/* Configuração do Graph */}
-            <section>
-                <h2>Configuração da API Microsoft Graph</h2>
-                <form onSubmit={handleSaveGraphConfig} className="agenda-form">
-                    <input type="text" value={tenantId} onChange={e => setTenantId(e.target.value)} placeholder="Tenant ID" required />
-                    <input type="text" value={clientId} onChange={e => setClientId(e.target.value)} placeholder="Client ID" required />
-                    <input type="password" value={newClientSecret} onChange={e => setNewClientSecret(e.target.value)} placeholder="Novo Client Secret (deixe em branco para manter o atual)" />
-                    <button type="submit">Salvar Configuração do Graph</button>
-                </form>
-                <p>O Client Secret não é visualizado por segurança. Para o alterar, insira um novo valor no campo acima.</p>
-            </section>
-
-            {/* Configuração Visual e Temas */}
-            <section>
-                <h2>Tema Base do Dashboard</h2>
-                <form onSubmit={handleSaveGraphConfig} className="agenda-form">
-                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>Selecione o Tema Base para o Painel:</label>
-                    <select 
-                        value={selectedTheme} 
-                        onChange={e => setSelectedTheme(e.target.value)}
-                        style={{ padding: '10px', width: '100%', marginBottom: '16px', borderRadius: '6px', border: '1px solid #ccc', backgroundColor: '#fff', fontSize: '14px' }}
+            <div className="admin-content-layout">
+                {/* Menu de Abas Lateral */}
+                <aside className="admin-sidebar">
+                    <button 
+                        className={`tab-button ${activeTab === 'rooms' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('rooms')}
                     >
-                        <option value="classic">📏 Clássico (Linha de Tempo Contínua)</option>
-                        <option value="cyber">⚡ Neon Cyberpunk (Holograma Digital)</option>
-                        <option value="ocean">🌊 Ocean Breeze (Cápsulas Flutuantes)</option>
-                        <option value="corporate">🏢 Corporate Minimal (Resumo Textual)</option>
-                        <option value="forest">🌲 Forest Moss (Tons de Terra & Linha Contínua)</option>
-                        <option value="sunset">🌅 Sunset Amber (Pôr do Sol & Cápsulas)</option>
-                        <option value="vintage">📜 Retro Sepia (Papel Envelhecido & Fading)</option>
-                        <option value="plum">🔮 Amethyst Plum (Ametista Roxo & Resumo Textual)</option>
-                        <option value="glacier">❄️ Glacier Ice (Tons Árticos & Linha Contínua)</option>
-                        <option value="mono">🖤 Monochrome Slate (Preto e Branco & Cápsulas)</option>
-                        <option value="mint">🌿 Mint Fresh (Hortelã & Linha Contínua)</option>
-                        <option value="rose">🌹 Rose Gold (Ouro Rosa & Cápsulas)</option>
-                        <option value="cosmic">🌌 Cosmic Nebula (Nebulosa Cósmica & Fading)</option>
-                        <option value="desert">🏜️ Desert Dunes (Dunas do Deserto & Linha Contínua)</option>
-                        <option value="steel">🔩 Industrial Steel (Aço Industrial & Resumo Textual)</option>
-                        <option value="luxury">👑 Luxury Gold (Ouro de Luxo & Cápsulas)</option>
-                        <option value="sakura">🌸 Cherry Sakura (Cerejeira Sakura & Resumo Textual)</option>
-                        <option value="candy">🍬 Candy Land (Mundo dos Doces & Fading)</option>
-                        <option value="aurora">✨ Arctic Aurora (Aurora Ártica & Cápsulas)</option>
-                        <option value="toxic">☣️ Toxic Acid (Ácido Tóxico & Fading)</option>
-                    </select>
-                    <button type="submit">Aplicar Tema ao Dashboard</button>
-                </form>
-            </section>
+                        <span className="tab-icon">🏢</span>
+                        <span>Salas de Reunião</span>
+                    </button>
+                    <button 
+                        className={`tab-button ${activeTab === 'theme' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('theme')}
+                    >
+                        <span className="tab-icon">🎨</span>
+                        <span>Tema e Aparência</span>
+                    </button>
+                    <button 
+                        className={`tab-button ${activeTab === 'graph' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('graph')}
+                    >
+                        <span className="tab-icon">⚙️</span>
+                        <span>Integração Azure AD</span>
+                    </button>
+                    <button 
+                        className={`tab-button ${activeTab === 'security' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('security')}
+                    >
+                        <span className="tab-icon">🔒</span>
+                        <span>Segurança</span>
+                    </button>
+                </aside>
 
-            {/* Alteração de Senha */}
-            <section>
-                <h2>Alterar Senha de Administrador</h2>
-                <form onSubmit={handleChangePassword} className="agenda-form">
-                    <input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="Nova Senha" required />
-                    <input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="Confirmar Nova Senha" required />
-                    <button type="submit">Alterar Senha</button>
-                </form>
-            </section>
+                {/* Painel Central de Conteúdo */}
+                <main className="admin-main-panel">
+                    
+                    {/* ABA 1: Salas de Reunião */}
+                    {activeTab === 'rooms' && (
+                        <div className="tab-pane">
+                            <h2>Gerenciar Salas de Reunião</h2>
+                            <p className="section-description">Cadastre novas salas sincronizadas com o Outlook do M365, envie logotipos e altere a ordem de exibição no painel.</p>
+                            
+                            <form onSubmit={handleAddRoom} className="add-room-form">
+                                <h3>Nova Sala de Reunião</h3>
+                                <div className="form-row-grid">
+                                    <div className="input-group">
+                                        <label>Nome Amigável da Sala</label>
+                                        <input 
+                                            type="text" 
+                                            value={newRoomName} 
+                                            onChange={e => setNewRoomName(e.target.value)} 
+                                            placeholder="Ex: Sala Laguna" 
+                                            required 
+                                        />
+                                    </div>
+                                    <div className="input-group">
+                                        <label>E-mail da Sala (Outlook/Exchange)</label>
+                                        <input 
+                                            type="email" 
+                                            value={newRoomEmail} 
+                                            onChange={e => setNewRoomEmail(e.target.value)} 
+                                            placeholder="sala-laguna@empresa.com" 
+                                            required 
+                                        />
+                                    </div>
+                                </div>
+                                <button type="submit" className="primary-action-btn">Adicionar Sala</button>
+                            </form>
+
+                            <div className="rooms-list-container">
+                                <h3>Salas de Reunião Ativas ({rooms.length})</h3>
+                                {rooms.length === 0 ? (
+                                    <p className="empty-list-message">Nenhuma sala cadastrada. Adicione uma sala no formulário acima.</p>
+                                ) : (
+                                    <ul className="agendas-list">
+                                        {rooms.map((room, index) => (
+                                            <RoomItem
+                                                key={index}
+                                                room={room}
+                                                onMove={(dir) => handleMoveRoom(index, dir)}
+                                                onRemove={() => handleRemoveRoom(index)}
+                                                onSave={(updatedRoom) => handleSaveRoom(index, updatedRoom)}
+                                                onUploadLogo={(file) => handleUploadLogo(index, file)}
+                                                isFirst={index === 0}
+                                                isLast={index === rooms.length - 1}
+                                            />
+                                        ))}
+                                    </ul>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* ABA 2: Temas e Aparência */}
+                    {activeTab === 'theme' && (
+                        <div className="tab-pane">
+                            <h2>Tema Base do Dashboard</h2>
+                            <p className="section-description">Altere o visual e o formato físico da linha de tempo do painel. A modificação é aplicada a todos os clientes que carregarem o dashboard.</p>
+                            
+                            <form onSubmit={handleSaveGraphConfig} className="theme-selection-form">
+                                <div className="input-group" style={{ marginBottom: '20px' }}>
+                                    <label>Tema Base Padrão</label>
+                                    <select 
+                                        value={selectedTheme} 
+                                        onChange={e => setSelectedTheme(e.target.value)}
+                                        className="styled-select"
+                                    >
+                                        <option value="classic">📏 Clássico (Linha de Tempo Contínua)</option>
+                                        <option value="cyber">⚡ Neon Cyberpunk (Holograma Digital)</option>
+                                        <option value="ocean">🌊 Ocean Breeze (Cápsulas Flutuantes)</option>
+                                        <option value="corporate">🏢 Corporate Minimal (Resumo Textual)</option>
+                                        <option value="forest">🌲 Forest Moss (Tons de Terra & Linha Contínua)</option>
+                                        <option value="sunset">🌅 Sunset Amber (Pôr do Sol & Cápsulas)</option>
+                                        <option value="vintage">📜 Retro Sepia (Papel Envelhecido & Fading)</option>
+                                        <option value="plum">🔮 Amethyst Plum (Ametista Roxo & Resumo Textual)</option>
+                                        <option value="glacier">❄️ Glacier Ice (Tons Árticos & Linha Contínua)</option>
+                                        <option value="mono">🖤 Monochrome Slate (Preto e Branco & Cápsulas)</option>
+                                        <option value="mint">🌿 Mint Fresh (Hortelã & Linha Contínua)</option>
+                                        <option value="rose">🌹 Rose Gold (Ouro Rosa & Cápsulas)</option>
+                                        <option value="cosmic">🌌 Cosmic Nebula (Nebulosa Cósmica & Fading)</option>
+                                        <option value="desert">🏜️ Desert Dunes (Dunas do Deserto & Linha Contínua)</option>
+                                        <option value="steel">🔩 Industrial Steel (Aço Industrial & Resumo Textual)</option>
+                                        <option value="luxury">👑 Luxury Gold (Ouro de Luxo & Cápsulas)</option>
+                                        <option value="sakura">🌸 Cherry Sakura (Cerejeira Sakura & Resumo Textual)</option>
+                                        <option value="candy">🍬 Candy Land (Mundo dos Doces & Fading)</option>
+                                        <option value="aurora">✨ Arctic Aurora (Aurora Ártica & Cápsulas)</option>
+                                        <option value="toxic">☣️ Toxic Acid (Ácido Tóxico & Fading)</option>
+                                    </select>
+                                </div>
+                                <button type="submit" className="primary-action-btn">Aplicar Tema ao Dashboard</button>
+                            </form>
+                        </div>
+                    )}
+
+                    {/* ABA 3: Integração Azure AD e Diagnósticos */}
+                    {activeTab === 'graph' && (
+                        <div className="tab-pane">
+                            <h2>Integração com Microsoft Graph (API M365)</h2>
+                            <p className="section-description">Forneça os identificadores da aplicação registrada na conta Azure AD para permitir que o backend consulte a disponibilidade das salas.</p>
+                            
+                            {/* Barra de Status e Teste de Conexão */}
+                            <div className={`diagnostics-bar status-${diagStatus.status}`}>
+                                <div className="diag-text-info">
+                                    <span className="diag-indicator-dot"></span>
+                                    <div>
+                                        <strong>Status da Conexão Azure AD:</strong>
+                                        <p style={{ margin: '4px 0 0 0', fontSize: '13px' }}>
+                                            {diagStatus.loading ? 'Realizando testes de comunicação com Microsoft Graph...' : diagStatus.message}
+                                        </p>
+                                    </div>
+                                </div>
+                                {!diagStatus.loading && (
+                                    <button onClick={runDiagnostics} className="retry-diag-button">
+                                        Testar Conexão
+                                    </button>
+                                )}
+                            </div>
+
+                            <form onSubmit={handleSaveGraphConfig} className="azure-config-form">
+                                <div className="input-group" style={{ marginBottom: '16px' }}>
+                                    <label>Tenant ID (Diretório)</label>
+                                    <input 
+                                        type="text" 
+                                        value={tenantId} 
+                                        onChange={e => setTenantId(e.target.value)} 
+                                        placeholder="Ex: a1b2c3d4-..." 
+                                        required 
+                                    />
+                                </div>
+                                <div className="input-group" style={{ marginBottom: '16px' }}>
+                                    <label>Client ID (Aplicação)</label>
+                                    <input 
+                                        type="text" 
+                                        value={clientId} 
+                                        onChange={e => setClientId(e.target.value)} 
+                                        placeholder="Ex: e5f6g7h8-..." 
+                                        required 
+                                    />
+                                </div>
+                                <div className="input-group" style={{ marginBottom: '24px' }}>
+                                    <label>Client Secret (Segredo do Cliente)</label>
+                                    <input 
+                                        type="password" 
+                                        value={newClientSecret} 
+                                        onChange={e => setNewClientSecret(e.target.value)} 
+                                        placeholder="Insira novo valor se desejar alterar o segredo atual" 
+                                    />
+                                    <span className="input-help-text">
+                                        Por motivos de segurança, o Client Secret atual não é exibido. Insira um novo valor apenas para atualizá-lo.
+                                    </span>
+                                </div>
+                                <button type="submit" className="primary-action-btn">Salvar Credenciais da API</button>
+                            </form>
+                        </div>
+                    )}
+
+                    {/* ABA 4: Segurança (Senha) */}
+                    {activeTab === 'security' && (
+                        <div className="tab-pane">
+                            <h2>Alterar Senha do Administrador</h2>
+                            <p className="section-description">Defina uma nova credencial de segurança para o acesso do painel de administração.</p>
+                            
+                            <form onSubmit={handleChangePassword} className="security-form">
+                                <div className="input-group" style={{ marginBottom: '16px' }}>
+                                    <label>Nova Senha</label>
+                                    <input 
+                                        type="password" 
+                                        value={newPassword} 
+                                        onChange={e => setNewPassword(e.target.value)} 
+                                        placeholder="Digite a nova senha" 
+                                        required 
+                                    />
+                                </div>
+                                <div className="input-group" style={{ marginBottom: '24px' }}>
+                                    <label>Confirmar Nova Senha</label>
+                                    <input 
+                                        type="password" 
+                                        value={confirmPassword} 
+                                        onChange={e => setConfirmPassword(e.target.value)} 
+                                        placeholder="Confirme a nova senha" 
+                                        required 
+                                    />
+                                </div>
+                                <button type="submit" className="primary-action-btn">Alterar Senha</button>
+                            </form>
+                        </div>
+                    )}
+
+                </main>
+            </div>
         </div>
     );
 };
