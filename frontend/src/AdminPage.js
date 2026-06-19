@@ -468,26 +468,34 @@ const AdminPage = ({ onThemeLoaded }) => {
                                         onChange={e => setSelectedTheme(e.target.value)}
                                         className="styled-select"
                                     >
-                                        <option value="classic">📏 Clássico (Linha de Tempo Contínua)</option>
-                                        <option value="cyber">⚡ Neon Cyberpunk (Holograma Digital)</option>
-                                        <option value="ocean">🌊 Ocean Breeze (Cápsulas Flutuantes)</option>
-                                        <option value="corporate">🏢 Corporate Minimal (Resumo Textual)</option>
-                                        <option value="forest">🌲 Forest Moss (Tons de Terra & Linha Contínua)</option>
-                                        <option value="sunset">🌅 Sunset Amber (Pôr do Sol & Cápsulas)</option>
-                                        <option value="vintage">📜 Retro Sepia (Papel Envelhecido & Fading)</option>
-                                        <option value="plum">🔮 Amethyst Plum (Ametista Roxo & Resumo Textual)</option>
-                                        <option value="glacier">❄️ Glacier Ice (Tons Árticos & Linha Contínua)</option>
-                                        <option value="mono">🖤 Monochrome Slate (Preto e Branco & Cápsulas)</option>
-                                        <option value="mint">🌿 Mint Fresh (Hortelã & Linha Contínua)</option>
-                                        <option value="rose">🌹 Rose Gold (Ouro Rosa & Cápsulas)</option>
-                                        <option value="cosmic">🌌 Cosmic Nebula (Nebulosa Cósmica & Fading)</option>
-                                        <option value="desert">🏜️ Desert Dunes (Dunas do Deserto & Linha Contínua)</option>
-                                        <option value="steel">🔩 Industrial Steel (Aço Industrial & Resumo Textual)</option>
-                                        <option value="luxury">👑 Luxury Gold (Ouro de Luxo & Cápsulas)</option>
-                                        <option value="sakura">🌸 Cherry Sakura (Cerejeira Sakura & Resumo Textual)</option>
-                                        <option value="candy">🍬 Candy Land (Mundo dos Doces & Fading)</option>
-                                        <option value="aurora">✨ Arctic Aurora (Aurora Ártica & Cápsulas)</option>
-                                        <option value="toxic">☣️ Toxic Acid (Ácido Tóxico & Fading)</option>
+                                        <optgroup label="Salas em Colunas (Tabela Vertical) - Linha horizontal no meio da tela (busca oculta)">
+                                            <option value="aurora">✨ Arctic Aurora (Aurora Ártica & Tabela Vertical)</option>
+                                            <option value="desert">🏜️ Desert Dunes (Dunas do Deserto & Tabela Vertical)</option>
+                                            <option value="steel">🔩 Industrial Steel (Aço Industrial & Tabela Vertical)</option>
+                                            <option value="toxic">☣️ Toxic Acid (Ácido Tóxico & Tabela Vertical)</option>
+                                        </optgroup>
+                                        <optgroup label="Gantt Clássico (Linha de Tempo Contínua) - Linha vermelha vertical contínua cruzando a grade">
+                                            <option value="candy">🍬 Candy Land (Mundo dos Doces & Linha Contínua)</option>
+                                            <option value="classic">📏 Clássico (Linha de Tempo Contínua)</option>
+                                            <option value="cosmic">🌌 Cosmic Nebula (Nebulosa Cósmica & Linha Contínua)</option>
+                                            <option value="cyber">⚡ Neon Cyberpunk (Holograma Digital & Linha Contínua)</option>
+                                            <option value="forest">🌲 Forest Moss (Tons de Terra & Linha Contínua)</option>
+                                            <option value="glacier">❄️ Glacier Ice (Tons Árticos & Linha Contínua)</option>
+                                            <option value="mint">🌿 Mint Fresh (Hortelã & Linha Contínua)</option>
+                                            <option value="vintage">📜 Retro Sepia (Papel Envelhecido & Linha Contínua)</option>
+                                        </optgroup>
+                                        <optgroup label="Cápsulas Flutuantes (Gantt Minimalista) - Linha vermelha vertical com indicador móvel discreto">
+                                            <option value="luxury">👑 Luxury Gold (Ouro de Luxo & Cápsulas Flutuantes)</option>
+                                            <option value="mono">🖤 Monochrome Slate (Preto e Branco & Cápsulas Flutuantes)</option>
+                                            <option value="ocean">🌊 Ocean Breeze (Cápsulas Flutuantes)</option>
+                                            <option value="rose">🌹 Rose Gold (Ouro Rosa & Cápsulas Flutuantes)</option>
+                                            <option value="sunset">🌅 Sunset Amber (Pôr do Sol & Cápsulas Flutuantes)</option>
+                                        </optgroup>
+                                        <optgroup label="Resumo Textual (Sem Gráfico) - Listagem textual das reuniões (sem barra de tempo gráfica)">
+                                            <option value="corporate">🏢 Corporate Minimal (Resumo Textual)</option>
+                                            <option value="plum">🔮 Amethyst Plum (Ametista Roxo & Resumo Textual)</option>
+                                            <option value="sakura">🌸 Cherry Sakura (Cerejeira Sakura & Resumo Textual)</option>
+                                        </optgroup>
                                     </select>
                                 </div>
                                 <button type="submit" className="primary-action-btn">Aplicar Tema ao Dashboard</button>

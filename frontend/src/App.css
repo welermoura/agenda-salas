@@ -1049,6 +1049,29 @@ nav a:hover, nav a.active {
     padding: 0;
 }
 
+/* Ajuste específico para temas verticais sem campo de busca */
+.dashboard-controls-bar.vertical-theme-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+@media (min-width: 769px) {
+    .dashboard-controls-bar.vertical-theme-controls {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        width: 100%;
+    }
+    .dashboard-controls-bar.vertical-theme-controls .date-navigation {
+        grid-column: 2;
+        justify-self: center;
+    }
+    .dashboard-controls-bar.vertical-theme-controls .filter-buttons {
+        grid-column: 3;
+        justify-self: end;
+    }
+}
+
 .search-wrapper {
     position: relative;
     flex-grow: 1;

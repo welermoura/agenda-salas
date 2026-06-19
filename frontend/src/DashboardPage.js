@@ -329,6 +329,13 @@ const DashboardPage = ({ theme = 'classic-light', onThemeLoaded }) => {
     });
 
     const isToday = selectedDate === formatDate(new Date());
+    const isVerticalTableTheme = theme.startsWith('steel') || theme.startsWith('desert') || theme.startsWith('toxic') || theme.startsWith('aurora');
+
+    useEffect(() => {
+        if (isVerticalTableTheme) {
+            setSearchTerm('');
+        }
+    }, [isVerticalTableTheme]);
 
     // Função para centralizar a linha do tempo (Opção 5) no meio da tela
     const centerTimeLine = useCallback((behavior = 'smooth') => {
@@ -458,16 +465,18 @@ const DashboardPage = ({ theme = 'classic-light', onThemeLoaded }) => {
     return (
         <div className="dashboard-page">
             {/* Controles de Busca, Data e Filtros em uma única barra */}
-            <div className="dashboard-controls-bar">
-                <div className="search-wrapper">
-                    <input
-                        type="text"
-                        placeholder="Buscar sala por nome ou e-mail..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="search-input"
-                    />
-                </div>
+            <div className={`dashboard-controls-bar ${isVerticalTableTheme ? 'vertical-theme-controls' : ''}`}>
+                {!isVerticalTableTheme && (
+                    <div className="search-wrapper">
+                        <input
+                            type="text"
+                            placeholder="Buscar sala por nome ou e-mail..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="search-input"
+                        />
+                    </div>
+                )}
 
                 <div className="date-navigation">
                     <button onClick={goToPreviousDay} className="nav-button">Anterior</button>
@@ -519,8 +528,6 @@ const DashboardPage = ({ theme = 'classic-light', onThemeLoaded }) => {
                         </p>
                     ) : (
                         (() => {
-                            const isVerticalTableTheme = theme.startsWith('steel') || theme.startsWith('desert') || theme.startsWith('toxic') || theme.startsWith('aurora');
-
                             if (isVerticalTableTheme) {
                                 const allHours = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00'];
                                 const currentHour = new Date().getHours();
