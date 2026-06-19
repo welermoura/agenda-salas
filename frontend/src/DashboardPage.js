@@ -565,10 +565,17 @@ const DashboardPage = ({ theme = 'classic-light', onThemeLoaded }) => {
                                                                             className="table-room-logo"
                                                                             onError={(e) => {
                                                                                 e.target.style.display = 'none';
+                                                                                const nameSpan = e.target.parentElement.querySelector('.table-room-name');
+                                                                                if (nameSpan) nameSpan.style.display = 'inline';
                                                                             }}
                                                                         />
                                                                     ) : null}
-                                                                    <span className="table-room-name">{room.nome}</span>
+                                                                    <span 
+                                                                        className="table-room-name"
+                                                                        style={{ display: room.logo_version > 0 ? 'none' : 'inline' }}
+                                                                    >
+                                                                        {room.nome}
+                                                                    </span>
                                                                 </div>
                                                             </th>
                                                         ))}
@@ -663,6 +670,8 @@ const DashboardPage = ({ theme = 'classic-light', onThemeLoaded }) => {
                                                                     e.target.style.display = 'none';
                                                                     const fallback = e.target.parentElement.querySelector('.room-avatar-fallback');
                                                                     if (fallback) fallback.style.display = 'flex';
+                                                                    const nameText = e.target.parentElement.querySelector('.room-name-text');
+                                                                    if (nameText) nameText.style.display = 'block';
                                                                 }}
                                                             />
                                                         ) : null}
@@ -673,7 +682,12 @@ const DashboardPage = ({ theme = 'classic-light', onThemeLoaded }) => {
                                                             {room.nome ? room.nome.charAt(0).toUpperCase() : '?'}
                                                         </div>
                                                         <div className="room-info-top" style={{ margin: 0 }}>
-                                                            <h3 style={{ margin: 0 }}>{room.nome}</h3>
+                                                            <h3 
+                                                                className="room-name-text" 
+                                                                style={{ margin: 0, display: room.logo_version > 0 ? 'none' : 'block' }}
+                                                            >
+                                                                {room.nome}
+                                                            </h3>
                                                             <div className="room-email">{room.url}</div>
                                                         </div>
                                                     </div>
