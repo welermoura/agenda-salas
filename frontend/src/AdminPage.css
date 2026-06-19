@@ -499,6 +499,23 @@
     text-decoration: underline;
 }
 
+.logo-remove-btn {
+    background: none;
+    border: none;
+    font-size: 11px;
+    color: #ef4444;
+    cursor: pointer;
+    font-weight: 600;
+    padding: 0;
+    margin-top: 2px;
+    transition: color 0.2s;
+}
+
+.logo-remove-btn:hover {
+    color: #dc2626;
+    text-decoration: underline;
+}
+
 /* Responsividade do Painel de Administração */
 @media (max-width: 900px) {
     .admin-content-layout {

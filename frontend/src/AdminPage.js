@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import './AdminPage.css';
 
 // Componente para um item da lista de salas, agora com estado de edição
-const RoomItem = ({ room, onMove, onRemove, onSave, onUploadLogo, isFirst, isLast }) => {
+const RoomItem = ({ room, onMove, onRemove, onSave, onUploadLogo, onRemoveLogo, isFirst, isLast }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [editedName, setEditedName] = useState(room.name);
     const [editedEmail, setEditedEmail] = useState(room.email);
@@ -45,6 +45,16 @@ const RoomItem = ({ room, onMove, onRemove, onSave, onUploadLogo, isFirst, isLas
                 />
                 <span>Alterar Logo</span>
             </label>
+            {room.logo_version > 0 && (
+                <button 
+                    type="button" 
+                    onClick={onRemoveLogo} 
+                    className="logo-remove-btn" 
+                    title="Remover logotipo"
+                >
+                    Remover Logo
+                </button>
+            )}
         </div>
     );
 
@@ -302,6 +312,25 @@ const AdminPage = ({ onThemeLoaded }) => {
         }
     };
 
+    const handleRemoveLogo = async (indexToUpdate) => {
+        const room = rooms[indexToUpdate];
+        try {
+            const response = await authenticatedFetch(`/api/rooms/${room.email}/logo`, {
+                method: 'DELETE',
+            });
+            if (!response.ok) throw new Error('Falha ao remover logotipo.');
+            
+            // Atualiza localmente a versão do logo daquela sala para 0
+            const updatedRooms = rooms.map((r, index) =>
+                index === indexToUpdate ? { ...r, logo_version: 0 } : r
+            );
+            setRooms(updatedRooms);
+            showMessage('Logotipo removido com sucesso!');
+        } catch (err) {
+            showValidationError(err.message);
+        }
+    };
+
     const handleSaveGraphConfig = async (e) => {
         e.preventDefault();
         try {
@@ -444,6 +473,7 @@ const AdminPage = ({ onThemeLoaded }) => {
                                                 onRemove={() => handleRemoveRoom(index)}
                                                 onSave={(updatedRoom) => handleSaveRoom(index, updatedRoom)}
                                                 onUploadLogo={(file) => handleUploadLogo(index, file)}
+                                                onRemoveLogo={() => handleRemoveLogo(index)}
                                                 isFirst={index === 0}
                                                 isLast={index === rooms.length - 1}
                                             />

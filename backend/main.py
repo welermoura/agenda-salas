@@ -223,6 +223,32 @@ async def upload_room_logo(email: str, file: UploadFile = File(...), current_use
     
     return {"message": "Logo enviado com sucesso.", "logo_version": room_found.logo_version}
 
+@app.delete("/api/rooms/{email}/logo")
+async def delete_room_logo(email: str, current_user: str = Depends(get_current_user)):
+    import os
+    room_found = None
+    for room in config_manager.app_config.rooms:
+        if room.email == email:
+            room_found = room
+            break
+            
+    if not room_found:
+        raise HTTPException(status_code=404, detail="Sala não encontrada.")
+
+    file_path = os.path.join(config_manager.DATA_DIR, "logos", f"{email}.png")
+    if os.path.exists(file_path):
+        try:
+            os.remove(file_path)
+        except Exception as e:
+            logging.error(f"Erro ao remover arquivo de logo para {email}: {e}", exc_info=True)
+            raise HTTPException(status_code=500, detail="Falha ao deletar arquivo de imagem.")
+
+    room_found.logo_version = 0
+    save_config(config_manager.app_config)
+    calendar_parser.clear_calendar_cache(email)
+    
+    return {"message": "Logo removido com sucesso."}
+
 @app.get("/api/rooms/{email}/logo")
 async def get_room_logo(email: str):
     import os
