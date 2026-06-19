@@ -1,0 +1,51 @@
+{
+    "is_configured": true,
+    "admin_password_hash": "$2b$12$lPQWws3L6ZJbOPp/wzRGxe38pJPnaWbiM.waZH6DdPIU/tuGOE2LK",
+    "jwt_secret_key": "uTY1HXTWhxNZmlvumDg4EH9dhO853uS2kjKxplnHVns",
+    "graph_tenant_id": "07d49b5e-b1e7-49e1-ab49-74596693c96f",
+    "graph_client_id": "efd6275b-6efb-48cb-8a5b-34c45b355df1",
+    "graph_client_secret": "gAAAAABqNZhB3ZzM6EH4fYBa7bKkyIPVPgSGPNe2euYFqeUI9_FHeOWZXaEei2Hm2KsIfJqpwWQvdufWtJUFiF02hw2xAyju9LseEIlc70Z_FMCuq1I6Uv6l8ebSubwYMozYveJmlvdk",
+    "rooms": [
+        {
+            "email": "Sala_Instituto@comolatti.com.br",
+            "name": "Instituto",
+            "logo_version": 1
+        },
+        {
+            "email": "sala_laguna@comolatti.com.br",
+            "name": "Laguna",
+            "logo_version": 4
+        },
+        {
+            "email": "Sala_pellegrino@comolatti.com.br",
+            "name": "Pellegrino",
+            "logo_version": 1
+        },
+        {
+            "email": "sala_rpr@comolatti.com.br",
+            "name": "RPR",
+            "logo_version": 1
+        },
+        {
+            "email": "sala_brautoparts@comolatti.com.br",
+            "name": "Brautoparts",
+            "logo_version": 1
+        },
+        {
+            "email": "sala_comolatti@comolatti.com.br",
+            "name": "Comolatti",
+            "logo_version": 1
+        },
+        {
+            "email": "sala_roles@comolatti.com.br",
+            "name": "Roles",
+            "logo_version": 2
+        },
+        {
+            "email": "sala_sama@comolatti.com.br",
+            "name": "Sama",
+            "logo_version": 1
+        }
+    ],
+    "selected_theme": "toxic"
+}
