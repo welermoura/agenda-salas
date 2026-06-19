@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Route, Routes, NavLink } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import AdminGuard from './AdminGuard'; // Importa o novo componente
 import DashboardPage from './DashboardPage';
 import './App.css';
@@ -53,14 +53,8 @@ function App() {
       <div className="App">
         <header className="app-header">
           <div className="header-left-controls">
-            <nav>
-              <ul>
-                <li><NavLink to="/" end>Dashboard</NavLink></li>
-                <li><NavLink to="/admin">Admin</NavLink></li>
-              </ul>
-            </nav>
             <button onClick={toggleMode} className="theme-toggle-button" aria-label="Alternar Claro/Escuro">
-              {mode === 'dark' ? '☀️' : '🌙'}
+              {mode === 'dark' ? '☀️ Modo Claro' : '🌙 Modo Escuro'}
             </button>
           </div>
           <h1 className="app-title">Disponibilidade das Salas de Reunião</h1>
