@@ -18,9 +18,21 @@ const AdminGuard = () => {
                 // Se já estiver configurado, verifica se há um token válido
                 if (data.is_configured) {
                     const token = localStorage.getItem('accessToken');
-                    // Idealmente, aqui haveria uma chamada para validar o token no backend
                     if (token) {
-                        setIsAuthenticated(true);
+                        try {
+                            const verifyResponse = await fetch('/api/verify', {
+                                headers: { 'Authorization': `Bearer ${token}` }
+                            });
+                            if (verifyResponse.ok) {
+                                setIsAuthenticated(true);
+                            } else {
+                                localStorage.removeItem('accessToken');
+                                setIsAuthenticated(false);
+                            }
+                        } catch (err) {
+                            console.error("Erro ao verificar validade do token:", err);
+                            setIsAuthenticated(false);
+                        }
                     }
                 }
             } catch (error) {

@@ -1,13 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, NavLink } from 'react-router-dom';
 import AdminGuard from './AdminGuard'; // Importa o novo componente
 import DashboardPage from './DashboardPage';
 import './App.css';
 
 function App() {
   const [currentTime, setCurrentTime] = useState(new Date());
-  // Estado para gerenciar o tema, lendo do localStorage ou usando 'light' como padrão
-  const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'light');
+  // Estado para gerenciar o tema, lendo do localStorage e migrando valores antigos se necessário
+  const [theme, setTheme] = useState(() => {
+    const saved = localStorage.getItem('theme');
+    if (saved === 'light') return 'classic-light';
+    if (saved === 'dark') return 'classic-dark';
+    return saved || 'classic-light';
+  });
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -33,11 +38,6 @@ function App() {
 
   const { date, time } = formatDateTime(currentTime);
 
-  // Função para alternar o tema
-  const toggleTheme = () => {
-    setTheme((prevTheme) => (prevTheme === 'dark' ? 'light' : 'dark'));
-  };
-
   return (
     <Router>
       {/* O atributo data-theme não é mais necessário aqui se estiver no body */}
@@ -46,13 +46,21 @@ function App() {
           <div className="header-left-controls">
             <nav>
               <ul>
-                <li><Link to="/">Dashboard</Link></li>
-                <li><Link to="/admin">Admin</Link></li>
+                <li><NavLink to="/" end>Dashboard</NavLink></li>
+                <li><NavLink to="/admin">Admin</NavLink></li>
               </ul>
             </nav>
-            <button onClick={toggleTheme} className="theme-toggle-button">
-              {theme === 'dark' ? '☀️' : '🌙'}
-            </button>
+            <select 
+              value={theme} 
+              onChange={(e) => setTheme(e.target.value)} 
+              className="theme-selector"
+              aria-label="Selecionar Tema"
+            >
+              <option value="classic-light">☀️ Clássico Claro</option>
+              <option value="classic-dark">🌙 Clássico Escuro</option>
+              <option value="neon-cyber">⚡ Neon Cyberpunk</option>
+              <option value="ocean-breeze">🌊 Ocean Breeze</option>
+            </select>
           </div>
           <h1 className="app-title">Disponibilidade das Salas de Reunião</h1>
           <div className="real-time-clock">

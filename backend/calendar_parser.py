@@ -3,7 +3,39 @@ import msal
 import requests
 import json
 import logging
+import time
 from datetime import timedelta
+
+# --- Função Auxiliar de Requisições com Retentativas (Retry Logic) ---
+
+def graph_request_with_retry(method, url, headers, params=None, timeout=10, max_retries=3):
+    backoff = 1
+    for attempt in range(max_retries):
+        try:
+            if method == "GET":
+                response = requests.get(url, headers=headers, params=params, timeout=timeout)
+            else:
+                response = requests.post(url, headers=headers, json=params, timeout=timeout)
+
+            if response.status_code in (429, 503):
+                retry_after = response.headers.get("Retry-After")
+                try:
+                    sleep_time = int(retry_after) if retry_after else (backoff * 2)
+                except ValueError:
+                    sleep_time = backoff * 2
+                logging.warning(f"API Graph retornou status {response.status_code}. Retentando em {sleep_time}s (Tentativa {attempt + 1}/{max_retries})")
+                time.sleep(sleep_time)
+                backoff *= 2
+                continue
+
+            return response
+        except requests.exceptions.RequestException as e:
+            if attempt == max_retries - 1:
+                raise
+            sleep_time = backoff * 2
+            logging.warning(f"Erro de conexão na API Graph: {e}. Retentando em {sleep_time}s (Tentativa {attempt + 1}/{max_retries})")
+            time.sleep(sleep_time)
+            backoff *= 2
 
 # Importa a configuração e os modelos partilhados do novo módulo
 import config_manager
@@ -16,7 +48,16 @@ token_cache = {
 }
 # Cache para os status das salas, para melhorar a performance de navegação de data
 calendar_cache = {}
-CACHE_TTL_SECONDS = 2
+CACHE_TTL_SECONDS = 30
+
+def clear_calendar_cache(email: str = None):
+    """Limpa o cache do calendário. Se email for fornecido, limpa apenas daquela sala."""
+    if email:
+        keys_to_remove = [k for k in calendar_cache.keys() if k[0] == email]
+        for k in keys_to_remove:
+            calendar_cache.pop(k, None)
+    else:
+        calendar_cache.clear()
 
 # Novo cache para mapear e-mails para IDs de objeto imutáveis
 user_id_cache = {}
@@ -68,7 +109,7 @@ def get_room_user_id(room_email: str, headers: dict):
 
     url = f"https://graph.microsoft.com/v1.0/users/{room_email}?$select=id"
     # Timeout adicionado para prevenir threads travadas
-    response = requests.get(url, headers=headers, timeout=10)
+    response = graph_request_with_retry("GET", url, headers=headers, timeout=10)
     response.raise_for_status() # Lança exceção para erros HTTP
     user_id = response.json().get('id')
     if user_id:
@@ -113,7 +154,7 @@ def get_room_status(room: Room, date_str: str | None = None):
         }
 
         # Timeout adicionado
-        response = requests.get(url, headers=headers, params=params, timeout=10)
+        response = graph_request_with_retry("GET", url, headers=headers, params=params, timeout=10)
         response.raise_for_status()
         events = response.json().get('value', [])
 
@@ -134,7 +175,7 @@ def get_room_status(room: Room, date_str: str | None = None):
                     # Nota: Simples repetição. Se o ID já estiver em cache, get_room_user_id retorna rápido.
                     user_id = get_room_user_id(room.email, headers)
                     url = f"https://graph.microsoft.com/v1.0/users/{user_id}/calendarView"
-                    response = requests.get(url, headers=headers, params=params, timeout=10)
+                    response = graph_request_with_retry("GET", url, headers=headers, params=params, timeout=10)
                     response.raise_for_status()
                     events = response.json().get('value', [])
                     # Se tiver sucesso, processa os eventos no bloco normal abaixo
@@ -183,7 +224,7 @@ def get_room_status(room: Room, date_str: str | None = None):
                     time_slots[slot_key] = 'ocupado'
                 current_slot_time = current_slot_time.shift(minutes=30)
 
-        result = {"nome": room.name, "status": time_slots}
+        result = {"nome": room.name, "logo_version": room.logo_version, "status": time_slots}
         calendar_cache[cache_key] = {'timestamp': now_utc, 'data': result}
         return result
 

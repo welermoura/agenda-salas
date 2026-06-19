@@ -2,11 +2,12 @@ import asyncio
 import json
 import logging
 from contextlib import asynccontextmanager
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 import secrets
 
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, Depends
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, Depends, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 import uvicorn
 
@@ -42,6 +43,8 @@ def get_password_hash(password):
 
 def create_access_token(data: dict):
     to_encode = data.copy()
+    expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
@@ -63,13 +66,18 @@ async def update_scheduler():
             if config_manager.app_config.is_configured and config_manager.app_config.rooms:
                 today_str = datetime.now().strftime('%Y-%m-%d')
                 statuses = {}
-                for room in config_manager.app_config.rooms:
-                    status = calendar_parser.get_room_status(room, today_str)
-                    statuses[room.email] = status
+                rooms = config_manager.app_config.rooms
+                tasks = [asyncio.to_thread(calendar_parser.get_room_status, room, today_str) for room in rooms]
+                results = await asyncio.gather(*tasks)
+                for room, status in zip(rooms, results):
+                    status_copy = status.copy() if isinstance(status, dict) else {}
+                    if "error" not in status_copy:
+                        status_copy["logo_version"] = room.logo_version
+                    statuses[room.email] = status_copy
 
                 await manager.broadcast(json.dumps({"date": today_str, "statuses": statuses}))
 
-            await asyncio.sleep(3)
+            await asyncio.sleep(5)
         except Exception as e:
             logging.error(f"Erro no loop de atualização do scheduler: {e}", exc_info=True)
             # Em caso de erro (ex: falha de rede), espera mais para evitar spam
@@ -165,7 +173,82 @@ async def get_rooms(current_user: str = Depends(get_current_user)):
 async def update_rooms(rooms: list[Room], current_user: str = Depends(get_current_user)):
     config_manager.app_config.rooms = rooms
     save_config(config_manager.app_config)
+    calendar_parser.clear_calendar_cache()
     return {"message": "Rooms updated successfully."}
+
+@app.post("/api/rooms/{email}/logo")
+async def upload_room_logo(email: str, file: UploadFile = File(...), current_user: str = Depends(get_current_user)):
+    import os
+    room_found = None
+    for room in config_manager.app_config.rooms:
+        if room.email == email:
+            room_found = room
+            break
+            
+    if not room_found:
+        raise HTTPException(status_code=404, detail="Sala não encontrada.")
+
+    logos_dir = os.path.join(config_manager.DATA_DIR, "logos")
+    os.makedirs(logos_dir, exist_ok=True)
+
+    ext = file.filename.split('.')[-1].lower()
+    if ext not in ('png', 'jpg', 'jpeg', 'svg', 'gif', 'webp'):
+        raise HTTPException(status_code=400, detail="Formato de arquivo não suportado.")
+
+    file_path = os.path.join(logos_dir, f"{email}.png")
+    try:
+        content = await file.read()
+        from PIL import Image
+        import io
+        try:
+            image = Image.open(io.BytesIO(content))
+            # Preserva transparência se o formato original suportar, caso contrário converte para RGB
+            if image.mode in ("RGBA", "LA") or (image.mode == "P" and "transparency" in image.info):
+                image = image.convert("RGBA")
+            else:
+                image = image.convert("RGB")
+            # Salva como PNG otimizado
+            image.save(file_path, "PNG", optimize=True)
+        except Exception as img_err:
+            logging.error(f"Erro ao converter imagem com Pillow para {email}: {img_err}", exc_info=True)
+            with open(file_path, "wb") as f:
+                f.write(content)
+    except Exception as e:
+        logging.error(f"Erro ao salvar logo da sala {email}: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Falha ao gravar arquivo de imagem.")
+
+    room_found.logo_version += 1
+    save_config(config_manager.app_config)
+    calendar_parser.clear_calendar_cache(email)
+    
+    return {"message": "Logo enviado com sucesso.", "logo_version": room_found.logo_version}
+
+@app.get("/api/rooms/{email}/logo")
+async def get_room_logo(email: str):
+    import os
+    file_path = os.path.join(config_manager.DATA_DIR, "logos", f"{email}.png")
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="Logo não encontrado.")
+    
+    # Detecta o tipo de mídia real a partir dos cabeçalhos do arquivo
+    media_type = "image/png"
+    try:
+        with open(file_path, "rb") as f:
+            header = f.read(12)
+            if header.startswith(b"\x89PNG\r\n\x1a\n"):
+                media_type = "image/png"
+            elif header.startswith(b"\xff\xd8\xff"):
+                media_type = "image/jpeg"
+            elif header.startswith(b"GIF87a") or header.startswith(b"GIF89a"):
+                media_type = "image/gif"
+            elif header.startswith(b"RIFF") and b"WEBP" in header[8:12]:
+                media_type = "image/webp"
+            elif b"<svg" in header.lower() or header.startswith(b"<?xml"):
+                media_type = "image/svg+xml"
+    except Exception:
+        pass
+
+    return FileResponse(file_path, media_type=media_type)
 
 class GraphConfig(BaseModel):
     tenant_id: str
@@ -199,6 +282,49 @@ async def change_password(password_data: PasswordChange, current_user: str = Dep
     save_config(config_manager.app_config)
     return {"message": "Password updated successfully."}
 
+@app.get("/api/verify")
+async def verify_token(current_user: str = Depends(get_current_user)):
+    return {"status": "valid", "username": current_user}
+
+@app.get("/api/diagnostics")
+async def get_diagnostics(current_user: str = Depends(get_current_user)):
+    import requests
+    token = calendar_parser.get_graph_access_token()
+    if not token:
+        return {
+            "status": "error",
+            "message": "Falha ao obter token da API Graph. Verifique as credenciais do Azure AD."
+        }
+    
+    headers = {'Authorization': f'Bearer {token}'}
+    try:
+        response = await asyncio.to_thread(
+            requests.get,
+            "https://graph.microsoft.com/v1.0/organization",
+            headers=headers,
+            timeout=5
+        )
+        if response.status_code == 200:
+            return {
+                "status": "ok",
+                "message": "Conexão com a API Graph estabelecida com sucesso."
+            }
+        else:
+            try:
+                error_details = response.json()
+                msg = error_details.get("error", {}).get("message", "N/A")
+            except Exception:
+                msg = "Erro desconhecido"
+            return {
+                "status": "error",
+                "message": f"Erro da API Graph (Status {response.status_code}): {msg}"
+            }
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": f"Erro ao conectar com a API Graph: {str(e)}"
+        }
+
 # --- WebSocket ---
 class ConnectionManager:
     def __init__(self):
@@ -229,9 +355,14 @@ async def websocket_endpoint(websocket: WebSocket):
 
                 if date_str and config_manager.app_config.is_configured:
                     statuses = {}
-                    for room in config_manager.app_config.rooms:
-                        status = calendar_parser.get_room_status(room, date_str)
-                        statuses[room.email] = status
+                    rooms = config_manager.app_config.rooms
+                    tasks = [asyncio.to_thread(calendar_parser.get_room_status, room, date_str) for room in rooms]
+                    results = await asyncio.gather(*tasks)
+                    for room, status in zip(rooms, results):
+                        status_copy = status.copy() if isinstance(status, dict) else {}
+                        if "error" not in status_copy:
+                            status_copy["logo_version"] = room.logo_version
+                        statuses[room.email] = status_copy
 
                     await websocket.send_text(json.dumps({"date": date_str, "statuses": statuses}))
             except WebSocketDisconnect:

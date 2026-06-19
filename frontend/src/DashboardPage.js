@@ -1,7 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 // --- Funções Auxiliares de Data ---
-// Formata um objeto Date para 'YYYY-MM-DD' ou 'DD/MM/YYYY'
 const formatDate = (date, format = 'YYYY-MM-DD') => {
     const year = date.getFullYear();
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
@@ -12,42 +11,89 @@ const formatDate = (date, format = 'YYYY-MM-DD') => {
     return `${year}-${month}-${day}`;
 };
 
-// Adiciona ou subtrai dias de uma data no formato 'YYYY-MM-DD'
 const addDays = (dateStr, days) => {
-    const date = new Date(dateStr + 'T00:00:00'); // Adiciona T00:00:00 para evitar problemas de fuso
+    const date = new Date(dateStr + 'T00:00:00');
     date.setDate(date.getDate() + days);
     return formatDate(date);
 };
-// --- Fim das Funções Auxiliares ---
 
+// Slots de 30 minutos das 08:00 às 19:30 (total de 24 slots)
+const TIME_SLOTS = [
+    "08:00", "08:30", "09:00", "09:30", "10:00", "10:30", 
+    "11:00", "11:30", "12:00", "12:30", "13:00", "13:30", 
+    "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", 
+    "17:00", "17:30", "18:00", "18:30", "19:00", "19:30"
+];
+
+// Marcadores de hora para exibir na régua da timeline Gantt
+const HOUR_MARKERS = [
+    { label: "08:00", position: 0 },
+    { label: "10:00", position: 16.66 },
+    { label: "12:00", position: 33.33 },
+    { label: "14:00", position: 50.00 },
+    { label: "16:00", position: 66.66 },
+    { label: "18:00", position: 83.33 },
+    { label: "20:00", position: 100.00 }
+];
 
 const DashboardPage = () => {
     const [schedules, setSchedules] = useState(null);
     const [loading, setLoading] = useState(true);
     const [selectedDate, setSelectedDate] = useState(formatDate(new Date()));
-    const [scheduleCache, setScheduleCache] = useState({}); // Cache para as agendas
-    const [displayHour, setDisplayHour] = useState(new Date().getHours()); // Novo estado para a hora de exibição
+    const [scheduleCache, setScheduleCache] = useState({});
+    
+    // Controles de Pesquisa e Filtros
+    const [searchTerm, setSearchTerm] = useState('');
+    const [statusFilter, setStatusFilter] = useState('all');
+    const [expandedRooms, setExpandedRooms] = useState({});
+
+    // Indicador da linha de tempo atual (%)
+    const [nowPosition, setNowPosition] = useState(null);
 
     const ws = useRef(null);
-    const scrollContainerRef = useRef(null); // Ref para o contêiner de rolagem
-    // Usa a variável de ambiente se definida, senão usa o host da janela como fallback
     const WS_URL = process.env.REACT_APP_WS_URL || `ws://${window.location.host}/ws`;
-    const selectedDateRef = useRef(selectedDate); // Ref para evitar closure estagnado
+    const selectedDateRef = useRef(selectedDate);
 
-    // Atualiza a ref sempre que a data selecionada mudar
+    // Efeito para sincronizar a ref da data
     useEffect(() => {
         selectedDateRef.current = selectedDate;
     }, [selectedDate]);
 
+    // Efeito para calcular a posição vertical vermelha (Live Time Indicator)
+    const updateTimeIndicator = useCallback(() => {
+        const isToday = selectedDate === formatDate(new Date());
+        if (!isToday) {
+            setNowPosition(null);
+            return;
+        }
 
-    // Efeito para gerenciar a conexão WebSocket e o recebimento de dados
+        const now = new Date();
+        const currentMinutes = now.getHours() * 60 + now.getMinutes();
+        const startMinutes = 8 * 60;   // 08:00
+        const endMinutes = 20 * 60;    // 20:00 (fim do slot das 19:30)
+
+        if (currentMinutes >= startMinutes && currentMinutes <= endMinutes) {
+            const pos = ((currentMinutes - startMinutes) / (endMinutes - startMinutes)) * 100;
+            setNowPosition(pos);
+        } else {
+            setNowPosition(null);
+        }
+    }, [selectedDate]);
+
+    useEffect(() => {
+        updateTimeIndicator();
+        const timer = setInterval(updateTimeIndicator, 30000); // Atualiza a cada 30 segundos
+        return () => clearInterval(timer);
+    }, [updateTimeIndicator]);
+
+    // Conexão WebSocket
     useEffect(() => {
         const connect = () => {
+            console.log("Tentando conectar ao WebSocket...");
             ws.current = new WebSocket(WS_URL);
 
             ws.current.onopen = () => {
                 console.log("Conexão WebSocket estabelecida.");
-                // Solicita os dados para a data inicial se não estiverem em cache
                 if (!scheduleCache[selectedDateRef.current]) {
                     ws.current.send(JSON.stringify({ date: selectedDateRef.current }));
                 }
@@ -55,20 +101,22 @@ const DashboardPage = () => {
 
             ws.current.onmessage = (event) => {
                 const data = JSON.parse(event.data);
-                // Atualiza o cache com os novos dados
                 setScheduleCache(prevCache => ({ ...prevCache, [data.date]: data.statuses }));
 
-                // Se os dados recebidos forem para a data atualmente selecionada, atualiza a UI
                 if (data.date === selectedDateRef.current) {
                     setSchedules(data.statuses);
                     setLoading(false);
                 }
             };
 
-            ws.current.onclose = () => console.log("Conexão WebSocket fechada.");
+            ws.current.onclose = (event) => {
+                console.log("Conexão WebSocket fechada. Tentando reconectar em 5 segundos...", event.reason);
+                setTimeout(connect, 5000);
+            };
+
             ws.current.onerror = (error) => {
                 console.error("Erro no WebSocket:", error);
-                setLoading(false);
+                ws.current.close();
             };
         };
 
@@ -77,89 +125,113 @@ const DashboardPage = () => {
         return () => {
             if (ws.current) ws.current.close();
         };
-        // Roda apenas uma vez para estabelecer a conexão
     }, [WS_URL]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    // Efeito para solicitar dados quando a data selecionada muda
+    // Efeito para atualizar visualização ao mudar de data ou obter do cache
     useEffect(() => {
         if (scheduleCache[selectedDate]) {
-            // Se os dados estiverem no cache, usa-os diretamente
             setSchedules(scheduleCache[selectedDate]);
             setLoading(false);
         } else {
-            // Caso contrário, solicita ao WebSocket se a conexão estiver aberta
             setLoading(true);
             if (ws.current && ws.current.readyState === WebSocket.OPEN) {
                 ws.current.send(JSON.stringify({ date: selectedDate }));
             }
-            // Se a conexão não estiver aberta, o 'onopen' do primeiro useEffect fará a solicitação inicial.
         }
     }, [selectedDate, scheduleCache]);
 
-    // Gera as horas cheias para as linhas, das 8:00 às 19:00
-    const hours = Array.from({ length: 12 }, (_, i) => (i + 8).toString().padStart(2, '0'));
-
-    // Extrai as salas para as colunas, garantindo que schedules não seja nulo
-    const rooms = schedules ? Object.entries(schedules).map(([url, data]) => ({ url, nome: data.nome })) : [];
-
-    const isToday = selectedDate === formatDate(new Date());
-
-    // Efeito para monitorar a mudança da hora e acionar a rolagem
+    // Pré-carregamento (Prefetch) do dia seguinte
     useEffect(() => {
-        if (isToday) {
-            const timer = setInterval(() => {
-                const currentHour = new Date().getHours();
-                setDisplayHour(prevHour => {
-                    if (currentHour !== prevHour) {
-                        return currentHour;
-                    }
-                    return prevHour;
-                });
-            }, 1000 * 60); // Verifica a cada minuto
-
-            return () => clearInterval(timer);
-        }
-    }, [isToday]);
-
-    // Efeito para rolar para a hora atual (agora depende de displayHour)
-    useEffect(() => {
-        if (!loading && isToday) {
-            const scrollTimer = setTimeout(() => {
-                const hour = displayHour.toString().padStart(2, '0');
-                const currentHourRowId = `hour-row-${hour}`;
-                const element = document.getElementById(currentHourRowId);
-                const container = scrollContainerRef.current;
-
-                if (element && container) {
-                    // Define a posição da barra de rolagem para o topo do elemento da hora atual.
-                    // O navegador lidará com o offset criado pelo cabeçalho "sticky".
-                    container.scrollTop = element.offsetTop;
-                }
-            }, 100);
-
-            return () => clearTimeout(scrollTimer);
-        }
-    }, [loading, isToday, displayHour]);
-
-
-    // Efeito para pré-carregar (pre-fetch) o dia seguinte
-    useEffect(() => {
-        // Só executa se o carregamento da data atual estiver concluído e a conexão WS estiver aberta
         if (!loading && ws.current && ws.current.readyState === WebSocket.OPEN) {
             const nextDate = addDays(selectedDate, 1);
-
-            // Pré-carrega o dia seguinte se ainda não estiver no cache
             if (!scheduleCache[nextDate]) {
                 console.log(`Pré-carregando dados para: ${nextDate}`);
                 ws.current.send(JSON.stringify({ date: nextDate }));
             }
         }
-    }, [loading, selectedDate, scheduleCache]); // Roda sempre que a data selecionada ou o estado de loading muda
+    }, [loading, selectedDate, scheduleCache]);
 
+    // Helpers de Status da Sala
+    const getRoomCurrentStatus = (roomData) => {
+        if (!roomData || roomData.error) return 'offline';
+        
+        const now = new Date();
+        const hour = now.getHours();
+        const minutes = now.getMinutes() >= 30 ? '30' : '00';
+        const currentSlotKey = `${hour.toString().padStart(2, '0')}:${minutes}`;
+        
+        const status = roomData.status || {};
+        return status[currentSlotKey] || 'offline';
+    };
+
+    const getMeetingProgress = (roomStatus) => {
+        if (!roomStatus) return null;
+        
+        const now = new Date();
+        const currentMinutes = now.getHours() * 60 + now.getMinutes();
+        const startOfDayMinutes = 8 * 60; // 08:00
+        const endOfDayMinutes = 20 * 60;  // 20:00
+        
+        // Se estiver fora do horário da grade, não calcula progresso
+        if (currentMinutes < startOfDayMinutes || currentMinutes > endOfDayMinutes) {
+            return null;
+        }
+
+        const currentHour = now.getHours();
+        const currentHalf = now.getMinutes() >= 30 ? '30' : '00';
+        const currentSlotKey = `${currentHour.toString().padStart(2, '0')}:${currentHalf}`;
+        
+        if (roomStatus[currentSlotKey] !== 'ocupado') {
+            return null;
+        }
+
+        // 1. Procurar início da reunião (voltando no tempo)
+        let startSlotIdx = TIME_SLOTS.indexOf(currentSlotKey);
+        while (startSlotIdx > 0 && roomStatus[TIME_SLOTS[startSlotIdx - 1]] === 'ocupado') {
+            startSlotIdx--;
+        }
+        const [startH, startM] = TIME_SLOTS[startSlotIdx].split(':').map(Number);
+        const startMinutes = startH * 60 + startM;
+
+        // 2. Procurar fim da reunião (avançando no tempo)
+        let endSlotIdx = TIME_SLOTS.indexOf(currentSlotKey);
+        while (endSlotIdx < TIME_SLOTS.length - 1 && roomStatus[TIME_SLOTS[endSlotIdx + 1]] === 'ocupado') {
+            endSlotIdx++;
+        }
+        
+        // O fim da reunião é o início do próximo slot livre ou 20:00 se for o último slot
+        let endMinutes;
+        if (endSlotIdx === TIME_SLOTS.length - 1) {
+            endMinutes = 20 * 60; // 20:00
+        } else {
+            const [nextH, nextM] = TIME_SLOTS[endSlotIdx + 1].split(':').map(Number);
+            endMinutes = nextH * 60 + nextM;
+        }
+
+        const totalDuration = endMinutes - startMinutes;
+        const elapsed = currentMinutes - startMinutes;
+        const timeLeft = endMinutes - currentMinutes;
+        const percentage = totalDuration > 0 ? Math.min(Math.max((elapsed / totalDuration) * 100, 0), 100) : 0;
+
+        return {
+            timeLeft,
+            percentage,
+            totalDuration
+        };
+    };
+
+    const getStatusText = (status) => {
+        if (status === 'livre') return 'Livre';
+        if (status === 'ocupado') return 'Ocupada';
+        return 'Indisponível';
+    };
+
+    const toggleExpandRoom = (email) => {
+        setExpandedRooms(prev => ({ ...prev, [email]: !prev[email] }));
+    };
 
     const goToToday = () => {
-        const today = formatDate(new Date());
-        setSelectedDate(today);
+        setSelectedDate(formatDate(new Date()));
         setLoading(true);
     };
 
@@ -173,12 +245,60 @@ const DashboardPage = () => {
         setLoading(true);
     };
 
-    // Formata a data para exibição no formato DD/MM/YYYY
-    const displayDate = formatDate(new Date(selectedDate + 'T00:00:00'), 'DD/MM/YYYY');
+    // Filtros e Pesquisa
+    const rooms = schedules ? Object.entries(schedules).map(([url, data]) => ({ url, nome: data.nome, logo_version: data.logo_version || 0 })) : [];
 
+    const filteredRooms = rooms.filter(room => {
+        const matchesSearch = room.nome.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                              room.url.toLowerCase().includes(searchTerm.toLowerCase());
+        if (!matchesSearch) return false;
+
+        const roomData = schedules && schedules[room.url];
+        const currentStatus = getRoomCurrentStatus(roomData);
+
+        if (statusFilter === 'free') return currentStatus === 'livre';
+        if (statusFilter === 'busy') return currentStatus === 'ocupado';
+        return true;
+    });
+
+    const isToday = selectedDate === formatDate(new Date());
 
     return (
         <div className="dashboard-page">
+            {/* Controles de Busca e Filtro Rápido */}
+            <div className="search-filter-container">
+                <div className="search-wrapper">
+                    <input
+                        type="text"
+                        placeholder="Buscar sala por nome ou e-mail..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="search-input"
+                    />
+                </div>
+                <div className="filter-buttons">
+                    <button 
+                        onClick={() => setStatusFilter('all')} 
+                        className={`filter-btn ${statusFilter === 'all' ? 'active' : ''}`}
+                    >
+                        Todas
+                    </button>
+                    <button 
+                        onClick={() => setStatusFilter('free')} 
+                        className={`filter-btn ${statusFilter === 'free' ? 'active' : ''}`}
+                    >
+                        Livres Agora
+                    </button>
+                    <button 
+                        onClick={() => setStatusFilter('busy')} 
+                        className={`filter-btn ${statusFilter === 'busy' ? 'active' : ''}`}
+                    >
+                        Ocupadas Agora
+                    </button>
+                </div>
+            </div>
+
+            {/* Controle de Navegação de Data */}
             <div className="date-navigation">
                 <button onClick={goToPreviousDay} className="nav-button">Anterior</button>
                 <input
@@ -191,63 +311,149 @@ const DashboardPage = () => {
                 <button onClick={goToToday} className="today-button">Hoje</button>
             </div>
 
+            {/* Renderização condicional de Loading / Esqueletos */}
             {(loading || schedules === null) ? (
-                <div className="loading-message">
-                    <div className="spinner"></div>
-                    <span>Carregando Agendas para {displayDate}, favor aguarde...</span>
+                <div className="skeleton-container">
+                    <div className="skeleton-header"></div>
+                    <div className="skeleton-row"><div className="skeleton-left"><div className="skeleton-text title"></div><div className="skeleton-text sub"></div><div className="skeleton-text badge"></div></div><div className="skeleton-right"><div className="skeleton-track"></div></div></div>
+                    <div className="skeleton-row"><div className="skeleton-left"><div className="skeleton-text title"></div><div className="skeleton-text sub"></div><div className="skeleton-text badge"></div></div><div className="skeleton-right"><div className="skeleton-track"></div></div></div>
+                    <div className="skeleton-row"><div className="skeleton-left"><div className="skeleton-text title"></div><div className="skeleton-text sub"></div><div className="skeleton-text badge"></div></div><div className="skeleton-right"><div className="skeleton-track"></div></div></div>
                 </div>
             ) : (
                 <>
-                    {rooms.length === 0 ? (
-                        <p>Nenhuma agenda cadastrada. Adicione uma na <a href="/admin">página de administração</a>.</p>
+                    {filteredRooms.length === 0 ? (
+                        <p style={{ textAlign: 'center', marginTop: '40px', color: 'var(--text-muted)' }}>
+                            Nenhuma sala encontrada para os filtros aplicados.
+                        </p>
                     ) : (
-                        <div className="table-scroll-container" ref={scrollContainerRef}>
-                            <table className="schedule-table schedule-table-vertical">
-                                <thead>
-                                    <tr>
-                                        <th className="time-header-cell">Horário</th>
-                                        {rooms.map(room => <th key={room.url}>{room.nome}</th>)}
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {hours.map(hour => (
-                                        <tr key={hour} id={`hour-row-${hour}`}>
-                                            <th className="time-cell">{hour}:00</th>
-                                            {rooms.map(room => {
-                                                const roomData = schedules && schedules[room.url];
-
-                                                // Se não houver dados ou se houver um erro, exibe uma célula de erro.
-                                                if (!roomData || roomData.error) {
-                                                    const errorMessage = roomData?.error || "Erro ao carregar dados.";
-                                                    return (
-                                                        <td key={room.url} className="status-cell">
-                                                            <div className="status-error" title={errorMessage}>
-                                                                {errorMessage}
-                                                            </div>
-                                                        </td>
-                                                    );
-                                                }
-
-                                                const status = roomData.status || {};
-                                                const slot1_status = status[`${hour}:00`] || 'indisponivel';
-                                                const slot2_status = status[`${hour}:30`] || 'indisponivel';
-
-                                                return (
-                                                    <td key={room.url} className="status-cell">
-                                                        <div className={`half-hour-slot slot-top status-${slot1_status}`}>
-                                                            {slot1_status.charAt(0).toUpperCase() + slot1_status.slice(1)}
-                                                        </div>
-                                                        <div className={`half-hour-slot slot-bottom status-${slot2_status}`}>
-                                                            {slot2_status.charAt(0).toUpperCase() + slot2_status.slice(1)}
-                                                        </div>
-                                                    </td>
-                                                );
-                                            })}
-                                        </tr>
+                        <>
+                            {/* Horários das Colunas (Apenas Desktop) */}
+                            <div className="timeline-header-row">
+                                <div className="timeline-hour-markers">
+                                    {HOUR_MARKERS.map(marker => (
+                                        <span 
+                                            key={marker.label} 
+                                            className="time-marker" 
+                                            style={{ left: `${marker.position}%` }}
+                                        >
+                                            {marker.label}
+                                        </span>
                                     ))}
-                                </tbody>
-                            </table>
-                        </div>
+                                </div>
+                            </div>
+
+                            {/* Lista de Salas */}
+                            <div className="rooms-list">
+                                {filteredRooms.map(room => {
+                                    const roomData = schedules[room.url];
+                                    const currentStatus = getRoomCurrentStatus(roomData);
+                                    const isExpanded = !!expandedRooms[room.url];
+
+                                    return (
+                                        <div key={room.url} className="room-row-container">
+                                            <div className="room-row">
+                                                {/* Card da Sala (Esquerda) */}
+                                                <div className="room-card-panel">
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                                                        {room.logo_version > 0 ? (
+                                                            <img 
+                                                                src={`/api/rooms/${room.url}/logo?v=${room.logo_version}`} 
+                                                                alt="Logo" 
+                                                                className="room-logo"
+                                                                onError={(e) => {
+                                                                    e.target.style.display = 'none';
+                                                                    const fallback = e.target.parentElement.querySelector('.room-avatar-fallback');
+                                                                    if (fallback) fallback.style.display = 'flex';
+                                                                }}
+                                                            />
+                                                        ) : null}
+                                                        <div 
+                                                            className="room-avatar-fallback" 
+                                                            style={{ display: room.logo_version > 0 ? 'none' : 'flex' }}
+                                                        >
+                                                            {room.nome ? room.nome.charAt(0).toUpperCase() : '?'}
+                                                        </div>
+                                                        <div className="room-info-top" style={{ margin: 0 }}>
+                                                            <h3 style={{ margin: 0 }}>{room.nome}</h3>
+                                                            <div className="room-email">{room.url}</div>
+                                                        </div>
+                                                    </div>
+                                                     <div className={`room-status-badge status-${currentStatus}`}>
+                                                         <span className="status-dot"></span>
+                                                         {getStatusText(currentStatus)}
+                                                     </div>
+                                                     {(() => {
+                                                         if (currentStatus !== 'ocupado') return null;
+                                                         const progress = getMeetingProgress(roomData?.status);
+                                                         if (!progress) return null;
+                                                         return (
+                                                             <div className="meeting-progress-container">
+                                                                 <div className="progress-bar-bg">
+                                                                     <div className="progress-bar-fill" style={{ width: `${progress.percentage}%` }}></div>
+                                                                 </div>
+                                                                 <span className="progress-text">Faltam {progress.timeLeft} min para liberar</span>
+                                                             </div>
+                                                         );
+                                                     })()}
+                                                     <button 
+                                                         onClick={() => toggleExpandRoom(room.url)} 
+                                                         className="mobile-expand-btn"
+                                                     >
+                                                        {isExpanded ? 'Ocultar Horários' : 'Ver Horários'}
+                                                    </button>
+                                                </div>
+
+                                                {/* Track da Timeline Gantt (Direita - Apenas Desktop) */}
+                                                <div className="timeline-track-panel">
+                                                    <div className="timeline-track">
+                                                        {/* Indicador de Tempo Atual */}
+                                                        {isToday && nowPosition !== null && (
+                                                            <div 
+                                                                className="live-time-indicator" 
+                                                                style={{ left: `${nowPosition}%` }}
+                                                                title="Hora Atual"
+                                                            ></div>
+                                                        )}
+
+                                                        {/* Desenha as 24 Células de Horário */}
+                                                        {TIME_SLOTS.map(slot => {
+                                                            const status = roomData?.status?.[slot] || 'indisponivel';
+                                                            return (
+                                                                <div 
+                                                                    key={slot} 
+                                                                    className={`timeline-slot status-${status}`}
+                                                                    title={`${slot} - ${getStatusText(status)}`}
+                                                                ></div>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Visão de Grade de Horários (Apenas Mobile - Expansível) */}
+                                            {isExpanded && (
+                                                <div className="mobile-slots-grid">
+                                                    {TIME_SLOTS.map(slot => {
+                                                        const status = roomData?.status?.[slot] || 'indisponivel';
+                                                        return (
+                                                            <div 
+                                                                key={slot} 
+                                                                className={`mobile-slot status-${status}`}
+                                                            >
+                                                                <div>{slot}</div>
+                                                                <div style={{ fontSize: '9px', opacity: 0.8 }}>
+                                                                    {getStatusText(status)}
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </>
                     )}
                 </>
             )}

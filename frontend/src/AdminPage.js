@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import './AdminPage.css';
 
 // Componente para um item da lista de salas, agora com estado de edição
-const RoomItem = ({ room, onMove, onRemove, onSave, isFirst, isLast }) => {
+const RoomItem = ({ room, onMove, onRemove, onSave, onUploadLogo, isFirst, isLast }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [editedName, setEditedName] = useState(room.name);
     const [editedEmail, setEditedEmail] = useState(room.email);
@@ -12,12 +12,51 @@ const RoomItem = ({ room, onMove, onRemove, onSave, isFirst, isLast }) => {
         setIsEditing(false);
     };
 
+    const logoContainer = (
+        <div className="room-logo-container">
+            {room.logo_version > 0 ? (
+                <img 
+                    src={`/api/rooms/${room.email}/logo?v=${room.logo_version}`} 
+                    alt="Logo" 
+                    className="room-logo-thumb"
+                    onError={(e) => {
+                        e.target.style.display = 'none';
+                        const fallback = e.target.parentElement.querySelector('.room-avatar-thumb');
+                        if (fallback) fallback.style.display = 'flex';
+                    }}
+                />
+            ) : null}
+            <div 
+                className="room-avatar-thumb" 
+                style={{ display: room.logo_version > 0 ? 'none' : 'flex' }}
+            >
+                {room.name ? room.name.charAt(0).toUpperCase() : '?'}
+            </div>
+            <label className="logo-upload-label">
+                <input 
+                    type="file" 
+                    accept="image/*" 
+                    onChange={(e) => {
+                        if (e.target.files && e.target.files[0]) {
+                            onUploadLogo(e.target.files[0]);
+                        }
+                    }} 
+                    style={{ display: 'none' }}
+                />
+                <span>Alterar Logo</span>
+            </label>
+        </div>
+    );
+
     if (isEditing) {
         return (
             <li>
-                <div className="agenda-info">
-                    <input type="text" value={editedName} onChange={(e) => setEditedName(e.target.value)} />
-                    <input type="email" value={editedEmail} onChange={(e) => setEditedEmail(e.target.value)} />
+                <div style={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
+                    {logoContainer}
+                    <div className="agenda-info" style={{ marginLeft: '12px', flexGrow: 1 }}>
+                        <input type="text" value={editedName} onChange={(e) => setEditedName(e.target.value)} style={{ marginBottom: '8px', width: '100%' }} />
+                        <input type="email" value={editedEmail} onChange={(e) => setEditedEmail(e.target.value)} style={{ width: '100%' }} />
+                    </div>
                 </div>
                 <div className="agenda-actions">
                     <button onClick={handleSave}>Salvar</button>
@@ -29,9 +68,12 @@ const RoomItem = ({ room, onMove, onRemove, onSave, isFirst, isLast }) => {
 
     return (
         <li>
-            <div className="agenda-info">
-                <strong>{room.name}</strong>
-                <span className="agenda-url">{room.email}</span>
+            <div style={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
+                {logoContainer}
+                <div className="agenda-info" style={{ marginLeft: '12px' }}>
+                    <strong>{room.name}</strong>
+                    <span className="agenda-url">{room.email}</span>
+                </div>
             </div>
             <div className="agenda-actions">
                 <button onClick={() => onMove(-1)} disabled={isFirst}>↑</button>
@@ -51,8 +93,11 @@ const useAuthenticatedFetch = () => {
         const headers = {
             ...options.headers,
             'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
         };
+
+        if (!(options.body instanceof FormData)) {
+            headers['Content-Type'] = 'application/json';
+        }
 
         const response = await fetch(url, { ...options, headers });
 
@@ -86,6 +131,23 @@ const AdminPage = () => {
     const [message, setMessage] = useState('');
 
     const authenticatedFetch = useAuthenticatedFetch();
+
+    const [diagStatus, setDiagStatus] = useState({ loading: true, status: '', message: '' });
+
+    const runDiagnostics = useCallback(async () => {
+        setDiagStatus(prev => ({ ...prev, loading: true }));
+        try {
+            const response = await authenticatedFetch('/api/diagnostics');
+            const data = await response.json();
+            setDiagStatus({ loading: false, status: data.status, message: data.message });
+        } catch (err) {
+            setDiagStatus({ loading: false, status: 'error', message: err.message });
+        }
+    }, [authenticatedFetch]);
+
+    useEffect(() => {
+        runDiagnostics();
+    }, [runDiagnostics]);
 
     // Carrega os dados iniciais (salas e config)
     useEffect(() => {
@@ -185,6 +247,29 @@ const AdminPage = () => {
         }
     };
 
+    const handleUploadLogo = async (indexToUpdate, file) => {
+        const room = rooms[indexToUpdate];
+        const formData = new FormData();
+        formData.append('file', file);
+        try {
+            const response = await authenticatedFetch(`/api/rooms/${room.email}/logo`, {
+                method: 'POST',
+                body: formData,
+            });
+            if (!response.ok) throw new Error('Falha ao enviar logotipo.');
+            const data = await response.json();
+            
+            // Atualiza localmente a versão do logo daquela sala
+            const updatedRooms = rooms.map((r, index) =>
+                index === indexToUpdate ? { ...r, logo_version: data.logo_version } : r
+            );
+            setRooms(updatedRooms);
+            showMessage('Logotipo enviado com sucesso!');
+        } catch (err) {
+            setError(err.message);
+        }
+    };
+
     const handleSaveGraphConfig = async (e) => {
         e.preventDefault();
         try {
@@ -231,6 +316,24 @@ const AdminPage = () => {
     return (
         <div className="admin-container">
             <h1>Administração</h1>
+
+            {/* Diagnósticos de Conexão */}
+            <div className={`diagnostics-bar status-${diagStatus.status}`}>
+                <div>
+                    <strong>Status de Conexão Azure AD:</strong>{' '}
+                    {diagStatus.loading ? (
+                        <span className="diag-loading">Carregando diagnóstico...</span>
+                    ) : (
+                        <span>{diagStatus.message}</span>
+                    )}
+                </div>
+                {!diagStatus.loading && (
+                    <button onClick={runDiagnostics} className="retry-diag-button">
+                        Testar Novamente
+                    </button>
+                )}
+            </div>
+
             {error && <p className="error-message">{error}</p>}
             {message && <p style={{ color: 'green', textAlign: 'center' }}>{message}</p>}
 
@@ -250,6 +353,7 @@ const AdminPage = () => {
                             onMove={(dir) => handleMoveRoom(index, dir)}
                             onRemove={() => handleRemoveRoom(index)}
                             onSave={(updatedRoom) => handleSaveRoom(index, updatedRoom)}
+                            onUploadLogo={(file) => handleUploadLogo(index, file)}
                             isFirst={index === 0}
                             isLast={index === rooms.length - 1}
                         />

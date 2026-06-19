@@ -2,13 +2,64 @@ import json
 import os
 import logging
 import time
+import base64
 from pydantic import BaseModel
+from cryptography.fernet import Fernet
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+
+# --- Funções de Criptografia Simétrica (Fernet) ---
+
+def get_encryption_key():
+    # Tenta obter a chave do ambiente
+    key_env = os.getenv("CONFIG_ENCRYPTION_KEY")
+    if key_env:
+        try:
+            # Verifica se já está no formato Fernet correto
+            Fernet(key_env.encode())
+            return key_env.encode()
+        except Exception:
+            pass
+    # Caso não exista, deriva uma chave baseada em um segredo estático
+    salt = b"agendasalas_salt_123"
+    kdf = PBKDF2HMAC(
+        algorithm=hashes.SHA256(),
+        length=32,
+        salt=salt,
+        iterations=100000,
+    )
+    key = base64.urlsafe_b64encode(kdf.derive(b"default_agendasalas_secret_key"))
+    return key
+
+_fernet = None
+def get_fernet():
+    global _fernet
+    if _fernet is None:
+        _fernet = Fernet(get_encryption_key())
+    return _fernet
+
+def encrypt_value(value: str) -> str:
+    if not value:
+        return value
+    f = get_fernet()
+    return f.encrypt(value.encode()).decode()
+
+def decrypt_value(value: str) -> str:
+    if not value:
+        return value
+    f = get_fernet()
+    try:
+        return f.decrypt(value.encode()).decode()
+    except Exception:
+        # Retorna o próprio valor se não puder descriptografar (retrocompatibilidade)
+        return value
 
 # --- Modelos de Dados Partilhados ---
 
 class Room(BaseModel):
     email: str
     name: str
+    logo_version: int = 0
 
 class AppConfig(BaseModel):
     is_configured: bool = False
@@ -61,6 +112,8 @@ def load_config() -> AppConfig:
 
                 config_data = json.load(f)
                 app_config = AppConfig(**config_data)
+                if app_config.graph_client_secret:
+                    app_config.graph_client_secret = decrypt_value(app_config.graph_client_secret)
 
             logging.info("Configuração carregada com sucesso.")
             return app_config # Sucesso, sai da função
@@ -77,8 +130,12 @@ def load_config() -> AppConfig:
 def save_config(config_to_save: AppConfig):
     """Guarda o objeto de configuração fornecido no ficheiro JSON, forçando a escrita em disco."""
     try:
+        config_copy = config_to_save.model_copy(deep=True)
+        if config_copy.graph_client_secret:
+            config_copy.graph_client_secret = encrypt_value(config_copy.graph_client_secret)
+            
         with open(CONFIG_FILE, "w") as f:
-            json.dump(config_to_save.model_dump(), f, indent=4)
+            json.dump(config_copy.model_dump(), f, indent=4)
             f.flush()
             os.fsync(f.fileno())
     except Exception as e:
