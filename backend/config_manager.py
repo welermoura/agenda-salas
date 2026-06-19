@@ -69,6 +69,7 @@ class AppConfig(BaseModel):
     graph_client_id: str | None = None
     graph_client_secret: str | None = None
     rooms: list[Room] = []
+    selected_theme: str = "classic"
 
 # --- Instância e Funções de Gerenciamento de Configuração ---
 

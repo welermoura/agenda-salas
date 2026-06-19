@@ -115,7 +115,7 @@ const useAuthenticatedFetch = () => {
 };
 
 
-const AdminPage = () => {
+const AdminPage = ({ onThemeLoaded }) => {
     const [rooms, setRooms] = useState([]);
     const [newRoomName, setNewRoomName] = useState('');
     const [newRoomEmail, setNewRoomEmail] = useState('');
@@ -123,6 +123,7 @@ const AdminPage = () => {
     const [tenantId, setTenantId] = useState('');
     const [clientId, setClientId] = useState('');
     const [newClientSecret, setNewClientSecret] = useState('');
+    const [selectedTheme, setSelectedTheme] = useState('classic');
 
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -165,13 +166,19 @@ const AdminPage = () => {
                 const configData = await configResponse.json();
                 setTenantId(configData.tenant_id);
                 setClientId(configData.client_id);
+                if (configData.selected_theme) {
+                    setSelectedTheme(configData.selected_theme);
+                    if (onThemeLoaded) {
+                        onThemeLoaded(configData.selected_theme);
+                    }
+                }
 
             } catch (err) {
                 setError(err.message);
             }
         };
         fetchData();
-    }, [authenticatedFetch]);
+    }, [authenticatedFetch, onThemeLoaded]);
 
     const showMessage = (msg) => {
         setMessage(msg);
@@ -277,16 +284,21 @@ const AdminPage = () => {
                 tenant_id: tenantId,
                 client_id: clientId,
                 client_secret: newClientSecret,
+                selected_theme: selectedTheme
             };
             const response = await authenticatedFetch('/api/config', {
                 method: 'POST',
                 body: JSON.stringify(body),
             });
-            if (!response.ok) throw new Error('Falha ao salvar configuração do Graph.');
+            if (!response.ok) throw new Error('Falha ao salvar as configurações.');
+
+            if (onThemeLoaded) {
+                onThemeLoaded(selectedTheme);
+            }
 
             // Limpa o campo do segredo após o envio bem-sucedido
             setNewClientSecret('');
-            showMessage('Configuração do Graph salva com sucesso!');
+            showMessage('Configurações salvas com sucesso!');
         } catch (err) {
             setError(err.message);
         }
@@ -371,6 +383,41 @@ const AdminPage = () => {
                     <button type="submit">Salvar Configuração do Graph</button>
                 </form>
                 <p>O Client Secret não é visualizado por segurança. Para o alterar, insira um novo valor no campo acima.</p>
+            </section>
+
+            {/* Configuração Visual e Temas */}
+            <section>
+                <h2>Tema Base do Dashboard</h2>
+                <form onSubmit={handleSaveGraphConfig} className="agenda-form">
+                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>Selecione o Tema Base para o Painel:</label>
+                    <select 
+                        value={selectedTheme} 
+                        onChange={e => setSelectedTheme(e.target.value)}
+                        style={{ padding: '10px', width: '100%', marginBottom: '16px', borderRadius: '6px', border: '1px solid #ccc', backgroundColor: '#fff', fontSize: '14px' }}
+                    >
+                        <option value="classic">📏 Clássico (Linha de Tempo Contínua)</option>
+                        <option value="cyber">⚡ Neon Cyberpunk (Holograma Digital)</option>
+                        <option value="ocean">🌊 Ocean Breeze (Cápsulas Flutuantes)</option>
+                        <option value="corporate">🏢 Corporate Minimal (Resumo Textual)</option>
+                        <option value="forest">🌲 Forest Moss (Tons de Terra & Linha Contínua)</option>
+                        <option value="sunset">🌅 Sunset Amber (Pôr do Sol & Cápsulas)</option>
+                        <option value="vintage">📜 Retro Sepia (Papel Envelhecido & Fading)</option>
+                        <option value="plum">🔮 Amethyst Plum (Ametista Roxo & Resumo Textual)</option>
+                        <option value="glacier">❄️ Glacier Ice (Tons Árticos & Linha Contínua)</option>
+                        <option value="mono">🖤 Monochrome Slate (Preto e Branco & Cápsulas)</option>
+                        <option value="mint">🌿 Mint Fresh (Hortelã & Linha Contínua)</option>
+                        <option value="rose">🌹 Rose Gold (Ouro Rosa & Cápsulas)</option>
+                        <option value="cosmic">🌌 Cosmic Nebula (Nebulosa Cósmica & Fading)</option>
+                        <option value="desert">🏜️ Desert Dunes (Dunas do Deserto & Linha Contínua)</option>
+                        <option value="steel">🔩 Industrial Steel (Aço Industrial & Resumo Textual)</option>
+                        <option value="luxury">👑 Luxury Gold (Ouro de Luxo & Cápsulas)</option>
+                        <option value="sakura">🌸 Cherry Sakura (Cerejeira Sakura & Resumo Textual)</option>
+                        <option value="candy">🍬 Candy Land (Mundo dos Doces & Fading)</option>
+                        <option value="aurora">✨ Arctic Aurora (Aurora Ártica & Cápsulas)</option>
+                        <option value="toxic">☣️ Toxic Acid (Ácido Tóxico & Fading)</option>
+                    </select>
+                    <button type="submit">Aplicar Tema ao Dashboard</button>
+                </form>
             </section>
 
             {/* Alteração de Senha */}

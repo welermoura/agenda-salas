@@ -254,24 +254,29 @@ class GraphConfig(BaseModel):
     tenant_id: str
     client_id: str
     client_secret: str | None = None
+    selected_theme: str | None = None
 
 @app.get("/api/config", response_model=GraphConfig)
 async def get_graph_config(current_user: str = Depends(get_current_user)):
     # Retorna a configuração SEM o client_secret por segurança
     return GraphConfig(
-        tenant_id=config_manager.app_config.graph_tenant_id,
-        client_id=config_manager.app_config.graph_client_id
+        tenant_id=config_manager.app_config.graph_tenant_id or "",
+        client_id=config_manager.app_config.graph_client_id or "",
+        selected_theme=config_manager.app_config.selected_theme
     )
 
 @app.post("/api/config")
 async def update_graph_config(config: GraphConfig, current_user: str = Depends(get_current_user)):
     config_manager.app_config.graph_tenant_id = config.tenant_id
     config_manager.app_config.graph_client_id = config.client_id
+    if config.selected_theme:
+        config_manager.app_config.selected_theme = config.selected_theme
     # Atualiza o segredo apenas se um novo valor não-vazio for fornecido
     if config.client_secret:
         config_manager.app_config.graph_client_secret = config.client_secret
     save_config(config_manager.app_config)
-    return {"message": "Graph configuration updated successfully."}
+    calendar_parser.clear_calendar_cache()
+    return {"message": "Configuration updated successfully."}
 
 class PasswordChange(BaseModel):
     new_password: str
@@ -364,7 +369,11 @@ async def websocket_endpoint(websocket: WebSocket):
                             status_copy["logo_version"] = room.logo_version
                         statuses[room.email] = status_copy
 
-                    await websocket.send_text(json.dumps({"date": date_str, "statuses": statuses}))
+                    await websocket.send_text(json.dumps({
+                        "date": date_str, 
+                        "statuses": statuses,
+                        "theme": config_manager.app_config.selected_theme
+                    }))
             except WebSocketDisconnect:
                 raise  # Re-levanta para ser tratado pelo bloco externo
             except Exception as e:

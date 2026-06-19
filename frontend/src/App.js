@@ -6,13 +6,18 @@ import './App.css';
 
 function App() {
   const [currentTime, setCurrentTime] = useState(new Date());
-  // Estado para gerenciar o tema, lendo do localStorage e migrando valores antigos se necessário
-  const [theme, setTheme] = useState(() => {
-    const saved = localStorage.getItem('theme');
-    if (saved === 'light') return 'classic-light';
-    if (saved === 'dark') return 'classic-dark';
-    return saved || 'classic-light';
+  // Estado para gerenciar o modo (claro/escuro), lendo do localStorage ou usando 'light'
+  const [mode, setMode] = useState(() => {
+    const saved = localStorage.getItem('mode');
+    if (saved === 'light' || saved === 'dark') return saved;
+    // Migração de chaves antigas se necessário
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme && savedTheme.includes('dark')) return 'dark';
+    return 'light';
   });
+
+  // Estado para armazenar o tema base configurado pelo administrador
+  const [baseTheme, setBaseTheme] = useState('classic');
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -21,12 +26,17 @@ function App() {
     return () => clearInterval(timer);
   }, []);
 
-  // Efeito para atualizar o localStorage e o atributo no body quando o tema muda
+  // Efeito para atualizar o localStorage e o atributo no body quando o modo ou tema base muda
   useEffect(() => {
-    localStorage.setItem('theme', theme);
-    // Aplica o tema no elemento raiz para que as variáveis CSS funcionem globalmente
-    document.body.setAttribute('data-theme', theme);
-  }, [theme]);
+    localStorage.setItem('mode', mode);
+    // Combina o tema base com o modo (ex: classic-light, cyber-dark, forest-light)
+    const fullThemeName = `${baseTheme}-${mode}`;
+    document.body.setAttribute('data-theme', fullThemeName);
+  }, [baseTheme, mode]);
+
+  const toggleMode = () => {
+    setMode((prevMode) => (prevMode === 'dark' ? 'light' : 'dark'));
+  };
 
   const formatDateTime = (date) => {
     const dateOptions = { weekday: 'long', day: 'numeric', month: 'long' };
@@ -40,7 +50,6 @@ function App() {
 
   return (
     <Router>
-      {/* O atributo data-theme não é mais necessário aqui se estiver no body */}
       <div className="App">
         <header className="app-header">
           <div className="header-left-controls">
@@ -50,30 +59,21 @@ function App() {
                 <li><NavLink to="/admin">Admin</NavLink></li>
               </ul>
             </nav>
-            <select 
-              value={theme} 
-              onChange={(e) => setTheme(e.target.value)} 
-              className="theme-selector"
-              aria-label="Selecionar Tema"
-            >
-              <option value="classic-light">☀️ Clássico Claro</option>
-              <option value="classic-dark">🌙 Clássico Escuro</option>
-              <option value="neon-cyber">⚡ Neon Cyberpunk</option>
-              <option value="ocean-breeze">🌊 Ocean Breeze</option>
-            </select>
+            <button onClick={toggleMode} className="theme-toggle-button" aria-label="Alternar Claro/Escuro">
+              {mode === 'dark' ? '☀️' : '🌙'}
+            </button>
           </div>
           <h1 className="app-title">Disponibilidade das Salas de Reunião</h1>
           <div className="real-time-clock">
             <div className="date-display">{date}</div>
             <div className="time-display">{time}</div>
           </div>
-          {/* O botão será adicionado na próxima etapa, mas a lógica está pronta */}
         </header>
 
         <main>
           <Routes>
-            <Route path="/admin" element={<AdminGuard />} />
-            <Route path="/" element={<DashboardPage />} />
+            <Route path="/admin" element={<AdminGuard onThemeLoaded={setBaseTheme} />} />
+            <Route path="/" element={<DashboardPage theme={`${baseTheme}-${mode}`} onThemeLoaded={setBaseTheme} />} />
           </Routes>
         </main>
       </div>

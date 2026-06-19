@@ -58,62 +58,878 @@
     --time-indicator: hsl(0, 85%, 60%);
 }
 
-[data-theme='neon-cyber'] {
+[data-theme='cyber-light'] {
+    --bg-app: hsl(300, 30%, 96%);
+    --bg-card: hsl(0, 0%, 100%);
+    --bg-header: hsl(300, 30%, 93%);
+    --border-color: hsl(300, 30%, 85%);
+    --text-main: hsl(300, 40%, 25%);
+    --text-muted: hsl(300, 20%, 45%);
+    --text-strong: hsl(300, 60%, 15%);
+    --primary: hsl(320, 90%, 50%);
+    --primary-hover: hsl(320, 90%, 40%);
+    --bg-slot-free: hsla(140, 60%, 90%, 0.85);
+    --text-slot-free: hsl(140, 70%, 25%);
+    --border-slot-free: hsla(140, 60%, 80%, 0.6);
+    --bg-slot-busy: hsla(320, 95%, 93%, 0.85);
+    --text-slot-busy: hsl(320, 90%, 35%);
+    --border-slot-busy: hsla(320, 95%, 85%, 0.6);
+    --bg-slot-offline: hsla(300, 10%, 90%, 0.8);
+    --text-slot-offline: hsl(300, 10%, 50%);
+    --border-slot-offline: hsla(300, 10%, 80%, 0.6);
+    --glow-color: rgba(255, 0, 128, 0.04);
+    --time-indicator: hsl(320, 90%, 50%);
+}
+
+[data-theme='cyber-dark'] {
     --bg-app: hsl(230, 35%, 5%);
     --bg-card: rgba(13, 17, 33, 0.7);
     --bg-header: rgba(13, 17, 33, 0.85);
     --border-color: rgba(0, 255, 255, 0.15);
-    
     --text-main: hsl(190, 70%, 75%);
     --text-muted: hsl(190, 40%, 50%);
     --text-strong: hsl(180, 100%, 85%);
-    
     --primary: hsl(185, 100%, 50%);
     --primary-hover: hsl(185, 100%, 40%);
-    
     --bg-slot-free: rgba(0, 255, 102, 0.08);
     --text-slot-free: hsl(140, 100%, 50%);
     --border-slot-free: rgba(0, 255, 102, 0.3);
-    
     --bg-slot-busy: rgba(255, 0, 85, 0.08);
     --text-slot-busy: hsl(340, 100%, 60%);
     --border-slot-busy: rgba(255, 0, 85, 0.3);
-    
     --bg-slot-offline: rgba(255, 255, 255, 0.05);
     --text-slot-offline: rgba(255, 255, 255, 0.3);
     --border-slot-offline: rgba(255, 255, 255, 0.1);
-    
     --glow-color: rgba(0, 255, 255, 0.05);
     --time-indicator: hsl(340, 100%, 55%);
 }
 
-[data-theme='ocean-breeze'] {
+[data-theme='ocean-light'] {
     --bg-app: hsl(205, 45%, 94%);
     --bg-card: hsl(0, 0%, 100%);
     --bg-header: hsl(205, 50%, 96%);
     --border-color: hsl(205, 30%, 86%);
-    
     --text-main: hsl(205, 50%, 25%);
     --text-muted: hsl(205, 30%, 45%);
     --text-strong: hsl(205, 60%, 15%);
-    
     --primary: hsl(195, 85%, 45%);
     --primary-hover: hsl(195, 85%, 35%);
-    
     --bg-slot-free: hsla(160, 60%, 92%, 0.9);
     --text-slot-free: hsl(160, 80%, 25%);
     --border-slot-free: hsla(160, 60%, 80%, 0.6);
-    
     --bg-slot-busy: hsla(15, 80%, 93%, 0.9);
     --text-slot-busy: hsl(15, 80%, 35%);
     --border-slot-busy: hsla(15, 80%, 85%, 0.6);
-    
     --bg-slot-offline: hsla(205, 10%, 88%, 0.8);
     --text-slot-offline: hsl(205, 10%, 50%);
     --border-slot-offline: hsla(205, 10%, 78%, 0.6);
-    
     --glow-color: rgba(0, 80, 160, 0.04);
     --time-indicator: hsl(195, 85%, 45%);
+}
+
+[data-theme='ocean-dark'] {
+    --bg-app: hsl(210, 35%, 8%);
+    --bg-card: hsla(210, 35%, 12%, 0.75);
+    --bg-header: hsl(210, 35%, 10%);
+    --border-color: hsl(210, 25%, 20%);
+    --text-main: hsl(200, 20%, 75%);
+    --text-muted: hsl(200, 15%, 55%);
+    --text-strong: hsl(200, 40%, 90%);
+    --primary: hsl(190, 80%, 50%);
+    --primary-hover: hsl(190, 80%, 40%);
+    --bg-slot-free: hsla(160, 70%, 15%, 0.35);
+    --text-slot-free: hsl(160, 70%, 50%);
+    --border-slot-free: hsla(160, 70%, 45%, 0.4);
+    --bg-slot-busy: hsla(15, 80%, 20%, 0.35);
+    --text-slot-busy: hsl(15, 80%, 60%);
+    --border-slot-busy: hsla(15, 80%, 50%, 0.4);
+    --bg-slot-offline: hsla(210, 15%, 22%, 0.3);
+    --text-slot-offline: hsl(210, 10%, 60%);
+    --border-slot-offline: hsla(210, 15%, 28%, 0.4);
+    --glow-color: rgba(0, 120, 240, 0.3);
+    --time-indicator: hsl(190, 80%, 50%);
+}
+
+[data-theme='corporate-light'] {
+    --bg-app: hsl(210, 15%, 95%);
+    --bg-card: hsl(0, 0%, 100%);
+    --bg-header: hsl(0, 0%, 100%);
+    --border-color: hsl(210, 10%, 88%);
+    --text-main: hsl(210, 10%, 30%);
+    --text-muted: hsl(210, 10%, 50%);
+    --text-strong: hsl(210, 10%, 15%);
+    --primary: hsl(210, 80%, 40%);
+    --primary-hover: hsl(210, 80%, 30%);
+    --bg-slot-free: hsl(120, 40%, 95%);
+    --text-slot-free: hsl(120, 60%, 25%);
+    --border-slot-free: hsl(120, 40%, 88%);
+    --bg-slot-busy: hsl(0, 50%, 96%);
+    --text-slot-busy: hsl(0, 70%, 35%);
+    --border-slot-busy: hsl(0, 50%, 88%);
+    --bg-slot-offline: hsl(210, 5%, 90%);
+    --text-slot-offline: hsl(210, 5%, 50%);
+    --border-slot-offline: hsl(210, 5%, 85%);
+    --glow-color: rgba(0, 0, 0, 0.03);
+    --time-indicator: hsl(210, 80%, 40%);
+}
+
+[data-theme='corporate-dark'] {
+    --bg-app: hsl(210, 15%, 12%);
+    --bg-card: hsl(210, 15%, 15%);
+    --bg-header: hsl(210, 15%, 14%);
+    --border-color: hsl(210, 10%, 22%);
+    --text-main: hsl(210, 10%, 75%);
+    --text-muted: hsl(210, 10%, 55%);
+    --text-strong: hsl(210, 10%, 92%);
+    --primary: hsl(210, 70%, 55%);
+    --primary-hover: hsl(210, 70%, 65%);
+    --bg-slot-free: hsla(120, 40%, 18%, 0.35);
+    --text-slot-free: hsl(120, 50%, 55%);
+    --border-slot-free: hsla(120, 40%, 25%, 0.4);
+    --bg-slot-busy: hsla(0, 50%, 20%, 0.35);
+    --text-slot-busy: hsl(0, 65%, 60%);
+    --border-slot-busy: hsla(0, 50%, 25%, 0.4);
+    --bg-slot-offline: hsla(210, 8%, 20%, 0.3);
+    --text-slot-offline: hsl(210, 5%, 60%);
+    --border-slot-offline: hsla(210, 8%, 26%, 0.4);
+    --glow-color: rgba(0, 0, 0, 0.25);
+    --time-indicator: hsl(210, 70%, 55%);
+}
+
+[data-theme='forest-light'] {
+    --bg-app: hsl(100, 25%, 95%);
+    --bg-card: hsl(0, 0%, 100%);
+    --bg-header: hsl(100, 20%, 93%);
+    --border-color: hsl(100, 15%, 85%);
+    --text-main: hsl(100, 35%, 22%);
+    --text-muted: hsl(100, 15%, 45%);
+    --text-strong: hsl(100, 45%, 12%);
+    --primary: hsl(120, 50%, 35%);
+    --primary-hover: hsl(120, 50%, 28%);
+    --bg-slot-free: hsla(120, 45%, 90%, 0.85);
+    --text-slot-free: hsl(120, 60%, 25%);
+    --border-slot-free: hsla(120, 45%, 80%, 0.6);
+    --bg-slot-busy: hsla(20, 70%, 93%, 0.85);
+    --text-slot-busy: hsl(20, 70%, 35%);
+    --border-slot-busy: hsla(20, 70%, 85%, 0.6);
+    --bg-slot-offline: hsla(100, 8%, 90%, 0.8);
+    --text-slot-offline: hsl(100, 8%, 50%);
+    --border-slot-offline: hsla(100, 8%, 80%, 0.6);
+    --glow-color: rgba(34, 139, 34, 0.04);
+    --time-indicator: hsl(120, 50%, 35%);
+}
+
+[data-theme='forest-dark'] {
+    --bg-app: hsl(110, 25%, 7%);
+    --bg-card: hsla(110, 25%, 11%, 0.7);
+    --bg-header: hsl(110, 25%, 9%);
+    --border-color: hsl(110, 15%, 18%);
+    --text-main: hsl(110, 15%, 70%);
+    --text-muted: hsl(110, 10%, 50%);
+    --text-strong: hsl(110, 20%, 90%);
+    --primary: hsl(120, 50%, 45%);
+    --primary-hover: hsl(120, 50%, 55%);
+    --bg-slot-free: hsla(120, 60%, 15%, 0.35);
+    --text-slot-free: hsl(120, 60%, 55%);
+    --border-slot-free: hsla(120, 60%, 40%, 0.4);
+    --bg-slot-busy: hsla(20, 70%, 18%, 0.35);
+    --text-slot-busy: hsl(20, 70%, 60%);
+    --border-slot-busy: hsla(20, 70%, 50%, 0.4);
+    --bg-slot-offline: hsla(110, 10%, 20%, 0.3);
+    --text-slot-offline: hsl(110, 5%, 60%);
+    --border-slot-offline: hsla(110, 10%, 25%, 0.4);
+    --glow-color: rgba(34, 139, 34, 0.25);
+    --time-indicator: hsl(120, 50%, 45%);
+}
+
+[data-theme='sunset-light'] {
+    --bg-app: hsl(30, 45%, 96%);
+    --bg-card: hsl(0, 0%, 100%);
+    --bg-header: hsl(30, 40%, 93%);
+    --border-color: hsl(30, 30%, 88%);
+    --text-main: hsl(15, 50%, 25%);
+    --text-muted: hsl(15, 30%, 45%);
+    --text-strong: hsl(15, 60%, 15%);
+    --primary: hsl(15, 80%, 45%);
+    --primary-hover: hsl(15, 80%, 35%);
+    --bg-slot-free: hsla(150, 45%, 92%, 0.85);
+    --text-slot-free: hsl(150, 60%, 25%);
+    --border-slot-free: hsla(150, 45%, 82%, 0.6);
+    --bg-slot-busy: hsla(15, 85%, 93%, 0.85);
+    --text-slot-busy: hsl(15, 80%, 35%);
+    --border-slot-busy: hsla(15, 85%, 85%, 0.6);
+    --bg-slot-offline: hsla(30, 10%, 90%, 0.8);
+    --text-slot-offline: hsl(30, 10%, 50%);
+    --border-slot-offline: hsla(30, 10%, 80%, 0.6);
+    --glow-color: rgba(220, 60, 0, 0.04);
+    --time-indicator: hsl(15, 80%, 45%);
+}
+
+[data-theme='sunset-dark'] {
+    --bg-app: hsl(340, 35%, 8%);
+    --bg-card: hsla(340, 35%, 13%, 0.7);
+    --bg-header: hsl(340, 35%, 11%);
+    --border-color: hsl(340, 20%, 22%);
+    --text-main: hsl(20, 30%, 75%);
+    --text-muted: hsl(20, 20%, 55%);
+    --text-strong: hsl(20, 50%, 90%);
+    --primary: hsl(15, 85%, 55%);
+    --primary-hover: hsl(15, 85%, 65%);
+    --bg-slot-free: hsla(150, 45%, 16%, 0.35);
+    --text-slot-free: hsl(150, 50%, 55%);
+    --border-slot-free: hsla(150, 45%, 22%, 0.4);
+    --bg-slot-busy: hsla(15, 85%, 20%, 0.35);
+    --text-slot-busy: hsl(15, 85%, 60%);
+    --border-slot-busy: hsla(15, 85%, 50%, 0.4);
+    --bg-slot-offline: hsla(340, 15%, 20%, 0.3);
+    --text-slot-offline: hsl(340, 10%, 60%);
+    --border-slot-offline: hsla(340, 15%, 26%, 0.4);
+    --glow-color: rgba(220, 60, 0, 0.3);
+    --time-indicator: hsl(15, 85%, 55%);
+}
+
+[data-theme='vintage-light'] {
+    --bg-app: hsl(40, 30%, 91%);
+    --bg-card: hsl(40, 30%, 97%);
+    --bg-header: hsl(40, 25%, 88%);
+    --border-color: hsl(40, 20%, 78%);
+    --text-main: hsl(40, 40%, 20%);
+    --text-muted: hsl(40, 20%, 40%);
+    --text-strong: hsl(40, 50%, 10%);
+    --primary: hsl(25, 40%, 35%);
+    --primary-hover: hsl(25, 40%, 28%);
+    --bg-slot-free: hsla(80, 30%, 90%, 0.85);
+    --text-slot-free: hsl(80, 40%, 25%);
+    --border-slot-free: hsla(80, 25%, 80%, 0.6);
+    --bg-slot-busy: hsla(25, 50%, 90%, 0.85);
+    --text-slot-busy: hsl(25, 50%, 35%);
+    --border-slot-busy: hsla(25, 45%, 80%, 0.6);
+    --bg-slot-offline: hsla(40, 15%, 85%, 0.8);
+    --text-slot-offline: hsl(40, 15%, 50%);
+    --border-slot-offline: hsla(40, 15%, 78%, 0.6);
+    --glow-color: rgba(139, 69, 19, 0.04);
+    --time-indicator: hsl(25, 40%, 35%);
+}
+
+[data-theme='vintage-dark'] {
+    --bg-app: hsl(40, 15%, 11%);
+    --bg-card: hsla(40, 15%, 15%, 0.7);
+    --bg-header: hsl(40, 15%, 13%);
+    --border-color: hsl(40, 10%, 22%);
+    --text-main: hsl(40, 15%, 70%);
+    --text-muted: hsl(40, 10%, 50%);
+    --text-strong: hsl(40, 25%, 88%);
+    --primary: hsl(25, 30%, 45%);
+    --primary-hover: hsl(25, 30%, 55%);
+    --bg-slot-free: hsla(80, 30%, 16%, 0.35);
+    --text-slot-free: hsl(80, 30%, 55%);
+    --border-slot-free: hsla(80, 30%, 22%, 0.4);
+    --bg-slot-busy: hsla(25, 45%, 18%, 0.35);
+    --text-slot-busy: hsl(25, 45%, 60%);
+    --border-slot-busy: hsla(25, 45%, 25%, 0.4);
+    --bg-slot-offline: hsla(40, 8%, 20%, 0.3);
+    --text-slot-offline: hsl(40, 5%, 60%);
+    --border-slot-offline: hsla(40, 8%, 25%, 0.4);
+    --glow-color: rgba(139, 69, 19, 0.25);
+    --time-indicator: hsl(25, 30%, 45%);
+}
+
+[data-theme='plum-light'] {
+    --bg-app: hsl(270, 30%, 96%);
+    --bg-card: hsl(0, 0%, 100%);
+    --bg-header: hsl(270, 30%, 93%);
+    --border-color: hsl(270, 20%, 86%);
+    --text-main: hsl(270, 40%, 25%);
+    --text-muted: hsl(270, 20%, 45%);
+    --text-strong: hsl(270, 50%, 15%);
+    --primary: hsl(280, 60%, 45%);
+    --primary-hover: hsl(280, 60%, 35%);
+    --bg-slot-free: hsla(140, 40%, 92%, 0.85);
+    --text-slot-free: hsl(140, 50%, 25%);
+    --border-slot-free: hsla(140, 40%, 82%, 0.6);
+    --bg-slot-busy: hsla(280, 65%, 94%, 0.85);
+    --text-slot-busy: hsl(280, 60%, 35%);
+    --border-slot-busy: hsla(280, 65%, 85%, 0.6);
+    --bg-slot-offline: hsla(270, 10%, 90%, 0.8);
+    --text-slot-offline: hsl(270, 10%, 50%);
+    --border-slot-offline: hsla(270, 10%, 80%, 0.6);
+    --glow-color: rgba(128, 0, 128, 0.04);
+    --time-indicator: hsl(280, 60%, 45%);
+}
+
+[data-theme='plum-dark'] {
+    --bg-app: hsl(275, 30%, 8%);
+    --bg-card: hsla(275, 30%, 13%, 0.7);
+    --bg-header: hsl(275, 30%, 11%);
+    --border-color: hsl(275, 20%, 22%);
+    --text-main: hsl(275, 20%, 75%);
+    --text-muted: hsl(275, 10%, 55%);
+    --text-strong: hsl(275, 40%, 92%);
+    --primary: hsl(280, 65%, 55%);
+    --primary-hover: hsl(280, 65%, 65%);
+    --bg-slot-free: hsla(140, 40%, 16%, 0.35);
+    --text-slot-free: hsl(140, 45%, 55%);
+    --border-slot-free: hsla(140, 40%, 22%, 0.4);
+    --bg-slot-busy: hsla(280, 65%, 20%, 0.35);
+    --text-slot-busy: hsl(280, 65%, 60%);
+    --border-slot-busy: hsla(280, 65%, 25%, 0.4);
+    --bg-slot-offline: hsla(275, 15%, 20%, 0.3);
+    --text-slot-offline: hsl(275, 10%, 60%);
+    --border-slot-offline: hsla(275, 15%, 26%, 0.4);
+    --glow-color: rgba(128, 0, 128, 0.25);
+    --time-indicator: hsl(280, 65%, 55%);
+}
+
+[data-theme='glacier-light'] {
+    --bg-app: hsl(200, 30%, 95%);
+    --bg-card: hsl(0, 0%, 100%);
+    --bg-header: hsl(200, 25%, 92%);
+    --border-color: hsl(200, 20%, 85%);
+    --text-main: hsl(200, 40%, 22%);
+    --text-muted: hsl(200, 20%, 45%);
+    --text-strong: hsl(200, 50%, 12%);
+    --primary: hsl(190, 70%, 40%);
+    --primary-hover: hsl(190, 70%, 32%);
+    --bg-slot-free: hsla(150, 45%, 92%, 0.85);
+    --text-slot-free: hsl(150, 60%, 25%);
+    --border-slot-free: hsla(150, 45%, 82%, 0.6);
+    --bg-slot-busy: hsla(190, 75%, 94%, 0.85);
+    --text-slot-busy: hsl(190, 70%, 35%);
+    --border-slot-busy: hsla(190, 75%, 85%, 0.6);
+    --bg-slot-offline: hsla(200, 8%, 90%, 0.8);
+    --text-slot-offline: hsl(200, 8%, 50%);
+    --border-slot-offline: hsla(200, 8%, 80%, 0.6);
+    --glow-color: rgba(0, 191, 255, 0.04);
+    --time-indicator: hsl(190, 70%, 40%);
+}
+
+[data-theme='glacier-dark'] {
+    --bg-app: hsl(200, 35%, 7%);
+    --bg-card: hsla(200, 35%, 11%, 0.7);
+    --bg-header: hsl(200, 35%, 9%);
+    --border-color: hsl(200, 20%, 18%);
+    --text-main: hsl(200, 20%, 72%);
+    --text-muted: hsl(200, 10%, 52%);
+    --text-strong: hsl(200, 30%, 90%);
+    --primary: hsl(190, 80%, 45%);
+    --primary-hover: hsl(190, 80%, 55%);
+    --bg-slot-free: hsla(150, 45%, 15%, 0.35);
+    --text-slot-free: hsl(150, 50%, 55%);
+    --border-slot-free: hsla(150, 45%, 22%, 0.4);
+    --bg-slot-busy: hsla(190, 75%, 18%, 0.35);
+    --text-slot-busy: hsl(190, 75%, 60%);
+    --border-slot-busy: hsla(190, 75%, 50%, 0.4);
+    --bg-slot-offline: hsla(200, 10%, 20%, 0.3);
+    --text-slot-offline: hsl(200, 5%, 60%);
+    --border-slot-offline: hsla(200, 10%, 25%, 0.4);
+    --glow-color: rgba(0, 191, 255, 0.25);
+    --time-indicator: hsl(190, 80%, 45%);
+}
+
+[data-theme='mono-light'] {
+    --bg-app: hsl(0, 0%, 98%);
+    --bg-card: hsl(0, 0%, 100%);
+    --bg-header: hsl(0, 0%, 100%);
+    --border-color: hsl(0, 0%, 85%);
+    --text-main: hsl(0, 0%, 20%);
+    --text-muted: hsl(0, 0%, 45%);
+    --text-strong: hsl(0, 0%, 5%);
+    --primary: hsl(0, 0%, 15%);
+    --primary-hover: hsl(0, 0%, 30%);
+    --bg-slot-free: hsla(0, 0%, 95%, 0.9);
+    --text-slot-free: hsl(0, 0%, 20%);
+    --border-slot-free: hsla(0, 0%, 85%, 0.6);
+    --bg-slot-busy: hsla(0, 0%, 80%, 0.9);
+    --text-slot-busy: hsl(0, 0%, 10%);
+    --border-slot-busy: hsla(0, 0%, 70%, 0.6);
+    --bg-slot-offline: hsla(0, 0%, 90%, 0.8);
+    --text-slot-offline: hsl(0, 0%, 50%);
+    --border-slot-offline: hsla(0, 0%, 80%, 0.6);
+    --glow-color: rgba(0, 0, 0, 0.02);
+    --time-indicator: hsl(0, 0%, 15%);
+}
+
+[data-theme='mono-dark'] {
+    --bg-app: hsl(0, 0%, 4%);
+    --bg-card: hsl(0, 0%, 8%);
+    --bg-header: hsl(0, 0%, 6%);
+    --border-color: hsl(0, 0%, 18%);
+    --text-main: hsl(0, 0%, 75%);
+    --text-muted: hsl(0, 0%, 50%);
+    --text-strong: hsl(0, 0%, 95%);
+    --primary: hsl(0, 0%, 90%);
+    --primary-hover: hsl(0, 0%, 70%);
+    --bg-slot-free: hsla(0, 0%, 12%, 0.9);
+    --text-slot-free: hsl(0, 0%, 75%);
+    --border-slot-free: hsla(0, 0%, 22%, 0.4);
+    --bg-slot-busy: hsla(0, 0%, 25%, 0.9);
+    --text-slot-busy: hsl(0, 0%, 95%);
+    --border-slot-busy: hsla(0, 0%, 35%, 0.4);
+    --bg-slot-offline: hsla(0, 0%, 15%, 0.8);
+    --text-slot-offline: hsl(0, 0%, 50%);
+    --border-slot-offline: hsla(0, 0%, 20%, 0.4);
+    --glow-color: rgba(255, 255, 255, 0.05);
+    --time-indicator: hsl(0, 0%, 90%);
+}
+
+[data-theme='mint-light'] {
+    --bg-app: hsl(150, 25%, 96%);
+    --bg-card: hsl(0, 0%, 100%);
+    --bg-header: hsl(150, 20%, 94%);
+    --border-color: hsl(150, 15%, 86%);
+    --text-main: hsl(155, 40%, 18%);
+    --text-muted: hsl(150, 15%, 45%);
+    --text-strong: hsl(155, 50%, 10%);
+    --primary: hsl(160, 60%, 38%);
+    --primary-hover: hsl(160, 60%, 30%);
+    --bg-slot-free: hsla(145, 50%, 92%, 0.85);
+    --text-slot-free: hsl(145, 60%, 25%);
+    --border-slot-free: hsla(145, 50%, 82%, 0.6);
+    --bg-slot-busy: hsla(15, 80%, 94%, 0.85);
+    --text-slot-busy: hsl(15, 80%, 35%);
+    --border-slot-busy: hsla(15, 80%, 86%, 0.6);
+    --bg-slot-offline: hsla(150, 8%, 91%, 0.8);
+    --text-slot-offline: hsl(150, 8%, 50%);
+    --border-slot-offline: hsla(150, 8%, 82%, 0.6);
+    --glow-color: rgba(0, 128, 96, 0.04);
+    --time-indicator: hsl(160, 60%, 38%);
+}
+
+[data-theme='mint-dark'] {
+    --bg-app: hsl(165, 30%, 7%);
+    --bg-card: hsla(165, 30%, 11%, 0.75);
+    --bg-header: hsl(165, 30%, 9%);
+    --border-color: hsl(165, 18%, 18%);
+    --text-main: hsl(160, 15%, 72%);
+    --text-muted: hsl(160, 10%, 52%);
+    --text-strong: hsl(160, 20%, 92%);
+    --primary: hsl(160, 55%, 45%);
+    --primary-hover: hsl(160, 55%, 55%);
+    --bg-slot-free: hsla(150, 65%, 15%, 0.35);
+    --text-slot-free: hsl(150, 65%, 52%);
+    --border-slot-free: hsla(150, 65%, 42%, 0.4);
+    --bg-slot-busy: hsla(10, 75%, 18%, 0.35);
+    --text-slot-busy: hsl(10, 75%, 62%);
+    --border-slot-busy: hsla(10, 75%, 52%, 0.4);
+    --bg-slot-offline: hsla(165, 10%, 20%, 0.3);
+    --text-slot-offline: hsl(165, 5%, 60%);
+    --border-slot-offline: hsla(165, 10%, 26%, 0.4);
+    --glow-color: rgba(0, 255, 160, 0.20);
+    --time-indicator: hsl(160, 55%, 45%);
+}
+
+[data-theme='rose-light'] {
+    --bg-app: hsl(350, 25%, 97%);
+    --bg-card: hsl(0, 0%, 100%);
+    --bg-header: hsl(350, 20%, 94%);
+    --border-color: hsl(350, 15%, 88%);
+    --text-main: hsl(350, 30%, 22%);
+    --text-muted: hsl(350, 15%, 50%);
+    --text-strong: hsl(350, 40%, 12%);
+    --primary: hsl(350, 50%, 52%);
+    --primary-hover: hsl(350, 50%, 42%);
+    --bg-slot-free: hsla(134, 45%, 91%, 0.85);
+    --text-slot-free: hsl(134, 60%, 28%);
+    --border-slot-free: hsla(134, 45%, 82%, 0.6);
+    --bg-slot-busy: hsla(350, 60%, 93%, 0.85);
+    --text-slot-busy: hsl(350, 60%, 38%);
+    --border-slot-busy: hsla(350, 60%, 85%, 0.6);
+    --bg-slot-offline: hsla(350, 8%, 91%, 0.8);
+    --text-slot-offline: hsl(350, 8%, 52%);
+    --border-slot-offline: hsla(350, 8%, 83%, 0.6);
+    --glow-color: rgba(220, 80, 100, 0.04);
+    --time-indicator: hsl(350, 50%, 52%);
+}
+
+[data-theme='rose-dark'] {
+    --bg-app: hsl(340, 20%, 8%);
+    --bg-card: hsla(340, 20%, 12%, 0.7);
+    --bg-header: hsl(340, 20%, 10%);
+    --border-color: hsl(340, 15%, 19%);
+    --text-main: hsl(340, 15%, 72%);
+    --text-muted: hsl(340, 10%, 52%);
+    --text-strong: hsl(340, 20%, 92%);
+    --primary: hsl(345, 50%, 58%);
+    --primary-hover: hsl(345, 50%, 68%);
+    --bg-slot-free: hsla(142, 60%, 15%, 0.3);
+    --text-slot-free: hsl(142, 60%, 52%);
+    --border-slot-free: hsla(142, 60%, 42%, 0.4);
+    --bg-slot-busy: hsla(345, 60%, 20%, 0.35);
+    --text-slot-busy: hsl(345, 60%, 62%);
+    --border-slot-busy: hsla(345, 60%, 52%, 0.4);
+    --bg-slot-offline: hsla(340, 10%, 20%, 0.3);
+    --text-slot-offline: hsl(340, 5%, 60%);
+    --border-slot-offline: hsla(340, 10%, 26%, 0.4);
+    --glow-color: rgba(255, 100, 130, 0.20);
+    --time-indicator: hsl(345, 50%, 58%);
+}
+
+[data-theme='cosmic-light'] {
+    --bg-app: hsl(265, 30%, 96%);
+    --bg-card: hsl(0, 0%, 100%);
+    --bg-header: hsl(265, 20%, 94%);
+    --border-color: hsl(265, 15%, 87%);
+    --text-main: hsl(265, 35%, 22%);
+    --text-muted: hsl(265, 15%, 48%);
+    --text-strong: hsl(265, 45%, 12%);
+    --primary: hsl(265, 60%, 48%);
+    --primary-hover: hsl(265, 60%, 38%);
+    --bg-slot-free: hsla(134, 45%, 90%, 0.85);
+    --text-slot-free: hsl(134, 60%, 26%);
+    --border-slot-free: hsla(134, 45%, 81%, 0.6);
+    --bg-slot-busy: hsla(280, 50%, 92%, 0.85);
+    --text-slot-busy: hsl(280, 55%, 36%);
+    --border-slot-busy: hsla(280, 50%, 84%, 0.6);
+    --bg-slot-offline: hsla(265, 8%, 90%, 0.8);
+    --text-slot-offline: hsl(265, 8%, 52%);
+    --border-slot-offline: hsla(265, 8%, 81%, 0.6);
+    --glow-color: rgba(140, 0, 240, 0.04);
+    --time-indicator: hsl(265, 60%, 48%);
+}
+
+[data-theme='cosmic-dark'] {
+    --bg-app: hsl(275, 40%, 5%);
+    --bg-card: hsla(275, 35%, 9%, 0.7);
+    --bg-header: hsl(275, 40%, 7%);
+    --border-color: hsl(275, 25%, 17%);
+    --text-main: hsl(270, 20%, 78%);
+    --text-muted: hsl(270, 15%, 55%);
+    --text-strong: hsl(270, 25%, 94%);
+    --primary: hsl(280, 80%, 65%);
+    --primary-hover: hsl(280, 80%, 75%);
+    --bg-slot-free: hsla(142, 60%, 15%, 0.3);
+    --text-slot-free: hsl(142, 60%, 52%);
+    --border-slot-free: hsla(142, 60%, 42%, 0.4);
+    --bg-slot-busy: hsla(280, 60%, 20%, 0.35);
+    --text-slot-busy: hsl(280, 80%, 68%);
+    --border-slot-busy: hsla(280, 60%, 50%, 0.4);
+    --bg-slot-offline: hsla(275, 15%, 18%, 0.3);
+    --text-slot-offline: hsl(275, 10%, 60%);
+    --border-slot-offline: hsla(275, 15%, 24%, 0.4);
+    --glow-color: rgba(186, 85, 211, 0.25);
+    --time-indicator: hsl(280, 80%, 65%);
+}
+
+[data-theme='desert-light'] {
+    --bg-app: hsl(40, 30%, 95%);
+    --bg-card: hsl(0, 0%, 100%);
+    --bg-header: hsl(40, 25%, 92%);
+    --border-color: hsl(40, 20%, 85%);
+    --text-main: hsl(35, 35%, 22%);
+    --text-muted: hsl(40, 15%, 48%);
+    --text-strong: hsl(35, 45%, 12%);
+    --primary: hsl(35, 60%, 42%);
+    --primary-hover: hsl(35, 60%, 32%);
+    --bg-slot-free: hsla(134, 45%, 90%, 0.85);
+    --text-slot-free: hsl(134, 60%, 26%);
+    --border-slot-free: hsla(134, 45%, 81%, 0.6);
+    --bg-slot-busy: hsla(25, 70%, 92%, 0.85);
+    --text-slot-busy: hsl(25, 70%, 35%);
+    --border-slot-busy: hsla(25, 70%, 84%, 0.6);
+    --bg-slot-offline: hsla(40, 10%, 90%, 0.8);
+    --text-slot-offline: hsl(40, 10%, 52%);
+    --border-slot-offline: hsla(40, 10%, 82%, 0.6);
+    --glow-color: rgba(210, 105, 30, 0.04);
+    --time-indicator: hsl(35, 60%, 42%);
+}
+
+[data-theme='desert-dark'] {
+    --bg-app: hsl(25, 20%, 9%);
+    --bg-card: hsla(25, 20%, 13%, 0.7);
+    --bg-header: hsl(25, 20%, 11%);
+    --border-color: hsl(25, 15%, 20%);
+    --text-main: hsl(25, 15%, 72%);
+    --text-muted: hsl(25, 10%, 52%);
+    --text-strong: hsl(25, 20%, 92%);
+    --primary: hsl(25, 50%, 55%);
+    --primary-hover: hsl(25, 50%, 65%);
+    --bg-slot-free: hsla(142, 60%, 15%, 0.3);
+    --text-slot-free: hsl(142, 60%, 52%);
+    --border-slot-free: hsla(142, 60%, 42%, 0.4);
+    --bg-slot-busy: hsla(25, 60%, 20%, 0.35);
+    --text-slot-busy: hsl(25, 60%, 62%);
+    --border-slot-busy: hsla(25, 60%, 50%, 0.4);
+    --bg-slot-offline: hsla(25, 12%, 20%, 0.3);
+    --text-slot-offline: hsl(25, 8%, 60%);
+    --border-slot-offline: hsla(25, 12%, 25%, 0.4);
+    --glow-color: rgba(244, 164, 96, 0.20);
+    --time-indicator: hsl(25, 50%, 55%);
+}
+
+[data-theme='steel-light'] {
+    --bg-app: hsl(210, 10%, 94%);
+    --bg-card: hsl(0, 0%, 100%);
+    --bg-header: hsl(210, 10%, 91%);
+    --border-color: hsl(210, 10%, 84%);
+    --text-main: hsl(210, 15%, 22%);
+    --text-muted: hsl(210, 10%, 48%);
+    --text-strong: hsl(210, 20%, 10%);
+    --primary: hsl(210, 20%, 42%);
+    --primary-hover: hsl(210, 20%, 32%);
+    --bg-slot-free: hsla(134, 45%, 90%, 0.85);
+    --text-slot-free: hsl(134, 60%, 26%);
+    --border-slot-free: hsla(134, 45%, 81%, 0.6);
+    --bg-slot-busy: hsla(20, 60%, 92%, 0.85);
+    --text-slot-busy: hsl(20, 60%, 36%);
+    --border-slot-busy: hsla(20, 60%, 84%, 0.6);
+    --bg-slot-offline: hsla(210, 8%, 89%, 0.8);
+    --text-slot-offline: hsl(210, 8%, 52%);
+    --border-slot-offline: hsla(210, 8%, 81%, 0.6);
+    --glow-color: rgba(112, 128, 144, 0.04);
+    --time-indicator: hsl(210, 20%, 42%);
+}
+
+[data-theme='steel-dark'] {
+    --bg-app: hsl(220, 15%, 8%);
+    --bg-card: hsla(220, 15%, 12%, 0.7);
+    --bg-header: hsl(220, 15%, 10%);
+    --border-color: hsl(220, 10%, 20%);
+    --text-main: hsl(220, 10%, 75%);
+    --text-muted: hsl(220, 10%, 55%);
+    --text-strong: hsl(220, 15%, 95%);
+    --primary: hsl(18, 60%, 50%);
+    --primary-hover: hsl(18, 60%, 60%);
+    --bg-slot-free: hsla(142, 60%, 15%, 0.3);
+    --text-slot-free: hsl(142, 60%, 52%);
+    --border-slot-free: hsla(142, 60%, 42%, 0.4);
+    --bg-slot-busy: hsla(18, 60%, 18%, 0.35);
+    --text-slot-busy: hsl(18, 60%, 62%);
+    --border-slot-busy: hsla(18, 60%, 45%, 0.4);
+    --bg-slot-offline: hsla(220, 12%, 18%, 0.3);
+    --text-slot-offline: hsl(220, 8%, 60%);
+    --border-slot-offline: hsla(220, 12%, 24%, 0.4);
+    --glow-color: rgba(225, 112, 85, 0.20);
+    --time-indicator: hsl(18, 60%, 50%);
+}
+
+[data-theme='luxury-light'] {
+    --bg-app: hsl(45, 15%, 97%);
+    --bg-card: hsl(0, 0%, 100%);
+    --bg-header: hsl(45, 10%, 94%);
+    --border-color: hsl(45, 10%, 86%);
+    --text-main: hsl(45, 10%, 20%);
+    --text-muted: hsl(45, 5%, 48%);
+    --text-strong: hsl(45, 15%, 10%);
+    --primary: hsl(45, 60%, 40%);
+    --primary-hover: hsl(45, 60%, 30%);
+    --bg-slot-free: hsla(134, 45%, 90%, 0.85);
+    --text-slot-free: hsl(134, 60%, 26%);
+    --border-slot-free: hsla(134, 45%, 81%, 0.6);
+    --bg-slot-busy: hsla(45, 40%, 92%, 0.85);
+    --text-slot-busy: hsl(45, 60%, 32%);
+    --border-slot-busy: hsla(45, 40%, 84%, 0.6);
+    --bg-slot-offline: hsla(45, 5%, 90%, 0.8);
+    --text-slot-offline: hsl(45, 5%, 52%);
+    --border-slot-offline: hsla(45, 5%, 82%, 0.6);
+    --glow-color: rgba(218, 165, 32, 0.04);
+    --time-indicator: hsl(45, 60%, 40%);
+}
+
+[data-theme='luxury-dark'] {
+    --bg-app: hsl(0, 0%, 5%);
+    --bg-card: hsla(0, 0%, 8%, 0.8);
+    --bg-header: hsl(0, 0%, 6%);
+    --border-color: hsl(0, 0%, 17%);
+    --text-main: hsl(45, 10%, 75%);
+    --text-muted: hsl(45, 5%, 52%);
+    --text-strong: hsl(45, 15%, 95%);
+    --primary: hsl(45, 75%, 52%);
+    --primary-hover: hsl(45, 75%, 62%);
+    --bg-slot-free: hsla(142, 60%, 15%, 0.3);
+    --text-slot-free: hsl(142, 60%, 52%);
+    --border-slot-free: hsla(142, 60%, 42%, 0.4);
+    --bg-slot-busy: hsla(45, 60%, 16%, 0.35);
+    --text-slot-busy: hsl(45, 80%, 62%);
+    --border-slot-busy: hsla(45, 60%, 45%, 0.4);
+    --bg-slot-offline: hsla(0, 0%, 16%, 0.3);
+    --text-slot-offline: hsl(0, 0%, 60%);
+    --border-slot-offline: hsla(0, 0%, 22%, 0.4);
+    --glow-color: rgba(255, 215, 0, 0.20);
+    --time-indicator: hsl(45, 75%, 52%);
+}
+
+[data-theme='sakura-light'] {
+    --bg-app: hsl(330, 35%, 97%);
+    --bg-card: hsl(0, 0%, 100%);
+    --bg-header: hsl(330, 30%, 94%);
+    --border-color: hsl(330, 20%, 88%);
+    --text-main: hsl(330, 40%, 20%);
+    --text-muted: hsl(330, 15%, 52%);
+    --text-strong: hsl(330, 45%, 12%);
+    --primary: hsl(330, 70%, 62%);
+    --primary-hover: hsl(330, 70%, 52%);
+    --bg-slot-free: hsla(134, 45%, 90%, 0.85);
+    --text-slot-free: hsl(134, 60%, 26%);
+    --border-slot-free: hsla(134, 45%, 81%, 0.6);
+    --bg-slot-busy: hsla(330, 60%, 93%, 0.85);
+    --text-slot-busy: hsl(330, 60%, 38%);
+    --border-slot-busy: hsla(330, 60%, 85%, 0.6);
+    --bg-slot-offline: hsla(330, 8%, 91%, 0.8);
+    --text-slot-offline: hsl(330, 8%, 52%);
+    --border-slot-offline: hsla(330, 8%, 83%, 0.6);
+    --glow-color: rgba(255, 182, 193, 0.04);
+    --time-indicator: hsl(330, 70%, 62%);
+}
+
+[data-theme='sakura-dark'] {
+    --bg-app: hsl(325, 25%, 8%);
+    --bg-card: hsla(325, 25%, 12%, 0.7);
+    --bg-header: hsl(325, 25%, 10%);
+    --border-color: hsl(325, 15%, 19%);
+    --text-main: hsl(325, 20%, 78%);
+    --text-muted: hsl(325, 10%, 55%);
+    --text-strong: hsl(325, 25%, 94%);
+    --primary: hsl(330, 60%, 58%);
+    --primary-hover: hsl(330, 60%, 68%);
+    --bg-slot-free: hsla(142, 60%, 15%, 0.3);
+    --text-slot-free: hsl(142, 60%, 52%);
+    --border-slot-free: hsla(142, 60%, 42%, 0.4);
+    --bg-slot-busy: hsla(330, 50%, 18%, 0.35);
+    --text-slot-busy: hsl(330, 70%, 62%);
+    --border-slot-busy: hsla(330, 50%, 48%, 0.4);
+    --bg-slot-offline: hsla(325, 10%, 19%, 0.3);
+    --text-slot-offline: hsl(325, 8%, 60%);
+    --border-slot-offline: hsla(325, 10%, 24%, 0.4);
+    --glow-color: rgba(255, 105, 180, 0.20);
+    --time-indicator: hsl(330, 60%, 58%);
+}
+
+[data-theme='candy-light'] {
+    --bg-app: hsl(300, 20%, 96%);
+    --bg-card: hsl(0, 0%, 100%);
+    --bg-header: hsl(300, 15%, 93%);
+    --border-color: hsl(300, 15%, 87%);
+    --text-main: hsl(300, 40%, 20%);
+    --text-muted: hsl(300, 15%, 50%);
+    --text-strong: hsl(300, 50%, 10%);
+    --primary: hsl(320, 80%, 52%);
+    --primary-hover: hsl(320, 80%, 42%);
+    --bg-slot-free: hsla(134, 45%, 90%, 0.85);
+    --text-slot-free: hsl(134, 60%, 26%);
+    --border-slot-free: hsla(134, 45%, 81%, 0.6);
+    --bg-slot-busy: hsla(320, 60%, 92%, 0.85);
+    --text-slot-busy: hsl(320, 70%, 36%);
+    --border-slot-busy: hsla(320, 60%, 84%, 0.6);
+    --bg-slot-offline: hsla(300, 8%, 90%, 0.8);
+    --text-slot-offline: hsl(300, 8%, 52%);
+    --border-slot-offline: hsla(300, 8%, 82%, 0.6);
+    --glow-color: rgba(255, 20, 147, 0.04);
+    --time-indicator: hsl(320, 80%, 52%);
+}
+
+[data-theme='candy-dark'] {
+    --bg-app: hsl(310, 35%, 5%);
+    --bg-card: hsla(310, 30%, 9%, 0.7);
+    --bg-header: hsl(310, 35%, 7%);
+    --border-color: hsl(310, 20%, 17%);
+    --text-main: hsl(300, 20%, 78%);
+    --text-muted: hsl(300, 15%, 55%);
+    --text-strong: hsl(300, 25%, 94%);
+    --primary: hsl(190, 90%, 48%);
+    --primary-hover: hsl(190, 90%, 58%);
+    --bg-slot-free: hsla(142, 60%, 15%, 0.3);
+    --text-slot-free: hsl(142, 60%, 52%);
+    --border-slot-free: hsla(142, 60%, 42%, 0.4);
+    --bg-slot-busy: hsla(320, 60%, 18%, 0.35);
+    --text-slot-busy: hsl(320, 80%, 65%);
+    --border-slot-busy: hsla(320, 60%, 48%, 0.4);
+    --bg-slot-offline: hsla(310, 12%, 18%, 0.3);
+    --text-slot-offline: hsl(310, 8%, 60%);
+    --border-slot-offline: hsla(310, 12%, 24%, 0.4);
+    --glow-color: rgba(0, 255, 255, 0.25);
+    --time-indicator: hsl(190, 90%, 48%);
+}
+
+[data-theme='aurora-light'] {
+    --bg-app: hsl(140, 20%, 96%);
+    --bg-card: hsl(0, 0%, 100%);
+    --bg-header: hsl(140, 15%, 93%);
+    --border-color: hsl(140, 15%, 86%);
+    --text-main: hsl(140, 30%, 20%);
+    --text-muted: hsl(140, 15%, 48%);
+    --text-strong: hsl(140, 40%, 10%);
+    --primary: hsl(145, 50%, 42%);
+    --primary-hover: hsl(145, 50%, 32%);
+    --bg-slot-free: hsla(134, 45%, 90%, 0.85);
+    --text-slot-free: hsl(134, 60%, 26%);
+    --border-slot-free: hsla(134, 45%, 81%, 0.6);
+    --bg-slot-busy: hsla(150, 40%, 92%, 0.85);
+    --text-slot-busy: hsl(150, 60%, 32%);
+    --border-slot-busy: hsla(150, 40%, 84%, 0.6);
+    --bg-slot-offline: hsla(140, 5%, 90%, 0.8);
+    --text-slot-offline: hsl(140, 5%, 52%);
+    --border-slot-offline: hsla(140, 5%, 82%, 0.6);
+    --glow-color: rgba(46, 139, 87, 0.04);
+    --time-indicator: hsl(145, 50%, 42%);
+}
+
+[data-theme='aurora-dark'] {
+    --bg-app: hsl(150, 40%, 5%);
+    --bg-card: hsla(150, 35%, 8%, 0.75);
+    --bg-header: hsl(150, 40%, 6%);
+    --border-color: hsl(150, 25%, 16%);
+    --text-main: hsl(140, 20%, 78%);
+    --text-muted: hsl(140, 15%, 55%);
+    --text-strong: hsl(140, 25%, 94%);
+    --primary: hsl(150, 80%, 48%);
+    --primary-hover: hsl(150, 80%, 58%);
+    --bg-slot-free: hsla(142, 60%, 15%, 0.3);
+    --text-slot-free: hsl(142, 60%, 52%);
+    --border-slot-free: hsla(142, 60%, 42%, 0.4);
+    --bg-slot-busy: hsla(150, 50%, 18%, 0.35);
+    --text-slot-busy: hsl(150, 80%, 65%);
+    --border-slot-busy: hsla(150, 50%, 48%, 0.4);
+    --bg-slot-offline: hsla(150, 15%, 17%, 0.3);
+    --text-slot-offline: hsl(150, 10%, 60%);
+    --border-slot-offline: hsla(150, 15%, 23%, 0.4);
+    --glow-color: rgba(0, 255, 128, 0.25);
+    --time-indicator: hsl(150, 80%, 48%);
+}
+
+[data-theme='toxic-light'] {
+    --bg-app: hsl(75, 25%, 95%);
+    --bg-card: hsl(0, 0%, 100%);
+    --bg-header: hsl(75, 20%, 92%);
+    --border-color: hsl(75, 15%, 85%);
+    --text-main: hsl(75, 45%, 16%);
+    --text-muted: hsl(75, 15%, 48%);
+    --text-strong: hsl(75, 55%, 10%);
+    --primary: hsl(75, 70%, 35%);
+    --primary-hover: hsl(75, 70%, 28%);
+    --bg-slot-free: hsla(134, 45%, 90%, 0.85);
+    --text-slot-free: hsl(134, 60%, 26%);
+    --border-slot-free: hsla(134, 45%, 81%, 0.6);
+    --bg-slot-busy: hsla(60, 60%, 91%, 0.85);
+    --text-slot-busy: hsl(60, 60%, 32%);
+    --border-slot-busy: hsla(60, 60%, 83%, 0.6);
+    --bg-slot-offline: hsla(75, 8%, 89%, 0.8);
+    --text-slot-offline: hsl(75, 8%, 52%);
+    --border-slot-offline: hsla(75, 8%, 81%, 0.6);
+    --glow-color: rgba(128, 128, 0, 0.04);
+    --time-indicator: hsl(75, 70%, 35%);
+}
+
+[data-theme='toxic-dark'] {
+    --bg-app: hsl(90, 40%, 4%);
+    --bg-card: hsla(90, 30%, 8%, 0.7);
+    --bg-header: hsl(90, 40%, 6%);
+    --border-color: hsl(90, 20%, 16%);
+    --text-main: hsl(80, 20%, 75%);
+    --text-muted: hsl(80, 15%, 52%);
+    --text-strong: hsl(80, 25%, 94%);
+    --primary: hsl(75, 90%, 48%);
+    --primary-hover: hsl(75, 90%, 58%);
+    --bg-slot-free: hsla(142, 60%, 15%, 0.3);
+    --text-slot-free: hsl(142, 60%, 52%);
+    --border-slot-free: hsla(142, 60%, 42%, 0.4);
+    --bg-slot-busy: hsla(75, 50%, 17%, 0.35);
+    --text-slot-busy: hsl(75, 95%, 65%);
+    --border-slot-busy: hsla(75, 50%, 45%, 0.4);
+    --bg-slot-offline: hsla(90, 12%, 18%, 0.3);
+    --text-slot-offline: hsl(90, 8%, 60%);
+    --border-slot-offline: hsla(90, 12%, 24%, 0.4);
+    --glow-color: rgba(173, 255, 47, 0.25);
+    --time-indicator: hsl(75, 90%, 48%);
 }
 
 /* --- Estilos Globais --- */
@@ -222,13 +1038,15 @@ nav a:hover, nav a.active {
 }
 
 /* --- Barra de Pesquisa e Filtros --- */
-.search-filter-container {
+.dashboard-controls-bar {
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 16px;
     margin-bottom: 24px;
     flex-wrap: wrap;
+    background: transparent;
+    padding: 0;
 }
 
 .search-wrapper {
@@ -287,7 +1105,6 @@ nav a:hover, nav a.active {
     justify-content: center;
     align-items: center;
     gap: 12px;
-    margin-bottom: 32px;
 }
 
 .date-picker {
@@ -762,12 +1579,12 @@ nav a:hover, nav a.active {
     box-shadow: 0 0 6px hsla(354, 70%, 60%, 0.4);
 }
 
-[data-theme='neon-cyber'] .progress-bar-fill {
+[data-theme^='cyber-'] .progress-bar-fill {
     background: linear-gradient(90deg, hsl(340, 100%, 50%), hsl(300, 100%, 50%));
     box-shadow: 0 0 8px hsla(340, 100%, 50%, 0.6);
 }
 
-[data-theme='ocean-breeze'] .progress-bar-fill {
+[data-theme^='ocean-'] .progress-bar-fill {
     background: linear-gradient(90deg, hsl(15, 80%, 45%), hsl(15, 80%, 60%));
     box-shadow: 0 2px 6px hsla(15, 80%, 45%, 0.3);
 }
@@ -810,53 +1627,64 @@ nav a:hover, nav a.active {
     background: linear-gradient(135deg, hsl(217, 70%, 55%) 0%, hsl(217, 70%, 35%) 100%);
 }
 
-[data-theme='neon-cyber'] .room-avatar-fallback {
+[data-theme^='cyber-'] .room-avatar-fallback {
     background: linear-gradient(135deg, hsl(185, 80%, 40%) 0%, hsl(185, 80%, 20%) 100%);
     border: 1px solid var(--border-color);
     box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
 }
 
-[data-theme='ocean-breeze'] .room-avatar-fallback {
+[data-theme^='ocean-'] .room-avatar-fallback {
     background: linear-gradient(135deg, hsl(195, 75%, 50%) 0%, hsl(195, 75%, 35%) 100%);
     box-shadow: 0 2px 8px rgba(0, 120, 240, 0.15);
 }
 
-/* --- Tema Neon Cyber: Estilos Físicos Customizados --- */
-[data-theme='neon-cyber'] .room-row {
+/* --- Tema Neon Cyber & Vintage: Estilos Físicos Customizados (Option 3) --- */
+[data-theme^='cyber-'] .room-row,
+[data-theme^='vintage-'] .room-row {
     background: var(--bg-card);
     border: 1px solid var(--border-color);
-    box-shadow: 0 0 15px rgba(0, 255, 255, 0.05);
+    box-shadow: 0 0 15px var(--glow-color);
     border-radius: 8px;
 }
 
-[data-theme='neon-cyber'] .room-row:hover {
-    box-shadow: 0 0 25px rgba(0, 255, 255, 0.18);
-    border-color: rgba(0, 255, 255, 0.35);
+[data-theme^='cyber-'] .room-row:hover,
+[data-theme^='vintage-'] .room-row:hover {
+    box-shadow: 0 0 25px var(--glow-color);
+    border-color: var(--primary);
     transform: translateY(-2px);
 }
 
-[data-theme='neon-cyber'] .room-card-panel {
+[data-theme^='cyber-'] .room-card-panel,
+[data-theme^='vintage-'] .room-card-panel {
     border-right: 1px dashed var(--border-color);
     font-family: 'Courier New', Courier, monospace;
 }
 
-[data-theme='neon-cyber'] h3 {
-    text-shadow: 0 0 8px rgba(0, 255, 255, 0.6);
+[data-theme^='cyber-'] h3,
+[data-theme^='vintage-'] h3 {
+    text-shadow: 0 0 8px var(--primary);
 }
 
-[data-theme='neon-cyber'] .room-status-badge {
+[data-theme^='cyber-'] .room-status-badge,
+[data-theme^='vintage-'] .room-status-badge {
     font-family: 'Courier New', Courier, monospace;
     border: 1px solid currentColor;
-    box-shadow: 0 0 8px /*! currentColor */;
+    box-shadow: 0 0 8px currentColor;
     border-radius: 4px;
 }
 
-[data-theme='neon-cyber'] .live-time-indicator {
+[data-theme^='cyber-'] .live-time-indicator,
+[data-theme^='vintage-'] .live-time-indicator {
     box-shadow: 0 0 8px hsl(340, 100%, 55%);
 }
 
-/* --- Tema Ocean Breeze: Layout Empilhado (Vertical) Customizado --- */
-[data-theme='ocean-breeze'] .room-row {
+/* --- Temas Ocean, Sunset, Mono, Rose, Luxury, Aurora: Layout Empilhado (Vertical) Customizado (Option 2) --- */
+[data-theme^='ocean-'] .room-row,
+[data-theme^='sunset-'] .room-row,
+[data-theme^='mono-'] .room-row,
+[data-theme^='rose-'] .room-row,
+[data-theme^='luxury-'] .room-row,
+[data-theme^='aurora-'] .room-row {
     display: grid;
     grid-template-columns: 1fr;
     border-radius: 16px;
@@ -864,15 +1692,25 @@ nav a:hover, nav a.active {
     gap: 16px;
     background-color: var(--bg-card);
     border: 1px solid var(--border-color);
-    box-shadow: 0 10px 30px rgba(0, 80, 160, 0.08);
+    box-shadow: 0 10px 30px var(--glow-color);
 }
 
-[data-theme='ocean-breeze'] .room-row:hover {
+[data-theme^='ocean-'] .room-row:hover,
+[data-theme^='sunset-'] .room-row:hover,
+[data-theme^='mono-'] .room-row:hover,
+[data-theme^='rose-'] .room-row:hover,
+[data-theme^='luxury-'] .room-row:hover,
+[data-theme^='aurora-'] .room-row:hover {
     transform: translateY(-3px);
-    box-shadow: 0 15px 35px rgba(0, 80, 160, 0.12);
+    box-shadow: 0 15px 35px var(--glow-color);
 }
 
-[data-theme='ocean-breeze'] .room-card-panel {
+[data-theme^='ocean-'] .room-card-panel,
+[data-theme^='sunset-'] .room-card-panel,
+[data-theme^='mono-'] .room-card-panel,
+[data-theme^='rose-'] .room-card-panel,
+[data-theme^='luxury-'] .room-card-panel,
+[data-theme^='aurora-'] .room-card-panel {
     width: 100%;
     border-right: none;
     border-bottom: 1px solid var(--border-color);
@@ -885,11 +1723,21 @@ nav a:hover, nav a.active {
     background-color: transparent;
 }
 
-[data-theme='ocean-breeze'] .room-card-panel > div:first-child {
+[data-theme^='ocean-'] .room-card-panel > div:first-child,
+[data-theme^='sunset-'] .room-card-panel > div:first-child,
+[data-theme^='mono-'] .room-card-panel > div:first-child,
+[data-theme^='rose-'] .room-card-panel > div:first-child,
+[data-theme^='luxury-'] .room-card-panel > div:first-child,
+[data-theme^='aurora-'] .room-card-panel > div:first-child {
     margin-bottom: 0 !important;
 }
 
-[data-theme='ocean-breeze'] .meeting-progress-container {
+[data-theme^='ocean-'] .meeting-progress-container,
+[data-theme^='sunset-'] .meeting-progress-container,
+[data-theme^='mono-'] .meeting-progress-container,
+[data-theme^='rose-'] .meeting-progress-container,
+[data-theme^='luxury-'] .meeting-progress-container,
+[data-theme^='aurora-'] .meeting-progress-container {
     margin-top: 0;
     width: auto;
     flex-grow: 1;
@@ -898,13 +1746,438 @@ nav a:hover, nav a.active {
     margin-right: 20px;
 }
 
-[data-theme='ocean-breeze'] .timeline-track-panel {
+[data-theme^='ocean-'] .timeline-track-panel,
+[data-theme^='sunset-'] .timeline-track-panel,
+[data-theme^='mono-'] .timeline-track-panel,
+[data-theme^='rose-'] .timeline-track-panel,
+[data-theme^='luxury-'] .timeline-track-panel,
+[data-theme^='aurora-'] .timeline-track-panel {
     width: 100%;
     padding: 8px 0 0 0;
 }
 
-[data-theme='ocean-breeze'] .timeline-header-row {
+[data-theme^='ocean-'] .timeline-header-row,
+[data-theme^='sunset-'] .timeline-header-row,
+[data-theme^='mono-'] .timeline-header-row,
+[data-theme^='rose-'] .timeline-header-row,
+[data-theme^='luxury-'] .timeline-header-row,
+[data-theme^='aurora-'] .timeline-header-row {
     padding-left: 20px;
     padding-right: 20px;
 }
+
+/* --- Timelines Contínuas para Temas Clássicos, Forest, Glacier, Mint, Desert (Option 1) --- */
+[data-theme^='classic-'] .timeline-track,
+[data-theme^='forest-'] .timeline-track,
+[data-theme^='glacier-'] .timeline-track,
+[data-theme^='mint-'] .timeline-track,
+[data-theme^='desert-'] .timeline-track {
+    gap: 0;
+    padding: 0;
+    border: 1px solid var(--border-color);
+}
+
+[data-theme^='classic-'] .timeline-slot,
+[data-theme^='forest-'] .timeline-slot,
+[data-theme^='glacier-'] .timeline-slot,
+[data-theme^='mint-'] .timeline-slot,
+[data-theme^='desert-'] .timeline-slot {
+    border-radius: 0;
+    border: none;
+    border-right: 1px solid var(--border-color);
+}
+
+[data-theme^='classic-'] .timeline-slot:last-child,
+[data-theme^='forest-'] .timeline-slot:last-child,
+[data-theme^='glacier-'] .timeline-slot:last-child,
+[data-theme^='mint-'] .timeline-slot:last-child,
+[data-theme^='desert-'] .timeline-slot:last-child {
+    border-right: none;
+}
+
+[data-theme^='classic-'] .timeline-slot:first-child,
+[data-theme^='forest-'] .timeline-slot:first-child,
+[data-theme^='glacier-'] .timeline-slot:first-child,
+[data-theme^='mint-'] .timeline-slot:first-child,
+[data-theme^='desert-'] .timeline-slot:first-child {
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
+}
+
+[data-theme^='classic-'] .timeline-slot:last-child,
+[data-theme^='forest-'] .timeline-slot:last-child,
+[data-theme^='glacier-'] .timeline-slot:last-child,
+[data-theme^='mint-'] .timeline-slot:last-child,
+[data-theme^='desert-'] .timeline-slot:last-child {
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+
+/* --- Tema Neon Cyber, Vintage, Cosmic, Candy, Toxic: Formato de Blocos Separados com Fading (Option 3) --- */
+[data-theme^='cyber-'] .timeline-track,
+[data-theme^='vintage-'] .timeline-track,
+[data-theme^='cosmic-'] .timeline-track,
+[data-theme^='candy-'] .timeline-track,
+[data-theme^='toxic-'] .timeline-track {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--border-color);
+    gap: 4px;
+    padding: 4px;
+}
+
+[data-theme^='cyber-'] .timeline-slot.status-livre,
+[data-theme^='vintage-'] .timeline-slot.status-livre,
+[data-theme^='cosmic-'] .timeline-slot.status-livre,
+[data-theme^='candy-'] .timeline-slot.status-livre,
+[data-theme^='toxic-'] .timeline-slot.status-livre {
+    background: transparent;
+    border: 1px dashed var(--border-slot-free);
+}
+
+[data-theme^='cyber-'] .timeline-slot.status-ocupado,
+[data-theme^='vintage-'] .timeline-slot.status-ocupado,
+[data-theme^='cosmic-'] .timeline-slot.status-ocupado,
+[data-theme^='candy-'] .timeline-slot.status-ocupado,
+[data-theme^='toxic-'] .timeline-slot.status-ocupado {
+    background: var(--bg-slot-busy);
+    border: 1px solid var(--border-slot-busy);
+    box-shadow: 0 0 8px var(--text-slot-busy);
+}
+
+[data-theme^='cyber-'] .timeline-slot.status-indisponivel,
+[data-theme^='vintage-'] .timeline-slot.status-indisponivel,
+[data-theme^='cosmic-'] .timeline-slot.status-indisponivel,
+[data-theme^='candy-'] .timeline-slot.status-indisponivel,
+[data-theme^='toxic-'] .timeline-slot.status-indisponivel {
+    background: transparent;
+    border: 1px dashed var(--border-slot-offline);
+}
+
+/* --- Tema Ocean, Sunset, Mono, Rose, Luxury, Aurora: Trilha Minimalista e Cápsulas (Option 2) --- */
+.timeline-track-minimal {
+    position: relative;
+    width: 100%;
+    height: 48px;
+    display: flex;
+    align-items: center;
+}
+
+.timeline-minimal-line {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background-color: var(--border-color);
+    border-radius: 2px;
+    z-index: 1;
+}
+
+.timeline-busy-capsule {
+    position: absolute;
+    height: 32px;
+    background: var(--bg-slot-busy);
+    border: 1px solid var(--border-slot-busy);
+    box-shadow: 0 4px 10px var(--glow-color);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-slot-busy);
+    font-size: 11px;
+    font-weight: 700;
+    z-index: 2;
+    overflow: hidden;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+.timeline-busy-capsule:hover {
+    transform: scaleY(1.08);
+    box-shadow: 0 6px 15px var(--glow-color);
+    filter: brightness(0.95);
+}
+
+.capsule-text {
+    white-space: nowrap;
+    padding: 0 8px;
+}
+
+/* --- Tema Corporate Minimal, Plum, Steel, Sakura: Resumo Textual (Option 4) --- */
+[data-theme^='corporate-'] .room-row,
+[data-theme^='plum-'] .room-row,
+[data-theme^='steel-'] .room-row,
+[data-theme^='sakura-'] .room-row {
+    border-radius: 8px;
+    padding: 16px 24px;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+}
+
+[data-theme^='corporate-'] .room-row:hover,
+[data-theme^='plum-'] .room-row:hover,
+[data-theme^='steel-'] .room-row:hover,
+[data-theme^='sakura-'] .room-row:hover {
+    box-shadow: 0 4px 12px var(--glow-color);
+    transform: translateY(-1px);
+}
+
+.timeline-text-summary {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 14px;
+}
+
+.upcoming-meetings-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: flex-start;
+}
+
+.upcoming-title {
+    font-size: 11px;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--text-muted);
+    letter-spacing: 0.5px;
+}
+
+.no-meetings {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+.meetings-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+}
+
+.meeting-pill-text {
+    background-color: var(--bg-slot-busy);
+    color: var(--text-slot-busy);
+    border: 1px solid var(--border-slot-busy);
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* --- Tabela de Disponibilidade Vertical (Option 5) --- */
+.vertical-availability-table-container {
+    width: 100%;
+    max-height: 580px;
+    height: calc(100vh - 280px);
+    min-height: 350px;
+    overflow-y: auto;
+    overflow-x: auto;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    border-radius: 0;
+    margin-top: 20px;
+    padding: 0;
+    box-sizing: border-box;
+    position: relative;
+}
+
+.vertical-availability-table-container::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.vertical-availability-table-container::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.vertical-availability-table-container::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 3px;
+}
+
+.vertical-availability-table-container::-webkit-scrollbar-thumb:hover {
+    background: var(--primary);
+}
+
+.vertical-availability-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 8px;
+    text-align: left;
+}
+
+.vertical-availability-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 12;
+    background: var(--bg-header);
+}
+
+.vertical-availability-table th {
+    background: var(--bg-header);
+    color: var(--text-strong);
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: 600;
+    border: 1px solid var(--border-color);
+    white-space: nowrap;
+    text-align: center;
+}
+
+.vertical-availability-table th:first-child {
+    position: sticky;
+    top: 0;
+    left: 0;
+    z-index: 13;
+    background: var(--bg-header);
+}
+
+.vertical-availability-table td {
+    padding: 0;
+    vertical-align: middle;
+}
+
+.vertical-availability-table .time-col {
+    background: var(--bg-header);
+    color: var(--text-strong);
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: bold;
+    text-align: center;
+    border: 1px solid var(--border-color);
+    white-space: nowrap;
+    width: 80px;
+    position: sticky;
+    left: 0;
+    z-index: 11;
+}
+
+.table-header-room {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    min-width: 120px;
+}
+
+.table-room-logo {
+    width: 100%;
+    max-width: 100px;
+    height: 40px;
+    object-fit: contain;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    background: #fff;
+    padding: 4px;
+    box-sizing: border-box;
+}
+
+.availability-cell-split {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+}
+
+.availability-block {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    cursor: default;
+    height: 30px;
+    box-sizing: border-box;
+}
+
+.availability-block.status-livre {
+    background-color: var(--bg-slot-free);
+    color: var(--text-slot-free);
+    border: 1px solid var(--border-slot-free);
+}
+
+.availability-block.status-ocupado {
+    background-color: var(--bg-slot-busy);
+    color: var(--text-slot-busy);
+    border: 1px solid var(--border-slot-busy);
+}
+
+.availability-block.status-indisponivel {
+    background-color: var(--bg-slot-offline);
+    color: var(--text-slot-offline);
+    border: 1px solid var(--border-slot-offline);
+}
+
+.availability-block:hover {
+    filter: brightness(0.95);
+    transform: translateY(-1px);
+}
+
+.table-live-time-line {
+    position: absolute;
+    height: 3px;
+    background-color: var(--time-indicator);
+    box-shadow: 0 0 10px var(--time-indicator);
+    z-index: 10;
+    pointer-events: none;
+    transition: top 0.3s ease;
+    border-radius: 2px;
+}
+
+.timeline-spacer-row {
+    height: calc((var(--container-height, 500px) - var(--header-height, 60px)) / 2);
+}
+
+.timeline-spacer-row td {
+    height: calc((var(--container-height, 500px) - var(--header-height, 60px)) / 2);
+    padding: 0 !important;
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+.timeline-recenter-btn {
+    position: absolute;
+    bottom: 24px;
+    right: 24px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg-card);
+    color: var(--text-strong);
+    border: 1px solid var(--border-color);
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    backdrop-filter: blur(8px);
+    z-index: 20;
+    transition: all 0.2s ease;
+}
+
+.timeline-recenter-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+    background: var(--bg-header);
+    border-color: var(--time-indicator);
+}
+
+.timeline-recenter-btn:active {
+    transform: translateY(0);
+}
+
+
 

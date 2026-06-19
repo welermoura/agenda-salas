@@ -3,7 +3,7 @@ import SetupPage from './SetupPage';
 import LoginPage from './LoginPage';
 import AdminPage from './AdminPage';
 
-const AdminGuard = () => {
+const AdminGuard = ({ onThemeLoaded }) => {
     const [isConfigured, setIsConfigured] = useState(null);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -67,7 +67,7 @@ const AdminGuard = () => {
         return <LoginPage onLoginSuccess={handleLoginSuccess} />;
     }
 
-    return <AdminPage />;
+    return <AdminPage onThemeLoaded={onThemeLoaded} />;
 };
 
 export default AdminGuard;

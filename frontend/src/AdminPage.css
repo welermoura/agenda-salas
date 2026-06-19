@@ -1,5 +1,17 @@
 /* Estilos para a Página de Administração */
 
+.admin-container {
+    --text-color-strong: var(--text-strong);
+    --background-color: var(--bg-card);
+    --text-color: var(--text-main);
+    --link-color: var(--primary);
+    --link-hover-color: var(--primary-hover);
+    --header-background-color: var(--bg-header);
+    --button-background-color: var(--bg-app);
+    --button-text-color: var(--text-main);
+    --button-hover-background-color: var(--border-color);
+}
+
 .admin-page h1 {
     color: var(--text-color-strong);
     font-size: 28px;
