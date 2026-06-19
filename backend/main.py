@@ -4,8 +4,9 @@ import logging
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta, timezone
 import secrets
+from collections import defaultdict
 
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, Depends, UploadFile, File
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, Depends, UploadFile, File, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
@@ -28,6 +29,11 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/login")
+
+# --- Limitador de tentativas de login (Rate Limiter em Memória) ---
+login_attempts = defaultdict(lambda: {"failed_attempts": 0, "lockout_until": None})
+MAX_FAILED_ATTEMPTS = 5
+LOCKOUT_DURATION = timedelta(minutes=15)
 
 def verify_password(plain_password, hashed_password):
     # Aplica a mesma lógica de truncamento usada no hashing
@@ -159,9 +165,49 @@ async def initialize_setup(data: SetupData):
 
 # --- Endpoints de Autenticação e Admin ---
 @app.post("/api/login")
-async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
+async def login_for_access_token(request: Request, form_data: OAuth2PasswordRequestForm = Depends()):
+    client_ip = request.client.host if request.client else "unknown"
+    
+    # Verifica se o IP está atualmente bloqueado
+    ip_data = login_attempts[client_ip]
+    now = datetime.now(timezone.utc)
+    
+    if ip_data["lockout_until"]:
+        # Se lockout_until for offset-naive, converte para offset-aware
+        lockout_time = ip_data["lockout_until"]
+        if lockout_time.tzinfo is None:
+            lockout_time = lockout_time.replace(tzinfo=timezone.utc)
+            
+        if now < lockout_time:
+            time_left = int((lockout_time - now).total_seconds())
+            raise HTTPException(
+                status_code=429, 
+                detail=f"Muitas tentativas incorretas. IP bloqueado por mais {time_left} segundos."
+            )
+        else:
+            # Tempo de bloqueio expirou, reseta o lockout
+            ip_data["lockout_until"] = None
+            ip_data["failed_attempts"] = 0
+
     if not config_manager.app_config.is_configured or not verify_password(form_data.password, config_manager.app_config.admin_password_hash):
-        raise HTTPException(status_code=401, detail="Incorrect username or password", headers={"WWW-Authenticate": "Bearer"})
+        # Incrementa tentativas incorretas
+        ip_data["failed_attempts"] += 1
+        if ip_data["failed_attempts"] >= MAX_FAILED_ATTEMPTS:
+            ip_data["lockout_until"] = now + LOCKOUT_DURATION
+            raise HTTPException(
+                status_code=429, 
+                detail="Muitas tentativas incorretas. Este IP foi bloqueado por 15 minutos."
+            )
+        raise HTTPException(
+            status_code=401, 
+            detail=f"Usuário ou senha incorretos. Tentativa {ip_data['failed_attempts']}/{MAX_FAILED_ATTEMPTS}.",
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+        
+    # Se o login for bem-sucedido, reseta as tentativas para este IP
+    if client_ip in login_attempts:
+        del login_attempts[client_ip]
+        
     access_token = create_access_token(data={"sub": form_data.username})
     return {"access_token": access_token, "token_type": "bearer"}
 
