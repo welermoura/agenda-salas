@@ -130,16 +130,31 @@ def load_config() -> AppConfig:
                 raise  # Levanta a última exceção após esgotar as tentativas
 
 def save_config(config_to_save: AppConfig):
-    """Guarda o objeto de configuração fornecido no ficheiro JSON, forçando a escrita em disco."""
+    """Guarda o objeto de configuração fornecido no ficheiro JSON de forma atômica, forçando a escrita em disco."""
+    import tempfile
+    temp_path = None
     try:
         config_copy = config_to_save.model_copy(deep=True)
         if config_copy.graph_client_secret:
             config_copy.graph_client_secret = encrypt_value(config_copy.graph_client_secret)
             
-        with open(CONFIG_FILE, "w") as f:
+        dir_name = os.path.dirname(CONFIG_FILE)
+        os.makedirs(dir_name, exist_ok=True)
+        
+        # Cria arquivo temporário no mesmo diretório para garantir rename atômico (mesmo volume)
+        with tempfile.NamedTemporaryFile("w", dir=dir_name, delete=False, prefix="config_", suffix=".json") as f:
+            temp_path = f.name
             json.dump(config_copy.model_dump(), f, indent=4)
             f.flush()
             os.fsync(f.fileno())
+            
+        # Substituição atômica no sistema operacional
+        os.replace(temp_path, CONFIG_FILE)
     except Exception as e:
         logging.error(f"ERRO CRÍTICO ao guardar a configuração: {e}", exc_info=True)
+        if temp_path and os.path.exists(temp_path):
+            try:
+                os.remove(temp_path)
+            except Exception:
+                pass
         raise

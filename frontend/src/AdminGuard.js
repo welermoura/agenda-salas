@@ -26,6 +26,9 @@ const AdminGuard = ({ onThemeLoaded }) => {
                             if (verifyResponse.ok) {
                                 setIsAuthenticated(true);
                             } else {
+                                try {
+                                    fetch('/api/logout', { method: 'POST' }).catch(() => {});
+                                } catch (e) {}
                                 localStorage.removeItem('accessToken');
                                 setIsAuthenticated(false);
                             }

@@ -6,7 +6,7 @@ from datetime import datetime, timedelta, timezone
 import secrets
 from collections import defaultdict
 
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, Depends, UploadFile, File, Request
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, Depends, UploadFile, File, Request, Cookie, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
@@ -54,7 +54,18 @@ def create_access_token(data: dict):
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
-async def get_current_user(token: str = Depends(oauth2_scheme)):
+async def get_current_user(
+    request: Request,
+    token: str | None = Cookie(default=None, alias="access_token")
+):
+    if not token:
+        authorization: str = request.headers.get("Authorization")
+        if authorization and authorization.startswith("Bearer "):
+            token = authorization.split(" ")[1]
+
+    if not token:
+        raise HTTPException(status_code=401, detail="Invalid authentication credentials")
+
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
@@ -73,7 +84,7 @@ async def update_scheduler():
                 today_str = datetime.now().strftime('%Y-%m-%d')
                 statuses = {}
                 rooms = config_manager.app_config.rooms
-                tasks = [asyncio.to_thread(calendar_parser.get_room_status, room, today_str) for room in rooms]
+                tasks = [calendar_parser.get_room_status_async(room, today_str) for room in rooms]
                 results = await asyncio.gather(*tasks)
                 for room, status in zip(rooms, results):
                     status_copy = status.copy() if isinstance(status, dict) else {}
@@ -166,7 +177,7 @@ async def initialize_setup(data: SetupData):
 
 # --- Endpoints de Autenticação e Admin ---
 @app.post("/api/login")
-async def login_for_access_token(request: Request, form_data: OAuth2PasswordRequestForm = Depends()):
+async def login_for_access_token(response: Response, request: Request, form_data: OAuth2PasswordRequestForm = Depends()):
     client_ip = request.client.host if request.client else "unknown"
     
     # Verifica se o IP está atualmente bloqueado
@@ -210,7 +221,24 @@ async def login_for_access_token(request: Request, form_data: OAuth2PasswordRequ
         del login_attempts[client_ip]
         
     access_token = create_access_token(data={"sub": form_data.username})
+    
+    # Set the HTTPOnly session cookie (SameSite=Lax for secure cross-origin safety within domain)
+    response.set_cookie(
+        key="access_token",
+        value=access_token,
+        httponly=True,
+        max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+        expires=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+        samesite="lax",
+        secure=False  # Set to False to support HTTP accesses on 10.10.1.220 / local dev
+    )
+    
     return {"access_token": access_token, "token_type": "bearer"}
+
+@app.post("/api/logout")
+async def logout(response: Response):
+    response.delete_cookie(key="access_token")
+    return {"message": "Logged out successfully."}
 
 @app.get("/api/rooms", response_model=list[Room])
 async def get_rooms(current_user: str = Depends(get_current_user)):
@@ -434,7 +462,7 @@ async def websocket_endpoint(websocket: WebSocket):
                 if date_str and config_manager.app_config.is_configured:
                     statuses = {}
                     rooms = config_manager.app_config.rooms
-                    tasks = [asyncio.to_thread(calendar_parser.get_room_status, room, date_str) for room in rooms]
+                    tasks = [calendar_parser.get_room_status_async(room, date_str) for room in rooms]
                     results = await asyncio.gather(*tasks)
                     for room, status in zip(rooms, results):
                         status_copy = status.copy() if isinstance(status, dict) else {}

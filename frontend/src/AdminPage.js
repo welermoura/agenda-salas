@@ -146,6 +146,9 @@ const useAuthenticatedFetch = () => {
 
         if (response.status === 401) {
             // Token inválido/expirado, força o logout
+            try {
+                fetch('/api/logout', { method: 'POST' }).catch(() => {});
+            } catch (e) {}
             localStorage.removeItem('accessToken');
             window.location.reload();
             throw new Error('Sessão expirada. Por favor, faça o login novamente.');
@@ -437,6 +440,20 @@ const AdminPage = ({ onThemeLoaded }) => {
                     >
                         <span className="tab-icon">🔒</span>
                         <span>Segurança</span>
+                    </button>
+                    <button 
+                        className="tab-button logout-btn"
+                        onClick={async () => {
+                            try {
+                                await fetch('/api/logout', { method: 'POST' });
+                            } catch (e) {}
+                            localStorage.removeItem('accessToken');
+                            window.location.reload();
+                        }}
+                        style={{ color: 'var(--status-busy, #ef4444)' }}
+                    >
+                        <span className="tab-icon">🚪</span>
+                        <span>Sair</span>
                     </button>
                 </aside>
 

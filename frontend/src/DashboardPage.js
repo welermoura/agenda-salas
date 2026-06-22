@@ -313,12 +313,19 @@ const DashboardPage = ({ theme = 'classic-light', onThemeLoaded }) => {
     };
 
     // Filtros e Pesquisa
-    const rooms = schedules ? Object.entries(schedules).map(([url, data]) => ({ 
-        url, 
-        nome: data.nome, 
-        logo_version: data.logo_version || 0,
-        tooltip: data.tooltip || ""
-    })) : [];
+    const isAdmin = !!localStorage.getItem('accessToken');
+    const rooms = schedules ? Object.entries(schedules).map(([url, data]) => {
+        let tooltipText = data.tooltip || "";
+        if (data.error && isAdmin) {
+            tooltipText = `[ADMIN ERROR] ${data.error}` + (tooltipText ? ` | ${tooltipText}` : "");
+        }
+        return { 
+            url, 
+            nome: data.nome, 
+            logo_version: data.logo_version || 0,
+            tooltip: tooltipText
+        };
+    }) : [];
 
     const filteredRooms = rooms.filter(room => {
         const matchesSearch = room.nome.toLowerCase().includes(searchTerm.toLowerCase()) || 
