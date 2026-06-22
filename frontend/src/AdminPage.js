@@ -84,7 +84,7 @@ const RoomItem = ({ room, onMove, onRemove, onSave, onUploadLogo, onRemoveLogo, 
                             />
                         </div>
                         <div className="input-group">
-                            <label>ToolTip (Dica ao passar mouse)</label>
+                            <label>Dica ao passar mouse</label>
                             <input 
                                 type="text" 
                                 value={editedTooltip} 
@@ -473,7 +473,7 @@ const AdminPage = ({ onThemeLoaded }) => {
                                         />
                                     </div>
                                     <div className="input-group">
-                                        <label>ToolTip (Dica da Sala)</label>
+                                        <label>Dica ao passar mouse</label>
                                         <input 
                                             type="text" 
                                             value={newRoomTooltip} 

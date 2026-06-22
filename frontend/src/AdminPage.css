@@ -173,6 +173,13 @@
     color: var(--text-color-strong);
 }
 
+.form-row-grid .input-group label,
+.room-edit-fields .input-group label {
+    min-height: 38px;
+    display: flex;
+    align-items: flex-end;
+}
+
 .input-group input, .styled-select {
     padding: 12px 16px;
     border: 1px solid var(--border-color);
@@ -555,5 +562,11 @@
     .agenda-actions {
         justify-content: space-between;
         margin-left: 0;
+    }
+
+    .form-row-grid .input-group label,
+    .room-edit-fields .input-group label {
+        min-height: auto;
+        display: block;
     }
 }
