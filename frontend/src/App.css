@@ -1174,6 +1174,11 @@ nav a:hover, nav a.active {
     outline: none;
 }
 
+/* Inverte a cor do ícone de calendário nativo nos temas escuros para maior visibilidade */
+[data-theme$='-dark'] .date-picker::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+}
+
 .nav-button, .today-button {
     background-color: var(--bg-card);
     color: var(--text-main);

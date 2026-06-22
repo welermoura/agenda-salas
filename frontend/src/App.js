@@ -6,14 +6,14 @@ import './App.css';
 
 function App() {
   const [currentTime, setCurrentTime] = useState(new Date());
-  // Estado para gerenciar o modo (claro/escuro), lendo do localStorage ou usando 'light'
+  // Estado para gerenciar o modo (claro/escuro), lendo do localStorage ou usando 'dark' (padrão)
   const [mode, setMode] = useState(() => {
     const saved = localStorage.getItem('mode');
     if (saved === 'light' || saved === 'dark') return saved;
     // Migração de chaves antigas se necessário
     const savedTheme = localStorage.getItem('theme');
-    if (savedTheme && savedTheme.includes('dark')) return 'dark';
-    return 'light';
+    if (savedTheme && savedTheme.includes('light')) return 'light';
+    return 'dark';
   });
 
   // Estado para armazenar o tema base configurado pelo administrador
