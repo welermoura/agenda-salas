@@ -1,10 +1,10 @@
 /* --- Definição das Variáveis de Tema (Design System HSL) --- */
 
 [data-theme='classic-light'] {
-    --bg-app: hsl(210, 20%, 96%);
-    --bg-card: hsl(0, 0%, 100%);
-    --bg-header: hsl(210, 20%, 98%);
-    --border-color: hsl(210, 14%, 89%);
+    --bg-app: hsl(210, 12%, 91%);
+    --bg-card: hsl(210, 14%, 95%);
+    --bg-header: hsl(210, 12%, 93%);
+    --border-color: hsl(210, 10%, 83%);
     
     --text-main: hsl(210, 10%, 20%);
     --text-muted: hsl(210, 10%, 45%);
@@ -13,13 +13,13 @@
     --primary: hsl(215, 90%, 52%);
     --primary-hover: hsl(215, 90%, 42%);
     
-    --bg-slot-free: hsla(134, 45%, 90%, 0.85);
-    --text-slot-free: hsl(134, 70%, 25%);
-    --border-slot-free: hsla(134, 45%, 80%, 0.6);
+    --bg-slot-free: hsla(134, 50%, 82%, 0.9);
+    --text-slot-free: hsl(134, 75%, 20%);
+    --border-slot-free: hsla(134, 45%, 72%, 0.7);
     
-    --bg-slot-busy: hsla(0, 75%, 93%, 0.85);
-    --text-slot-busy: hsl(0, 75%, 35%);
-    --border-slot-busy: hsla(0, 75%, 85%, 0.6);
+    --bg-slot-busy: hsla(0, 75%, 85%, 0.9);
+    --text-slot-busy: hsl(0, 80%, 30%);
+    --border-slot-busy: hsla(0, 70%, 75%, 0.7);
     
     --bg-slot-offline: hsla(210, 10%, 90%, 0.8);
     --text-slot-offline: hsl(210, 10%, 50%);
@@ -59,10 +59,10 @@
 }
 
 [data-theme='cyber-light'] {
-    --bg-app: hsl(300, 30%, 96%);
-    --bg-card: hsl(0, 0%, 100%);
-    --bg-header: hsl(300, 30%, 93%);
-    --border-color: hsl(300, 30%, 85%);
+    --bg-app: hsl(300, 15%, 91%);
+    --bg-card: hsl(300, 15%, 95%);
+    --bg-header: hsl(300, 15%, 93%);
+    --border-color: hsl(300, 15%, 82%);
     --text-main: hsl(300, 40%, 25%);
     --text-muted: hsl(300, 20%, 45%);
     --text-strong: hsl(300, 60%, 15%);
@@ -105,10 +105,10 @@
 }
 
 [data-theme='ocean-light'] {
-    --bg-app: hsl(205, 45%, 94%);
-    --bg-card: hsl(0, 0%, 100%);
-    --bg-header: hsl(205, 50%, 96%);
-    --border-color: hsl(205, 30%, 86%);
+    --bg-app: hsl(205, 25%, 89%);
+    --bg-card: hsl(205, 25%, 94%);
+    --bg-header: hsl(205, 25%, 92%);
+    --border-color: hsl(205, 20%, 82%);
     --text-main: hsl(205, 50%, 25%);
     --text-muted: hsl(205, 30%, 45%);
     --text-strong: hsl(205, 60%, 15%);
@@ -151,10 +151,10 @@
 }
 
 [data-theme='corporate-light'] {
-    --bg-app: hsl(210, 15%, 95%);
-    --bg-card: hsl(0, 0%, 100%);
-    --bg-header: hsl(0, 0%, 100%);
-    --border-color: hsl(210, 10%, 88%);
+    --bg-app: hsl(210, 10%, 90%);
+    --bg-card: hsl(210, 10%, 95%);
+    --bg-header: hsl(210, 10%, 93%);
+    --border-color: hsl(210, 8%, 83%);
     --text-main: hsl(210, 10%, 30%);
     --text-muted: hsl(210, 10%, 50%);
     --text-strong: hsl(210, 10%, 15%);
@@ -197,10 +197,10 @@
 }
 
 [data-theme='forest-light'] {
-    --bg-app: hsl(100, 25%, 95%);
-    --bg-card: hsl(0, 0%, 100%);
-    --bg-header: hsl(100, 20%, 93%);
-    --border-color: hsl(100, 15%, 85%);
+    --bg-app: hsl(100, 15%, 89%);
+    --bg-card: hsl(100, 15%, 94%);
+    --bg-header: hsl(100, 15%, 92%);
+    --border-color: hsl(100, 10%, 80%);
     --text-main: hsl(100, 35%, 22%);
     --text-muted: hsl(100, 15%, 45%);
     --text-strong: hsl(100, 45%, 12%);
@@ -243,10 +243,10 @@
 }
 
 [data-theme='sunset-light'] {
-    --bg-app: hsl(30, 45%, 96%);
-    --bg-card: hsl(0, 0%, 100%);
-    --bg-header: hsl(30, 40%, 93%);
-    --border-color: hsl(30, 30%, 88%);
+    --bg-app: hsl(30, 25%, 90%);
+    --bg-card: hsl(30, 25%, 95%);
+    --bg-header: hsl(30, 25%, 93%);
+    --border-color: hsl(30, 20%, 83%);
     --text-main: hsl(15, 50%, 25%);
     --text-muted: hsl(15, 30%, 45%);
     --text-strong: hsl(15, 60%, 15%);
@@ -289,21 +289,21 @@
 }
 
 [data-theme='vintage-light'] {
-    --bg-app: hsl(40, 30%, 91%);
-    --bg-card: hsl(40, 30%, 97%);
-    --bg-header: hsl(40, 25%, 88%);
-    --border-color: hsl(40, 20%, 78%);
+    --bg-app: hsl(40, 20%, 86%);
+    --bg-card: hsl(40, 20%, 91%);
+    --bg-header: hsl(40, 18%, 83%);
+    --border-color: hsl(40, 15%, 74%);
     --text-main: hsl(40, 40%, 20%);
     --text-muted: hsl(40, 20%, 40%);
     --text-strong: hsl(40, 50%, 10%);
     --primary: hsl(25, 40%, 35%);
     --primary-hover: hsl(25, 40%, 28%);
-    --bg-slot-free: hsla(80, 30%, 90%, 0.85);
-    --text-slot-free: hsl(80, 40%, 25%);
-    --border-slot-free: hsla(80, 25%, 80%, 0.6);
-    --bg-slot-busy: hsla(25, 50%, 90%, 0.85);
-    --text-slot-busy: hsl(25, 50%, 35%);
-    --border-slot-busy: hsla(25, 45%, 80%, 0.6);
+    --bg-slot-free: hsla(85, 40%, 82%, 0.9);
+    --text-slot-free: hsl(85, 50%, 20%);
+    --border-slot-free: hsla(85, 40%, 72%, 0.7);
+    --bg-slot-busy: hsla(20, 55%, 83%, 0.9);
+    --text-slot-busy: hsl(20, 60%, 28%);
+    --border-slot-busy: hsla(20, 50%, 72%, 0.7);
     --bg-slot-offline: hsla(40, 15%, 85%, 0.8);
     --text-slot-offline: hsl(40, 15%, 50%);
     --border-slot-offline: hsla(40, 15%, 78%, 0.6);
@@ -335,10 +335,10 @@
 }
 
 [data-theme='plum-light'] {
-    --bg-app: hsl(270, 30%, 96%);
-    --bg-card: hsl(0, 0%, 100%);
-    --bg-header: hsl(270, 30%, 93%);
-    --border-color: hsl(270, 20%, 86%);
+    --bg-app: hsl(270, 15%, 91%);
+    --bg-card: hsl(270, 15%, 95%);
+    --bg-header: hsl(270, 15%, 93%);
+    --border-color: hsl(270, 15%, 82%);
     --text-main: hsl(270, 40%, 25%);
     --text-muted: hsl(270, 20%, 45%);
     --text-strong: hsl(270, 50%, 15%);
@@ -381,10 +381,10 @@
 }
 
 [data-theme='glacier-light'] {
-    --bg-app: hsl(200, 30%, 95%);
-    --bg-card: hsl(0, 0%, 100%);
-    --bg-header: hsl(200, 25%, 92%);
-    --border-color: hsl(200, 20%, 85%);
+    --bg-app: hsl(200, 15%, 90%);
+    --bg-card: hsl(200, 15%, 94%);
+    --bg-header: hsl(200, 15%, 92%);
+    --border-color: hsl(200, 15%, 81%);
     --text-main: hsl(200, 40%, 22%);
     --text-muted: hsl(200, 20%, 45%);
     --text-strong: hsl(200, 50%, 12%);
@@ -427,10 +427,10 @@
 }
 
 [data-theme='mono-light'] {
-    --bg-app: hsl(0, 0%, 98%);
-    --bg-card: hsl(0, 0%, 100%);
-    --bg-header: hsl(0, 0%, 100%);
-    --border-color: hsl(0, 0%, 85%);
+    --bg-app: hsl(0, 0%, 92%);
+    --bg-card: hsl(0, 0%, 96%);
+    --bg-header: hsl(0, 0%, 94%);
+    --border-color: hsl(0, 0%, 82%);
     --text-main: hsl(0, 0%, 20%);
     --text-muted: hsl(0, 0%, 45%);
     --text-strong: hsl(0, 0%, 5%);
@@ -473,10 +473,10 @@
 }
 
 [data-theme='mint-light'] {
-    --bg-app: hsl(150, 25%, 96%);
-    --bg-card: hsl(0, 0%, 100%);
-    --bg-header: hsl(150, 20%, 94%);
-    --border-color: hsl(150, 15%, 86%);
+    --bg-app: hsl(150, 15%, 90%);
+    --bg-card: hsl(150, 15%, 95%);
+    --bg-header: hsl(150, 15%, 93%);
+    --border-color: hsl(150, 12%, 82%);
     --text-main: hsl(155, 40%, 18%);
     --text-muted: hsl(150, 15%, 45%);
     --text-strong: hsl(155, 50%, 10%);
@@ -519,10 +519,10 @@
 }
 
 [data-theme='rose-light'] {
-    --bg-app: hsl(350, 25%, 97%);
-    --bg-card: hsl(0, 0%, 100%);
-    --bg-header: hsl(350, 20%, 94%);
-    --border-color: hsl(350, 15%, 88%);
+    --bg-app: hsl(350, 15%, 91%);
+    --bg-card: hsl(350, 15%, 95%);
+    --bg-header: hsl(350, 15%, 93%);
+    --border-color: hsl(350, 12%, 83%);
     --text-main: hsl(350, 30%, 22%);
     --text-muted: hsl(350, 15%, 50%);
     --text-strong: hsl(350, 40%, 12%);
@@ -565,10 +565,10 @@
 }
 
 [data-theme='cosmic-light'] {
-    --bg-app: hsl(265, 30%, 96%);
-    --bg-card: hsl(0, 0%, 100%);
-    --bg-header: hsl(265, 20%, 94%);
-    --border-color: hsl(265, 15%, 87%);
+    --bg-app: hsl(265, 15%, 91%);
+    --bg-card: hsl(265, 15%, 95%);
+    --bg-header: hsl(265, 15%, 93%);
+    --border-color: hsl(265, 12%, 83%);
     --text-main: hsl(265, 35%, 22%);
     --text-muted: hsl(265, 15%, 48%);
     --text-strong: hsl(265, 45%, 12%);
@@ -611,10 +611,10 @@
 }
 
 [data-theme='desert-light'] {
-    --bg-app: hsl(40, 30%, 95%);
-    --bg-card: hsl(0, 0%, 100%);
-    --bg-header: hsl(40, 25%, 92%);
-    --border-color: hsl(40, 20%, 85%);
+    --bg-app: hsl(40, 18%, 89%);
+    --bg-card: hsl(40, 18%, 94%);
+    --bg-header: hsl(40, 18%, 92%);
+    --border-color: hsl(40, 15%, 80%);
     --text-main: hsl(35, 35%, 22%);
     --text-muted: hsl(40, 15%, 48%);
     --text-strong: hsl(35, 45%, 12%);
@@ -657,10 +657,10 @@
 }
 
 [data-theme='steel-light'] {
-    --bg-app: hsl(210, 10%, 94%);
-    --bg-card: hsl(0, 0%, 100%);
-    --bg-header: hsl(210, 10%, 91%);
-    --border-color: hsl(210, 10%, 84%);
+    --bg-app: hsl(210, 8%, 89%);
+    --bg-card: hsl(210, 8%, 94%);
+    --bg-header: hsl(210, 8%, 92%);
+    --border-color: hsl(210, 8%, 81%);
     --text-main: hsl(210, 15%, 22%);
     --text-muted: hsl(210, 10%, 48%);
     --text-strong: hsl(210, 20%, 10%);
@@ -703,10 +703,10 @@
 }
 
 [data-theme='luxury-light'] {
-    --bg-app: hsl(45, 15%, 97%);
-    --bg-card: hsl(0, 0%, 100%);
-    --bg-header: hsl(45, 10%, 94%);
-    --border-color: hsl(45, 10%, 86%);
+    --bg-app: hsl(45, 12%, 91%);
+    --bg-card: hsl(45, 12%, 95%);
+    --bg-header: hsl(45, 10%, 93%);
+    --border-color: hsl(45, 10%, 82%);
     --text-main: hsl(45, 10%, 20%);
     --text-muted: hsl(45, 5%, 48%);
     --text-strong: hsl(45, 15%, 10%);
@@ -749,10 +749,10 @@
 }
 
 [data-theme='sakura-light'] {
-    --bg-app: hsl(330, 35%, 97%);
-    --bg-card: hsl(0, 0%, 100%);
-    --bg-header: hsl(330, 30%, 94%);
-    --border-color: hsl(330, 20%, 88%);
+    --bg-app: hsl(330, 18%, 91%);
+    --bg-card: hsl(330, 18%, 95%);
+    --bg-header: hsl(330, 18%, 93%);
+    --border-color: hsl(330, 15%, 83%);
     --text-main: hsl(330, 40%, 20%);
     --text-muted: hsl(330, 15%, 52%);
     --text-strong: hsl(330, 45%, 12%);
@@ -795,10 +795,10 @@
 }
 
 [data-theme='candy-light'] {
-    --bg-app: hsl(300, 20%, 96%);
-    --bg-card: hsl(0, 0%, 100%);
-    --bg-header: hsl(300, 15%, 93%);
-    --border-color: hsl(300, 15%, 87%);
+    --bg-app: hsl(300, 12%, 91%);
+    --bg-card: hsl(300, 12%, 95%);
+    --bg-header: hsl(300, 12%, 93%);
+    --border-color: hsl(300, 12%, 83%);
     --text-main: hsl(300, 40%, 20%);
     --text-muted: hsl(300, 15%, 50%);
     --text-strong: hsl(300, 50%, 10%);
@@ -841,10 +841,10 @@
 }
 
 [data-theme='aurora-light'] {
-    --bg-app: hsl(140, 20%, 96%);
-    --bg-card: hsl(0, 0%, 100%);
-    --bg-header: hsl(140, 15%, 93%);
-    --border-color: hsl(140, 15%, 86%);
+    --bg-app: hsl(140, 12%, 91%);
+    --bg-card: hsl(140, 12%, 95%);
+    --bg-header: hsl(140, 12%, 93%);
+    --border-color: hsl(140, 12%, 82%);
     --text-main: hsl(140, 30%, 20%);
     --text-muted: hsl(140, 15%, 48%);
     --text-strong: hsl(140, 40%, 10%);
@@ -887,10 +887,10 @@
 }
 
 [data-theme='toxic-light'] {
-    --bg-app: hsl(75, 25%, 95%);
-    --bg-card: hsl(0, 0%, 100%);
-    --bg-header: hsl(75, 20%, 92%);
-    --border-color: hsl(75, 15%, 85%);
+    --bg-app: hsl(75, 15%, 89%);
+    --bg-card: hsl(75, 15%, 94%);
+    --bg-header: hsl(75, 15%, 92%);
+    --border-color: hsl(75, 12%, 80%);
     --text-main: hsl(75, 45%, 16%);
     --text-muted: hsl(75, 15%, 48%);
     --text-strong: hsl(75, 55%, 10%);
