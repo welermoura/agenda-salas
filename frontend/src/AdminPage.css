@@ -153,7 +153,7 @@
 /* Formulários e Inputs */
 .form-row-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
     gap: 16px;
     margin-bottom: 16px;
     width: 100%;
@@ -286,7 +286,7 @@
 
 .room-edit-fields {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
     gap: 12px;
     flex-grow: 1;
     margin-right: 16px;

@@ -6,9 +6,10 @@ const RoomItem = ({ room, onMove, onRemove, onSave, onUploadLogo, onRemoveLogo, 
     const [isEditing, setIsEditing] = useState(false);
     const [editedName, setEditedName] = useState(room.name);
     const [editedEmail, setEditedEmail] = useState(room.email);
+    const [editedTooltip, setEditedTooltip] = useState(room.tooltip || '');
 
     const handleSave = () => {
-        onSave({ name: editedName, email: editedEmail });
+        onSave({ name: editedName, email: editedEmail, tooltip: editedTooltip });
         setIsEditing(false);
     };
 
@@ -82,6 +83,15 @@ const RoomItem = ({ room, onMove, onRemove, onSave, onUploadLogo, onRemoveLogo, 
                                 required 
                             />
                         </div>
+                        <div className="input-group">
+                            <label>ToolTip (Dica ao passar mouse)</label>
+                            <input 
+                                type="text" 
+                                value={editedTooltip} 
+                                onChange={(e) => setEditedTooltip(e.target.value)} 
+                                placeholder="Dica informativa da sala"
+                            />
+                        </div>
                     </div>
                 </div>
                 <div className="agenda-actions">
@@ -99,6 +109,11 @@ const RoomItem = ({ room, onMove, onRemove, onSave, onUploadLogo, onRemoveLogo, 
                 <div className="agenda-info">
                     <strong className="room-title-name">{room.name}</strong>
                     <span className="agenda-url">{room.email}</span>
+                    {room.tooltip && (
+                        <span className="agenda-tooltip-desc" style={{ display: 'block', fontSize: '11px', color: 'var(--text-color-muted)', marginTop: '4px' }}>
+                            Dica: "{room.tooltip}"
+                        </span>
+                    )}
                 </div>
             </div>
             <div className="agenda-actions">
@@ -148,6 +163,7 @@ const AdminPage = ({ onThemeLoaded }) => {
     const [rooms, setRooms] = useState([]);
     const [newRoomName, setNewRoomName] = useState('');
     const [newRoomEmail, setNewRoomEmail] = useState('');
+    const [newRoomTooltip, setNewRoomTooltip] = useState('');
 
     const [tenantId, setTenantId] = useState('');
     const [clientId, setClientId] = useState('');
@@ -223,7 +239,7 @@ const AdminPage = ({ onThemeLoaded }) => {
 
     const handleAddRoom = async (e) => {
         e.preventDefault();
-        const updatedRooms = [...rooms, { name: newRoomName, email: newRoomEmail }];
+        const updatedRooms = [...rooms, { name: newRoomName, email: newRoomEmail, tooltip: newRoomTooltip }];
         try {
             const response = await authenticatedFetch('/api/rooms', {
                 method: 'POST',
@@ -233,6 +249,7 @@ const AdminPage = ({ onThemeLoaded }) => {
             setRooms(updatedRooms);
             setNewRoomName('');
             setNewRoomEmail('');
+            setNewRoomTooltip('');
             showMessage('Sala adicionada com sucesso!');
         } catch (err) {
             showValidationError(err.message);
@@ -453,6 +470,15 @@ const AdminPage = ({ onThemeLoaded }) => {
                                             onChange={e => setNewRoomEmail(e.target.value)} 
                                             placeholder="sala-laguna@empresa.com" 
                                             required 
+                                        />
+                                    </div>
+                                    <div className="input-group">
+                                        <label>ToolTip (Dica da Sala)</label>
+                                        <input 
+                                            type="text" 
+                                            value={newRoomTooltip} 
+                                            onChange={e => setNewRoomTooltip(e.target.value)} 
+                                            placeholder="Dica que aparece ao passar o mouse" 
                                         />
                                     </div>
                                 </div>

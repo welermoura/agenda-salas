@@ -313,7 +313,12 @@ const DashboardPage = ({ theme = 'classic-light', onThemeLoaded }) => {
     };
 
     // Filtros e Pesquisa
-    const rooms = schedules ? Object.entries(schedules).map(([url, data]) => ({ url, nome: data.nome, logo_version: data.logo_version || 0 })) : [];
+    const rooms = schedules ? Object.entries(schedules).map(([url, data]) => ({ 
+        url, 
+        nome: data.nome, 
+        logo_version: data.logo_version || 0,
+        tooltip: data.tooltip || ""
+    })) : [];
 
     const filteredRooms = rooms.filter(room => {
         const matchesSearch = room.nome.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -557,7 +562,7 @@ const DashboardPage = ({ theme = 'classic-light', onThemeLoaded }) => {
                                                         <th>Horário</th>
                                                         {filteredRooms.map(room => (
                                                             <th key={room.url}>
-                                                                <div className="table-header-room">
+                                                                <div className="table-header-room" title={room.tooltip || undefined}>
                                                                     {room.logo_version > 0 ? (
                                                                         <img 
                                                                             src={`/api/rooms/${room.url}/logo?v=${room.logo_version}`} 
@@ -599,7 +604,7 @@ const DashboardPage = ({ theme = 'classic-light', onThemeLoaded }) => {
                                                                                 <div className={`availability-block status-${status1}`} title={`${slot1} - ${getStatusText(status1)}`}>
                                                                                     <span className="block-status-text">{getStatusText(status1)}</span>
                                                                                 </div>
-                                                                                <div className={`availability-block status-${status2}`} title={`${slot2} - ${getStatusText(slot2)}`}>
+                                                                                <div className={`availability-block status-${status2}`} title={`${slot2} - ${getStatusText(status2)}`}>
                                                                                     <span className="block-status-text">{getStatusText(status2)}</span>
                                                                                 </div>
                                                                             </div>
@@ -660,7 +665,7 @@ const DashboardPage = ({ theme = 'classic-light', onThemeLoaded }) => {
                                             <div className="room-row">
                                                 {/* Card da Sala (Esquerda) */}
                                                 <div className="room-card-panel">
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                                                    <div title={room.tooltip || undefined} style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
                                                         {room.logo_version > 0 ? (
                                                             <img 
                                                                 src={`/api/rooms/${room.url}/logo?v=${room.logo_version}`} 

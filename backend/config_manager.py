@@ -60,6 +60,7 @@ class Room(BaseModel):
     email: str
     name: str
     logo_version: int = 0
+    tooltip: str = ""
 
 class AppConfig(BaseModel):
     is_configured: bool = False
