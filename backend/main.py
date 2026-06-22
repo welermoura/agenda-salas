@@ -77,8 +77,9 @@ async def update_scheduler():
                 results = await asyncio.gather(*tasks)
                 for room, status in zip(rooms, results):
                     status_copy = status.copy() if isinstance(status, dict) else {}
-                    if "error" not in status_copy:
-                        status_copy["logo_version"] = room.logo_version
+                    status_copy["nome"] = room.name
+                    status_copy["logo_version"] = room.logo_version
+                    status_copy["tooltip"] = room.tooltip
                     statuses[room.email] = status_copy
 
                 await manager.broadcast(json.dumps({"date": today_str, "statuses": statuses}))
@@ -437,8 +438,9 @@ async def websocket_endpoint(websocket: WebSocket):
                     results = await asyncio.gather(*tasks)
                     for room, status in zip(rooms, results):
                         status_copy = status.copy() if isinstance(status, dict) else {}
-                        if "error" not in status_copy:
-                            status_copy["logo_version"] = room.logo_version
+                        status_copy["nome"] = room.name
+                        status_copy["logo_version"] = room.logo_version
+                        status_copy["tooltip"] = room.tooltip
                         statuses[room.email] = status_copy
 
                     await websocket.send_text(json.dumps({

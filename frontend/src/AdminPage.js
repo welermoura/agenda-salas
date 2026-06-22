@@ -9,7 +9,7 @@ const RoomItem = ({ room, onMove, onRemove, onSave, onUploadLogo, onRemoveLogo, 
     const [editedTooltip, setEditedTooltip] = useState(room.tooltip || '');
 
     const handleSave = () => {
-        onSave({ name: editedName, email: editedEmail, tooltip: editedTooltip });
+        onSave({ ...room, name: editedName, email: editedEmail, tooltip: editedTooltip });
         setIsEditing(false);
     };
 

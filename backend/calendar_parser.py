@@ -224,7 +224,7 @@ def get_room_status(room: Room, date_str: str | None = None):
                     time_slots[slot_key] = 'ocupado'
                 current_slot_time = current_slot_time.shift(minutes=30)
 
-        result = {"nome": room.name, "logo_version": room.logo_version, "status": time_slots}
+        result = {"nome": room.name, "logo_version": room.logo_version, "tooltip": room.tooltip, "status": time_slots}
         calendar_cache[cache_key] = {'timestamp': now_utc, 'data': result}
         return result
 
