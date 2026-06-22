@@ -13,13 +13,13 @@
     --primary: hsl(215, 90%, 52%);
     --primary-hover: hsl(215, 90%, 42%);
     
-    --bg-slot-free: hsla(134, 50%, 82%, 0.9);
-    --text-slot-free: hsl(134, 75%, 20%);
-    --border-slot-free: hsla(134, 45%, 72%, 0.7);
+    --bg-slot-free: hsla(120, 70%, 80%, 0.95);
+    --text-slot-free: hsl(120, 80%, 18%);
+    --border-slot-free: hsla(120, 60%, 68%, 0.85);
     
-    --bg-slot-busy: hsla(0, 75%, 85%, 0.9);
-    --text-slot-busy: hsl(0, 80%, 30%);
-    --border-slot-busy: hsla(0, 70%, 75%, 0.7);
+    --bg-slot-busy: hsla(0, 85%, 83%, 0.95);
+    --text-slot-busy: hsl(0, 85%, 25%);
+    --border-slot-busy: hsla(0, 75%, 72%, 0.85);
     
     --bg-slot-offline: hsla(210, 10%, 90%, 0.8);
     --text-slot-offline: hsl(210, 10%, 50%);
@@ -298,12 +298,12 @@
     --text-strong: hsl(40, 50%, 10%);
     --primary: hsl(25, 40%, 35%);
     --primary-hover: hsl(25, 40%, 28%);
-    --bg-slot-free: hsla(85, 40%, 82%, 0.9);
-    --text-slot-free: hsl(85, 50%, 20%);
-    --border-slot-free: hsla(85, 40%, 72%, 0.7);
-    --bg-slot-busy: hsla(20, 55%, 83%, 0.9);
-    --text-slot-busy: hsl(20, 60%, 28%);
-    --border-slot-busy: hsla(20, 50%, 72%, 0.7);
+    --bg-slot-free: hsla(100, 65%, 80%, 0.95);
+    --text-slot-free: hsl(100, 70%, 18%);
+    --border-slot-free: hsla(100, 55%, 68%, 0.85);
+    --bg-slot-busy: hsla(10, 80%, 80%, 0.95);
+    --text-slot-busy: hsl(10, 85%, 25%);
+    --border-slot-busy: hsla(10, 70%, 68%, 0.85);
     --bg-slot-offline: hsla(40, 15%, 85%, 0.8);
     --text-slot-offline: hsl(40, 15%, 50%);
     --border-slot-offline: hsla(40, 15%, 78%, 0.6);
