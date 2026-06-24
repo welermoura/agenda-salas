@@ -114,7 +114,8 @@ const DashboardPage = ({ theme = 'classic-light', onThemeLoaded }) => {
     }, []);
 
     const ws = useRef(null);
-    const WS_URL = process.env.REACT_APP_WS_URL || `ws://${window.location.host}/ws`;
+    const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const WS_URL = process.env.REACT_APP_WS_URL || `${wsProtocol}//${window.location.host}/ws`;
     const selectedDateRef = useRef(selectedDate);
 
     // Efeito para sincronizar a ref da data

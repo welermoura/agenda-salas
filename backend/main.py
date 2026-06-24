@@ -223,6 +223,7 @@ async def login_for_access_token(response: Response, request: Request, form_data
     access_token = create_access_token(data={"sub": form_data.username})
     
     # Set the HTTPOnly session cookie (SameSite=Lax for secure cross-origin safety within domain)
+    is_secure = request.headers.get("x-forwarded-proto") == "https" or request.url.scheme == "https"
     response.set_cookie(
         key="access_token",
         value=access_token,
@@ -230,7 +231,7 @@ async def login_for_access_token(response: Response, request: Request, form_data
         max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
         expires=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
         samesite="lax",
-        secure=False  # Set to False to support HTTP accesses on 10.10.1.220 / local dev
+        secure=is_secure
     )
     
     return {"access_token": access_token, "token_type": "bearer"}
