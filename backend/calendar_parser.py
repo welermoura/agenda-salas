@@ -128,8 +128,8 @@ def get_graph_access_token(force_refresh=False):
             client_credential=config_manager.app_config.graph_client_secret,
         )
         result = app.acquire_token_for_client(scopes=["https://graph.microsoft.com/.default"])
-    except ValueError as e:
-        logging.error(f"Erro de configuração da autoridade MSAL: {e}")
+    except Exception as e:
+        logging.error(f"Erro de configuração ou de rede ao adquirir token MSAL: {e}", exc_info=True)
         return None
 
     if "access_token" in result:
@@ -169,7 +169,7 @@ async def get_room_status_async(room: Room, date_str: str | None = None):
        (now_utc - calendar_cache[cache_key]['timestamp']).total_seconds() < CACHE_TTL_SECONDS:
         return calendar_cache[cache_key]['data']
 
-    token = get_graph_access_token()
+    token = await asyncio.to_thread(get_graph_access_token)
     if not token:
         return {"error": "Falha na autenticação. Verifique as credenciais, o Tenant ID e a conectividade de rede do servidor."}
 
@@ -204,7 +204,7 @@ async def get_room_status_async(room: Room, date_str: str | None = None):
             # Lógica de Retry para Token Expirado (401)
             if e.response is not None and e.response.status_code == 401:
                 logging.warning(f"Token expirado (401) detectado para {room.email}. Tentando renovar e repetir a operação.")
-                new_token = get_graph_access_token(force_refresh=True)
+                new_token = await asyncio.to_thread(get_graph_access_token, force_refresh=True)
                 if new_token:
                     headers['Authorization'] = f'Bearer {new_token}'
                     try:
